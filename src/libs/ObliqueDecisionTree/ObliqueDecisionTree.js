@@ -68,16 +68,68 @@ class Odt {
 
     draw() {
         const { data, opts, computed, parts, height, width, constants: { minZoom, maxZoom } } = this;
-
+        
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
             .attr('id', this.id)
             .attr('class', 'svg-content-responsive')
             .attr('width', width)
             .attr('height', height)
+            .attr("transform", "translate("
+                + 20 + "," + 20 + ")")
             .style('border', '1px solid black');
         
         console.log(this);
+
+        let i = 0;
+        parts.svgGroup = parts.baseSvg
+                            .append('g')
+                            .attr('class', 'treeGroup')
+
+        parts.treeMap = d3.tree().size([height - 40, width - 40]);
+
+        let nodes = d3.hierarchy(this.data);
+        nodes = parts.treeMap(nodes);
+
+        const links = parts.svgGroup.selectAll(".link")
+                                    .data(nodes.descendants().slice(1))
+                                    .enter().append("path")
+                                    .attr("class", "link")
+                                    .attr("d", (d) => {
+                                        return "M" + d.x + "," + d.y
+                                            + "C" + d.x + "," + (d.y + d.parent.y) / 2
+                                            + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
+                                            + " " + d.parent.x + "," + d.parent.y;
+                                    })
+                                    .style("fill", "none")
+                                    .style("stroke", "#ccc")
+                                    .style("stroke-width", "2px")
+        
+        const node = parts.svgGroup.selectAll(".node")
+                                    .data(nodes.descendants())
+                                    .enter().append("g")
+                                    .attr("class", (d) => { 
+                                        return "node" + 
+                                        (d.children ? " node--internal" : " node--leaf"); 
+                                    })
+                                    .attr("transform", (d) => { 
+                                        return "translate(" + d.x + "," + d.y + ")"; 
+                                    });
+        
+        // adds the circle to the node
+        node.append("circle")
+            .attr("r", 10)
+            .style("fill", "#fff")
+            .style("stroke", "steelblue")
+            .style("stroke-width", "3px");
+
+        // adds the text to the node
+        node.append("text")
+            .attr("dy", ".35em")
+            .attr("y", (d) => { return d.children ? -20 : 20; })
+            .style("text-anchor", "middle")
+            .style("font", "12px sans-serif")
+            .text((d) => { return d.data.name; });
     }
 
     update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
@@ -88,14 +140,16 @@ class Odt {
         let curr_index = 1;
 
         const helper = (curr_node) => {
-            return {
-                [ID]: `${(curr_node[opts.id || ID] || curr_index++)}`.replace(/ /g, ''),
-                [NAME]: curr_node[opts.name || NAME],
-                [VALUE]: curr_node[opts.value || VALUE],
-                [CHILDREN]: _(curr_node[opts.childrenName] || curr_node[CHILDREN] || curr_node._children).map(helper).value(),
+            return curr_node;
+
+            // TODO: think about data for tooltip and other detailed visualization
+            // return {
+            //     [ID]: `${(curr_node[opts.id || ID] || curr_index++)}`.replace(/ /g, ''),
+            //     [NAME]: curr_node[opts.name || NAME],
+            //     [VALUE]: curr_node[opts.value || VALUE],
+            //     [CHILDREN]: _(curr_node[opts.childrenName] || curr_node[CHILDREN] || curr_node._children).map(helper).value(),
                 
-                // TODO: think about data for tooltip and other detailed visualization
-            };
+            // };
         };
 
         return helper(data);
@@ -103,7 +157,7 @@ class Odt {
 
     setDataAndOpts(opts, data) {
         this.opts = opts;
-        this.data = this.processData(data, this.opts);
+        this.data = this.processData(this.opts, data);
     }
 
 }
