@@ -117,8 +117,13 @@ class Odt {
                                     });
         
         // adds the circle to the node
-        node.append("circle")
-            .attr("r", 10)
+        node.append("rect")
+            .attr("width", 40)
+            .attr("height", 40)
+            .attr("x",-10)
+            .attr("y",0)
+            .attr("rx",6)
+            .attr("ry",6)
             .style("fill", "#fff")
             .style("stroke", "steelblue")
             .style("stroke-width", "3px");
