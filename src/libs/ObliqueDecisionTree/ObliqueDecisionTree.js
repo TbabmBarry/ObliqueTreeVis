@@ -75,8 +75,6 @@ class Odt {
             .attr('class', 'svg-content-responsive')
             .attr('width', width)
             .attr('height', height)
-            .attr("transform", "translate("
-                + 20 + "," + 20 + ")")
             .style('border', '1px solid black');
         
         console.log(this);
@@ -84,9 +82,11 @@ class Odt {
         let i = 0;
         parts.svgGroup = parts.baseSvg
                             .append('g')
+                            .attr("transform",
+                                `translate(${0},${40})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([height - 40, width - 40]);
+        parts.treeMap = d3.tree().size([height - 80, width - 80]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
