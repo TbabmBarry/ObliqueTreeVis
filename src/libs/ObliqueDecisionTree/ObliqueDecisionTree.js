@@ -77,17 +77,15 @@ class Odt {
             .attr('width', width)
             .attr('height', height)
             .style('border', '1px solid black');
-        
-        console.log(this);
 
         let i = 0;
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             .attr("transform",
-                                `translate(${0},${40})`)
+                                `translate(${-100},${100})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([height - 80, width - 80]);
+        parts.treeMap = d3.tree().size([height - 160, width - 80]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
@@ -119,8 +117,8 @@ class Odt {
         
         // adds the circle to the node
         node.append("rect")
-            .attr("width", 40)
-            .attr("height", 40)
+            .attr("width", 80)
+            .attr("height", 80)
             .attr("x",-10)
             .attr("y",0)
             .attr("rx",6)
@@ -128,6 +126,31 @@ class Odt {
             .style("fill", "#fff")
             .style("stroke", "steelblue")
             .style("stroke-width", "3px");
+        
+        const x = d3.scaleLinear()
+                    .domain([0, 10])
+                    .range([10, 80]);
+        const y = d3.scaleLinear()
+                    .domain([0, 10])
+                    .range([10, 80]);
+
+        node.each((nodeData, index) => {
+            d3.select(node._groups[0][index]).selectAll("circle")
+                .data(nodeData.data.samples)
+                .enter()
+                .append("circle")
+                    .attr("cx", (d) => {
+                        return x(d["Length"]);
+                    })
+                    .attr("cy", (d) => {
+                        return y(d["Height"]);
+                    })
+                    .attr("r", 3.5)
+                    .attr("class", (d) => {
+                        return `${d["Year"]}--${index}}`;
+                    })
+                    .style("fill", "#ff0000");
+        })
 
         // adds the text to the node
         node.append("text")
