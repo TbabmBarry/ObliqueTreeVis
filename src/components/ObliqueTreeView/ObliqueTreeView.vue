@@ -1,5 +1,10 @@
 <template>
-    <div class="md:container md:mx-auto h-screen" id="vis"></div>
+    <div class="md:container md:mx-auto h-screen">
+        <div>
+            Oblique Tree View
+        </div>
+        <div class="w-full h-screen" id="vis"></div>
+    </div>
 </template>
 <script setup>
 import { onMounted } from "vue";
