@@ -4,28 +4,15 @@
         <div class="col-start-1 col-end-3">
             <div class="grid grid-rows-2 grid-flow-col gap-2 h-full">
                 <div class="grid grid-rows-6 grid-flow-col gap border border-gray-800/100">
-                    <div class="header w-full row-start-1 row-span-1">
-                        Projection View
-                    </div>
-                    <div class="row-start-2 row-span-5">
-                        <ProjectionView />
-                    </div>
+                    <ProjectionView />
                 </div>
                 <div class="grid grid-rows-6 grid-flow-col gap border border-gray-800/100">
-                    <div class="header w-full row-start-1 row-span-1">
-                        Table Data View
-                    </div>
-                    <div class="row-start-2 row-span-5">
-                        <TableDataView />
-                    </div>
+                    <TableDataView />
                 </div>
             </div>
         </div>
         <div class="col-start-3 col-end-7">
             <div class="border border-gray-800/100">
-                <div class="header">
-                        Oblique Tree View
-                </div>
                 <ObliqueTreeView />
             </div>
         </div>
