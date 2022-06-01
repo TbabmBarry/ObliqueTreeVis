@@ -68,7 +68,7 @@ class Odt {
     }
 
     draw() {
-        const { data, opts, computed, parts, height, width, constants: { minZoom, maxZoom } } = this;
+        const { data, opts, computed, parts, height, width, constants: { minZoom, maxZoom, treeMargins } } = this;
         
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
@@ -76,7 +76,6 @@ class Odt {
             .attr('class', 'svg-content-responsive')
             .attr('width', width)
             .attr('height', height)
-            .style('border', '1px solid black');
 
         let i = 0;
         parts.svgGroup = parts.baseSvg
@@ -85,7 +84,7 @@ class Odt {
                                 `translate(${-100},${100})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([height - 160, width - 80]);
+        parts.treeMap = d3.tree().size([height - treeMargins.top - treeMargins.bottom, width - treeMargins.left - treeMargins.right]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
