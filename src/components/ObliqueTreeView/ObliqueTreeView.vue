@@ -1,5 +1,5 @@
 <template>
-    <div id="vis"></div>
+    <div class="md:container md:mx-auto h-screen" id="vis"></div>
 </template>
 <script setup>
 import { onMounted } from "vue";
@@ -70,9 +70,4 @@ onMounted(() => {
 })
 </script>
 <style scoped>
-#vis {
-    height: 900px;
-    width: 600px;
-}
-
 </style>
