@@ -1,9 +1,9 @@
 <template>
-    <div class="md:container md:mx-auto h-screen">
+    <div class="md:container md:mx-auto min-h-screen">
         <div>
             Oblique Tree View
         </div>
-        <div class="w-full h-screen" id="vis"></div>
+        <div class="w-full min-h-screen" id="vis"></div>
     </div>
 </template>
 <script setup>

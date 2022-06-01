@@ -1,6 +1,6 @@
 <template>
-<div class="container m-auto p-2 w-full h-full max-w-screen-2xl">
-    <div class="grid grid-cols-6 gap-2">
+<div class="container m-auto p-2 w-full min-h-screen max-w-screen-2xl">
+    <div class="grid grid-cols-6 gap-2 min-h-screen">
         <div class="col-start-1 col-end-3">
             <div class="grid grid-rows-2 grid-flow-col gap-2 h-full">
                 <div class="grid grid-rows-6 grid-flow-col gap border border-gray-800/100">
@@ -11,8 +11,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-start-3 col-end-7">
-            <div class="border border-gray-800/100">
+        <div class="col-start-3 col-end-7 min-h-screen">
+            <div class="border border-gray-800/100 min-h-screen">
                 <ObliqueTreeView />
             </div>
         </div>

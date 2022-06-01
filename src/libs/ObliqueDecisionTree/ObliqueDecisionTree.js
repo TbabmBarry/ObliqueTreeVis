@@ -60,6 +60,7 @@ class Odt {
     updateContainerDimensions() {
         try {
             const { width, height } = adjustedClientRect(this.rootElement);
+            console.log(width, height);
             _.assign(this, { width, height });
         } catch (err) {
             err.message = `Fail to reset the container: ${err.message}`;
@@ -81,14 +82,13 @@ class Odt {
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             .attr("transform",
-                                `translate(${-100},${100})`)
+                                `translate(${50},${50})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([height - treeMargins.top - treeMargins.bottom, width - treeMargins.left - treeMargins.right]);
+        parts.treeMap = d3.tree().size([width - 200, height - 200]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
-
         const links = parts.svgGroup.selectAll(".link")
                                     .data(nodes.descendants().slice(1))
                                     .enter().append("path")
@@ -111,6 +111,7 @@ class Odt {
                                         (d.children ? " node--internal" : " node--leaf"); 
                                     })
                                     .attr("transform", (d) => { 
+                                        console.log("positions: ", d.x, d.y);
                                         return "translate(" + d.x + "," + d.y + ")"; 
                                     });
         
@@ -198,6 +199,7 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
+    console.log(curr);
     return curr;
 };
 
