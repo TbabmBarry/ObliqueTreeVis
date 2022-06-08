@@ -35,7 +35,6 @@ import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
 import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
 import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
 import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
-import TableDataPanel1 from "../components/DataRepresentationPanels/TableDataPanel.vue";
 </script>
 <style scoped>
 </style>
