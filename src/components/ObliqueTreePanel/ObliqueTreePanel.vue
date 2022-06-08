@@ -78,10 +78,4 @@ onMounted(() => {
 })
 </script>
 <style scoped>
-.titles {
-    text-align: start;
-    font-size: 14px;
-    font-weight: 500;
-    color: #1e2225;
-}
 </style>

@@ -62,11 +62,4 @@ let { dataSource, columns } = toRefs(state);
 .table {
     height: fit-content;
 }
-
-.titles {
-    text-align: start;
-    font-size: 14px;
-    font-weight: 500;
-    color: #1e2225;
-}
 </style>
