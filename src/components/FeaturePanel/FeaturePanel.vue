@@ -1,6 +1,6 @@
 <template>
-    <div class="h-3/6">
-        TableData
+    <div class="h-full">
+        Feature Panel
     </div>
 </template>
 <script setup>

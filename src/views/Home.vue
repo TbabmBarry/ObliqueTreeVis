@@ -1,29 +1,34 @@
 <template>
-<div class="container m-auto p-2 w-full min-h-screen max-w-screen-2xl">
+<div class="container m-auto p-2 w-full min-h-screen min-w-full max-w-screen-2xl">
     <div class="grid grid-cols-6 gap-2 min-h-screen">
-        <div class="col-start-1 col-end-3">
-            <div class="grid grid-rows-2 grid-flow-col gap-2 h-full">
-                <div class="grid grid-rows-6 grid-flow-col gap border border-gray-800/100">
-                    <ProjectionView />
+        <div class="col-start-1 col-end-2">
+            <div class="grid grid-rows-3 grid-flow-col gap-2 h-screen">
+                <div class="grid row-span-2 grid-flow-col gap border border-gray-800/100">
+                    <ControlPanel />
                 </div>
-                <div class="grid grid-rows-6 grid-flow-col gap border border-gray-800/100">
-                    <TableDataView />
+                <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
+                    <ProjectionPanel />
                 </div>
             </div>
         </div>
-        <div class="col-start-3 col-end-7 min-h-screen">
-            <div class="border border-gray-800/100 min-h-screen">
-                <ObliqueTreeView />
+        <div class="col-start-2 col-end-6">
+            <div class="border border-gray-800/100 h-screen">
+                <ObliqueTreePanel />
+            </div>
+        </div>
+        <div class="col-start-6 col-end-7">
+            <div class="border border-gray-800/100 h-screen">
+                <FeaturePanel />
             </div>
         </div>
     </div>
 </div>
 </template>
 <script setup>
-import ObliqueTreeView from "../components/ObliqueTreeView/ObliqueTreeView.vue";
-import ProjectionView from "../components/DataRepresentationView/ProjectionView.vue";
-import TableDataView from "../components/DataRepresentationView/TableDataView.vue";
-
+import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
+import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
+import ProjectionPanel from "../components/ProjectionPanel/ProjectionPanel.vue";
+import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
 </script>
 <style scoped>
 </style>

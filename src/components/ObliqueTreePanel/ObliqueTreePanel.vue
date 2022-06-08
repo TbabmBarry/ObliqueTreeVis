@@ -1,5 +1,5 @@
 <template>
-    <div class="md:container md:mx-auto min-h-screen">
+    <div class="min-h-screen">
         <div>
             Oblique Tree View
         </div>

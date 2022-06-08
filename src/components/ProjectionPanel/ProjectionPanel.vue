@@ -1,6 +1,6 @@
 <template>
-    <div class="h-3/6">
-        Projection
+    <div class="h-full">
+        Projection Panel
     </div>
 </template>
 <script setup>
