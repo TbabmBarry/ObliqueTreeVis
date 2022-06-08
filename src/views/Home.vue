@@ -17,8 +17,13 @@
             </div>
         </div>
         <div class="col-start-6 col-end-7">
-            <div class="border border-gray-800/100 h-screen">
-                <FeaturePanel />
+            <div class="grid grid-rows-3 grid-flow-col gap-2 h-screen">
+                <div class="grid row-span-2 grid-flow-col gap border border-gray-800/100">
+                    <FeaturePanel />
+                </div>
+                <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
+                    <TableDataPanel />
+                </div>
             </div>
         </div>
     </div>
@@ -27,8 +32,10 @@
 <script setup>
 import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
 import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
-import ProjectionPanel from "../components/ProjectionPanel/ProjectionPanel.vue";
+import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
+import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
 import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
+import TableDataPanel1 from "../components/DataRepresentationPanels/TableDataPanel.vue";
 </script>
 <style scoped>
 </style>
