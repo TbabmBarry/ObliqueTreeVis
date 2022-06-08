@@ -1,6 +1,6 @@
 <template>
 <div class="container m-auto p-2 w-full min-h-screen min-w-full max-w-screen-2xl">
-    <div class="grid grid-cols-5 gap-2 min-h-screen">
+    <div class="grid grid-cols-6 gap-2 min-h-screen">
         <div class="col-start-1 col-end-2">
             <div class="grid grid-rows-3 grid-flow-col gap-2 h-screen">
                 <div class="grid row-span-2 grid-flow-col gap border border-gray-800/100">
@@ -11,12 +11,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-start-2 col-end-5">
+        <div class="col-start-2 col-end-6">
             <div class="border border-gray-800/100 h-screen">
                 <ObliqueTreePanel />
             </div>
         </div>
-        <div class="col-start-5 col-end-6">
+        <div class="col-start-6 col-end-7">
             <div class="grid grid-rows-3 grid-flow-col gap-2 h-screen">
                 <div class="grid row-span-2 grid-flow-col gap border border-gray-800/100">
                     <FeaturePanel />
