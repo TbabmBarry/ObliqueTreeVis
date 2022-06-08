@@ -1,8 +1,11 @@
 <template>
     <div class="min-h-screen">
-        <div>
-            Oblique Tree View
+        <div class="m-2">
+            <div class="col-span-1 titles">
+                Oblique Tree View
+            </div>
         </div>
+        <hr style="height:1px" />
         <div class="w-full min-h-screen" id="vis"></div>
     </div>
 </template>
@@ -75,4 +78,10 @@ onMounted(() => {
 })
 </script>
 <style scoped>
+.titles {
+    text-align: start;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e2225;
+}
 </style>
