@@ -1,5 +1,11 @@
 <template>
     <div class="h-full">
+        <div class="m-2">
+            <div class="col-span-1 titles">
+                Data Table: train | ()
+            </div>
+        </div>
+        <hr style="height:1px" />
         <div class="table">
             <a-table
                 bordered
@@ -53,7 +59,14 @@ const state = reactive({
 let { dataSource, columns } = toRefs(state);
 </script>
 <style scoped>
-    .table {
-        height: fit-content;
-    }
+.table {
+    height: fit-content;
+}
+
+.titles {
+    text-align: start;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e2225;
+}
 </style>
