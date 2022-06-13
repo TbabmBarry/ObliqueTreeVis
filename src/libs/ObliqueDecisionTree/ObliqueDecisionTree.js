@@ -75,16 +75,16 @@ class Odt {
             .attr('id', this.id)
             .attr('class', 'svg-content-responsive')
             .attr('width', width)
-            .attr('height', height)
+            .attr('height', height);
 
         let i = 0;
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             .attr("transform",
-                                `translate(${50},${50})`)
+                                `translate(${150},${150})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([width - 200, height - 200]);
+        parts.treeMap = d3.tree().size([width - 400, height - 400]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
@@ -128,10 +128,10 @@ class Odt {
         
         // adds the rectangle to the node
         node.append("rect")
-            .attr("width", 80)
-            .attr("height", 80)
-            .attr("x",-10)
-            .attr("y",0)
+            .attr("width", 240)
+            .attr("height", 240)
+            .attr("x",-120)
+            .attr("y",-120)
             .attr("rx",6)
             .attr("ry",6)
             .style("fill", "#fff")
@@ -210,6 +210,8 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
+    curr.height *= 2;
+    curr.width *= 2;
     return curr;
 };
 

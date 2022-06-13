@@ -1,12 +1,12 @@
 <template>
-    <div class="min-h-screen">
-        <div class="m-2">
+    <div class="w-full h-screen overflow-scroll">
+        <!-- <div class="m-2">
             <div class="col-span-1 titles">
                 Oblique Tree View
             </div>
         </div>
-        <hr style="height:1px" />
-        <div class="w-full min-h-screen" id="vis"></div>
+        <hr style="height:1px" /> -->
+        <div class="w-full h-screen inline-block" id="vis"></div>
     </div>
 </template>
 <script setup>
