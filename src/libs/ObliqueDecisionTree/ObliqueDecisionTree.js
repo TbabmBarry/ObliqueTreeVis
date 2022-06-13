@@ -60,7 +60,6 @@ class Odt {
     updateContainerDimensions() {
         try {
             const { width, height } = adjustedClientRect(this.rootElement);
-            console.log(width, height);
             _.assign(this, { width, height });
         } catch (err) {
             err.message = `Fail to reset the container: ${err.message}`;
@@ -94,12 +93,24 @@ class Odt {
                                     .enter().append("path")
                                     .attr("class", "link")
                                     .attr("d", (d) => {
-                                        return "M" + d.x + "," + d.y
-                                            + "C" + d.x + "," + (d.y + d.parent.y) / 2
-                                            + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
-                                            + " " + d.parent.x + "," + d.parent.y;
+                                        // return "M" + d.x + "," + d.y
+                                        //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
+                                        //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
+                                        //     + " " + d.parent.x + "," + d.parent.y;
+                                        return d3.area().curve(d3.curveBumpY).x(dd => dd.x).y0(dd => dd.y0).y1(dd => dd.y1)([
+                                            {
+                                                x: d.parent.x + 25,
+                                                y0: d.parent.y + 25,
+                                                y1: d.parent.y + 25,
+                                            },
+                                            {
+                                                x: d.x + 25,
+                                                y0: d.y + 25,
+                                                y1: d.y + 50,
+                                            }
+                                        ]);
                                     })
-                                    .style("fill", "none")
+                                    .style("fill", "blue")
                                     .style("stroke", "#ccc")
                                     .style("stroke-width", "2px")
         
@@ -111,11 +122,10 @@ class Odt {
                                         (d.children ? " node--internal" : " node--leaf"); 
                                     })
                                     .attr("transform", (d) => { 
-                                        console.log("positions: ", d.x, d.y);
                                         return "translate(" + d.x + "," + d.y + ")"; 
                                     });
         
-        // adds the circle to the node
+        // adds the rectangle to the node
         node.append("rect")
             .attr("width", 80)
             .attr("height", 80)
@@ -199,7 +209,6 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
-    console.log(curr);
     return curr;
 };
 
