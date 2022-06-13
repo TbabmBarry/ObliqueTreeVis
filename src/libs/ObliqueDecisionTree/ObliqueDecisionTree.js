@@ -97,6 +97,7 @@ class Odt {
                                         //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
                                         //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
                                         //     + " " + d.parent.x + "," + d.parent.y;
+                                        // TODO: Consider add color scale according to its class distribution
                                         return d3.area().curve(d3.curveBumpY).x(dd => dd.x).y0(dd => dd.y0).y1(dd => dd.y1)([
                                             {
                                                 x: d.parent.x + 25,
