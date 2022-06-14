@@ -98,23 +98,25 @@ class Odt {
                                         //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
                                         //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
                                         //     + " " + d.parent.x + "," + d.parent.y;
+                                        console.log(`Parent: ${d.parent.x}, ${d.parent.y}`);
+                                        console.log(`Child: ${d.x}, ${d.y}`);
                                         // TODO: Consider add color scale according to its class distribution
-                                        return d3.area().curve(d3.curveBumpY).x(dd => dd.x).y0(dd => dd.y0).y1(dd => dd.y1)([
+                                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                                             {
-                                                x: d.parent.x + 25,
-                                                y0: d.parent.y + 25,
-                                                y1: d.parent.y + 25,
+                                                x0: d.parent.x + 20,
+                                                x1: d.parent.x + 40,
+                                                y: d.parent.y,
                                             },
                                             {
-                                                x: d.x + 25,
-                                                y0: d.y + 25,
-                                                y1: d.y + 50,
+                                                x0: d.x + 20,
+                                                x1: d.x + 40,
+                                                y: d.y,
                                             }
                                         ]);
                                     })
                                     .style("fill", "blue")
-                                    .style("stroke", "#ccc")
-                                    .style("stroke-width", "2px")
+                                    .style("stroke", "none")
+                                    .style('mix-blend-mode', 'multiply');
         
         const node = parts.svgGroup.selectAll(".node")
                                     .data(nodes.descendants())
