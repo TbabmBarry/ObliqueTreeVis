@@ -21,6 +21,11 @@ class Odt {
 
     }
 
+    /**
+     * Initialize Oblique Tree View, including clearing state listeners,
+     * updating the container, and reassign this.
+     * @date 2022-06-14
+     */
     init() {
         // Unregister existing listeners
         this.registeredStateListeners.forEach(dergisterFn => dergisterFn());
@@ -56,6 +61,12 @@ class Odt {
     }
 
 
+    /**
+     * Update Oblique Tree View according to information about
+     * the size of DOMRect element and its position relative to
+     * the viewport.
+     * @date 2022-06-14
+     */
     updateContainerDimensions() {
         try {
             const { width, height } = adjustedClientRect(this.rootElement);
@@ -96,6 +107,11 @@ class Odt {
         this.enableZooming();
     }
 
+    /**
+     * Update Oblique Tree View accordingly.
+     * @date 2022-06-14
+     * @param {any} parm1
+     */
     update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
 
     }
@@ -140,6 +156,12 @@ class Odt {
     }
 
 
+    /**
+     * Render decision and leaf nodes according to the param nodes 
+     * which is an array of node objects.
+     * @date 2022-06-14
+     * @param {nodes} nodes
+     */
     renderNodes(nodes) {
         const { parts, width, height } = this;
 
@@ -243,6 +265,12 @@ class Odt {
         return helper(data);
     }
 
+    /**
+     * Set preprocessed data and options.
+     * @date 2022-06-14
+     * @param {opts} opts
+     * @param {data} data
+     */
     setDataAndOpts(opts, data) {
         this.opts = opts;
         this.data = this.processData(this.opts, data);
