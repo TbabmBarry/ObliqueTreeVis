@@ -100,6 +100,14 @@ class Odt {
 
     }
 
+
+    /**
+     * Render sankey-like links according to param links
+     * param links should be an array of objects with 
+     * length # of classes * # of links in the tree diagram.
+     * @date 2022-06-14
+     * @param {links} links
+     */
     renderLinks(links) {
         const { parts, height, width } = this;
 
@@ -130,6 +138,7 @@ class Odt {
                 .style("stroke", "none");
 
     }
+
 
     renderNodes(nodes) {
         const { parts, width, height } = this;
@@ -209,6 +218,12 @@ class Odt {
         parts.baseSvg.call(zoomListener);
     }
 
+    /**
+     * Process data according to options and return d3.hierarchy() compatible object.  
+     * @date 2022-06-14
+     * @param {opts} opts
+     * @param {data} data
+     */
     processData(opts, data) {
         let curr_index = 1;
 
