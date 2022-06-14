@@ -1,6 +1,4 @@
 import * as d3 from 'd3';
-import { zoom } from 'd3';
-// import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import _ from 'lodash';
 
 const ID = 'id';
@@ -147,7 +145,7 @@ class Odt {
                                         return "translate(" + d.x + "," + d.y + ")"; 
                                     });
         
-        // adds the rectangle to the node
+        // Add a rectangle to each node
         node.append("rect")
             .attr("width", 80)
             .attr("height", 80)
@@ -184,7 +182,7 @@ class Odt {
                     .style("fill", "#ff0000");
         })
 
-        // adds the text to the node
+        // Add texts to each node
         node.append("text")
             .attr("dy", ".35em")
             .attr("y", (d) => { return d.children ? -20 : 20; })
@@ -193,6 +191,11 @@ class Odt {
             .text((d) => { return d.data.name; });
     }
 
+    /**
+     * Zooming is performed by either double clickiing on an empty part
+     * of the SVG or by scrolling the mouse-wheel.
+     * @date 2022-06-14
+     */
     enableZooming() {
         const { parts, width, height } = this;
         const zoomed = ({ transform }) => {
@@ -232,6 +235,12 @@ class Odt {
 
 }
 
+/**
+ * Return information about the size of the whole Oblique Decision Tree (Odt)
+ * and its position relative to the viewport. 
+ * @date 2022-06-14
+ * @param {node} node
+ */
 const adjustedClientRect = (node) => {
     const curr = _.pick(node.getBoundingClientRect(), ['x', 'y', 'width', 'height', 'top', 'right', 'bottom', 'left']);
     curr.top += window.scrollY;
