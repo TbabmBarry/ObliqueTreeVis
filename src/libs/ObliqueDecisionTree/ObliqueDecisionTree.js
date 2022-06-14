@@ -70,7 +70,7 @@ class Odt {
 
     draw() {
         const { data, opts, computed, parts, height, width, constants: { minZoom, maxZoom, treeMargins } } = this;
-        
+
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
             .attr('id', this.id)
@@ -89,37 +89,55 @@ class Odt {
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
-        const links = parts.svgGroup.selectAll(".link")
-                                    .data(nodes.descendants().slice(1))
-                                    .enter().append("path")
-                                    .attr("class", "link")
-                                    .attr("d", (d) => {
-                                        // return "M" + d.x + "," + d.y
-                                        //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
-                                        //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
-                                        //     + " " + d.parent.x + "," + d.parent.y;
-                                        console.log(`Parent: ${d.parent.x}, ${d.parent.y}`);
-                                        console.log(`Child: ${d.x}, ${d.y}`);
-                                        // TODO: Consider add color scale according to its class distribution
-                                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                                            {
-                                                x0: d.parent.x + 20,
-                                                x1: d.parent.x + 40,
-                                                y: d.parent.y,
-                                            },
-                                            {
-                                                x0: d.x + 20,
-                                                x1: d.x + 40,
-                                                y: d.y,
-                                            }
-                                        ]);
-                                    })
-                                    .style("fill", "blue")
-                                    .style("stroke", "none")
-                                    .style('mix-blend-mode', 'multiply');
         
+        // Render Oblique Tree Links and Nodes
+        this.renderLinks(nodes.descendants().slice(1));
+        this.renderNodes(nodes.descendants());
+
+        // Enable zooming
+        this.enableZooming();
+    }
+
+    update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
+
+    }
+
+    renderLinks(links) {
+        const { parts, height, width } = this;
+
+        parts.svgGroup.selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", (d) => {
+                    // return "M" + d.x + "," + d.y
+                    //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
+                    //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
+                    //     + " " + d.parent.x + "," + d.parent.y;
+                    // TODO: Consider add color scale according to its class distribution
+                    return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                        {
+                            x0: d.parent.x + 20,
+                            x1: d.parent.x + 40,
+                            y: d.parent.y,
+                        },
+                        {
+                            x0: d.x + 20,
+                            x1: d.x + 40,
+                            y: d.y,
+                        }
+                    ]);
+                })
+                .style("fill", "blue")
+                .style("stroke", "none");
+
+    }
+
+    renderNodes(nodes) {
+        const { parts, width, height } = this;
+
         const node = parts.svgGroup.selectAll(".node")
-                                    .data(nodes.descendants())
+                                    .data(nodes)
                                     .enter().append("g")
                                     .attr("class", (d) => { 
                                         return "node" + 
@@ -173,7 +191,10 @@ class Odt {
             .style("text-anchor", "middle")
             .style("font", "12px sans-serif")
             .text((d) => { return d.data.name; });
+    }
 
+    enableZooming() {
+        const { parts, width, height } = this;
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
         }
@@ -183,10 +204,6 @@ class Odt {
                                 .scaleExtent([1, 8])
                                 .on('zoom', zoomed);
         parts.baseSvg.call(zoomListener);
-    }
-
-    update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
-
     }
 
     processData(opts, data) {

@@ -20,12 +20,15 @@ onMounted(() => {
     let opts = null;
     let data = {
         "name": "Top Level",
+        "distribution": [115,99,52],
         "children": [
             { 
                 "name": "Level 2: A",
+                "distribution": [115,0,52],
                 "children": [
                     { 
                         "name": "Son of A",
+                        "distribution": [115,0,0],
                         "samples": [
                             {"Year": "2001", "Height": "4.41", "Length": "3.17"},
                             {"Year": "2003", "Height": "3.81", "Length": "7.33"},
@@ -34,6 +37,7 @@ onMounted(() => {
                     },
                     {
                         "name": "Daughter of A",
+                        "distribution": [0,0,52],
                         "samples": [
                             {"Year": "2002", "Height": "3.21", "Length": "4.51"},
                             {"Year": "1998", "Height": "3.89", "Length": "8.05"},
@@ -52,6 +56,7 @@ onMounted(() => {
             },
             { 
                 "name": "Level 2: B",
+                "distribution": [0,99,0],
                 "samples": [
                     {"Year": "1997", "Height": "4.11", "Length": "2.34"},
                     {"Year": "2000", "Height": "5.21", "Length": "2.38"},
