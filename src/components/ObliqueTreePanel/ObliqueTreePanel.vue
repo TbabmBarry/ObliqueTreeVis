@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-screen overflow-scroll">
+    <div class="w-full h-screen">
         <!-- <div class="m-2">
             <div class="col-span-1 titles">
                 Oblique Tree View

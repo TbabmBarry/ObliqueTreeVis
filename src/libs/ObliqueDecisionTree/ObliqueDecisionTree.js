@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { zoom } from 'd3';
 // import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
 import _ from 'lodash';
 
@@ -81,10 +82,10 @@ class Odt {
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             .attr("transform",
-                                `translate(${150},${150})`)
+                                `translate(${50},${50})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([width - 400, height - 400]);
+        parts.treeMap = d3.tree().size([width - 200, height - 200]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
@@ -128,10 +129,10 @@ class Odt {
         
         // adds the rectangle to the node
         node.append("rect")
-            .attr("width", 240)
-            .attr("height", 240)
-            .attr("x",-120)
-            .attr("y",-120)
+            .attr("width", 80)
+            .attr("height", 80)
+            .attr("x",-15)
+            .attr("y",-10)
             .attr("rx",6)
             .attr("ry",6)
             .style("fill", "#fff")
@@ -170,6 +171,16 @@ class Odt {
             .style("text-anchor", "middle")
             .style("font", "12px sans-serif")
             .text((d) => { return d.data.name; });
+
+        const zoomed = ({ transform }) => {
+            parts.svgGroup.attr('transform', transform);
+        }
+
+        const zoomListener = d3.zoom()
+                                .extent([[0,0], [width, height]])
+                                .scaleExtent([1, 8])
+                                .on('zoom', zoomed);
+        parts.baseSvg.call(zoomListener);
     }
 
     update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
@@ -210,8 +221,6 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
-    curr.height *= 2;
-    curr.width *= 2;
     return curr;
 };
 
