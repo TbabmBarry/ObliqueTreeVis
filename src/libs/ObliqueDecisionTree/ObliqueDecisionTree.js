@@ -142,13 +142,13 @@ class Odt {
                     // TODO: Consider add color scale according to its class distribution
                     return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                         {
-                            x0: d.source.x - d.source.width,
-                            x1: d.source.x + d.source.width,
+                            x0: d.source.x - 0.5 * d.source.width,
+                            x1: d.source.x + 0.5 * d.source.width,
                             y: d.source.y,
                         },
                         {
-                            x0: d.target.x - d.target.width,
-                            x1: d.target.x + d.target.width,
+                            x0: d.target.x - 0.5 * d.target.width,
+                            x1: d.target.x + 0.5 * d.target.width,
                             y: d.target.y,
                         }
                     ]);
@@ -183,8 +183,8 @@ class Odt {
         node.append("rect")
             .attr("width", 80)
             .attr("height", 80)
-            .attr("x",-15)
-            .attr("y",-10)
+            .attr("x",-30)
+            .attr("y",-50)
             .attr("rx",6)
             .attr("ry",6)
             .style("fill", "#fff")
