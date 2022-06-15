@@ -127,6 +127,7 @@ class Odt {
      */
     renderLinks(links) {
         const { parts, height, width } = this;
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         const testArr = this.generateFlows(links);
         console.log("Processed links: ", testArr);
         parts.svgGroup.selectAll(".link")
@@ -152,7 +153,7 @@ class Odt {
                         }
                     ]);
                 })
-                .style("fill", "blue")
+                .style("fill", (d) => colorScale(d.class))
                 .style("stroke", "none");
 
     }
