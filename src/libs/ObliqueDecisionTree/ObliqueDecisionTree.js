@@ -100,6 +100,7 @@ class Odt {
         nodes = parts.treeMap(nodes);
         
         // Render Oblique Tree Links and Nodes
+        console.log("Input links: ", nodes.descendants().slice(1));
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
 
@@ -126,9 +127,10 @@ class Odt {
      */
     renderLinks(links) {
         const { parts, height, width } = this;
-
+        const testArr = this.generateFlows(links);
+        console.log("Processed links: ", testArr);
         parts.svgGroup.selectAll(".link")
-                .data(links)
+                .data(testArr)
                 .enter().append("path")
                 .attr("class", "link")
                 .attr("d", (d) => {
@@ -139,14 +141,14 @@ class Odt {
                     // TODO: Consider add color scale according to its class distribution
                     return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                         {
-                            x0: d.parent.x + 20,
-                            x1: d.parent.x + 40,
-                            y: d.parent.y,
+                            x0: d.source.x - d.source.width,
+                            x1: d.source.x + d.source.width,
+                            y: d.source.y,
                         },
                         {
-                            x0: d.x + 20,
-                            x1: d.x + 40,
-                            y: d.y,
+                            x0: d.target.x - d.target.width,
+                            x1: d.target.x + d.target.width,
+                            y: d.target.y,
                         }
                     ]);
                 })
@@ -274,6 +276,49 @@ class Odt {
     setDataAndOpts(opts, data) {
         this.opts = opts;
         this.data = this.processData(this.opts, data);
+    }
+
+    /**
+     * Return an array of processed link object with structure
+     * {"source": {x: , y: , width: }, "target": {x: , y: , width: }, class: }
+     * @date 2022-06-15
+     * @param {links} links
+     */
+    generateFlows(links) {
+        const widthFlow = 40;
+        let currParentWidth = widthFlow, currChildWidth = widthFlow;
+        let currParentSize, currChildSize;
+        const fullsize = links[0].parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
+        const resFlows = [];
+        let currParentX, currChildX;
+        for (const link of links) {
+            currParentSize = link.parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
+            currChildSize = link.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
+            currParentWidth = Math.ceil((currParentSize / fullsize) * widthFlow);
+            currChildWidth = Math.ceil((currChildSize / fullsize) * widthFlow);
+            const parentWidthArr = link.parent.data.distribution.map(ele => Math.ceil((ele / currParentSize) * currParentWidth));
+            const childWidthArr = link.data.distribution.map(ele => Math.ceil((ele / currChildSize) * currChildWidth));
+            currParentX = link.parent.x;
+            currChildX = link.x;
+            parentWidthArr.forEach((val, idx) => {
+                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : 0;
+                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : 0;
+                resFlows.push({
+                    source: {
+                        x: currParentX,
+                        y: link.parent.y,
+                        width: val,
+                    },
+                    target: {
+                        x: currChildX,
+                        y: link.y,
+                        width: childWidthArr[idx],
+                    },
+                    class: idx,
+                });
+            })
+        }
+        return resFlows;
     }
 
 }
