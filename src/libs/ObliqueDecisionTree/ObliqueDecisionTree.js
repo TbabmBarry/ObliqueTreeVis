@@ -308,7 +308,7 @@ class Odt {
                     source: {
                         x: currParentX,
                         y: link.parent.y,
-                        width: val,
+                        width: childWidthArr[idx],
                     },
                     target: {
                         x: currChildX,
