@@ -180,10 +180,10 @@ class Odt {
         node.append("rect")
             .attr("width", 240)
             .attr("height", 240)
-            .attr("x",-100)
+            .attr("x",-120)
             .attr("y",0)
-            .attr("rx",6)
-            .attr("ry",6)
+            .attr("rx",20)
+            .attr("ry",20)
             .style("fill", "#fff")
             .style("stroke", "steelblue")
             .style("stroke-width", "3px");
@@ -283,7 +283,7 @@ class Odt {
      * @param {links} links
      */
     generateFlows(links) {
-        const widthFlow = 80;
+        const widthFlow = 200;
         let currParentWidth = widthFlow, currChildWidth = widthFlow;
         let currParentSize, currChildSize;
         const fullsize = links[0].parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
@@ -299,8 +299,8 @@ class Odt {
             currParentX = link.parent.x;
             currChildX = link.x;
             parentWidthArr.forEach((val, idx) => {
-                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : 0;
-                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : 0;
+                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (widthFlow - parentWidthArr[idx]);
+                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (widthFlow - childWidthArr[idx]);
                 resFlows.push({
                     source: {
                         x: currParentX,
