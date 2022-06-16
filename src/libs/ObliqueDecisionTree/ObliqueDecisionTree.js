@@ -53,6 +53,7 @@ class Odt {
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
                 scatterPlotPadding: 10,
+                colorScale: d3.scaleOrdinal(d3.schemeCategory10),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -128,8 +129,7 @@ class Odt {
      * @param {links} links
      */
     renderLinks(links) {
-        const { parts, height, width } = this;
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        const { parts, height, width, constants: { colorScale } } = this;
         const flowLinks = this.generateFlows(links);
         parts.svgGroup.selectAll(".link")
                 .data(flowLinks)
@@ -196,7 +196,7 @@ class Odt {
      * @param {node} node
      */
     drawScatterPlot(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
         // Add a rectangle to each node
         node.append("rect")
             .attr("width", nodeRectWidth)
@@ -241,7 +241,7 @@ class Odt {
                     .attr("class", (d) => {
                         return `${d["Year"]}--${index}}`;
                     })
-                    .style("fill", "#ff0000");
+                    .style("fill", d => colorScale(d["Year"]));
         })
     }
 
