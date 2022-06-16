@@ -184,7 +184,7 @@ class Odt {
             .attr("width", 80)
             .attr("height", 80)
             .attr("x",-30)
-            .attr("y",-50)
+            .attr("y",0)
             .attr("rx",6)
             .attr("ry",6)
             .style("fill", "#fff")
@@ -307,7 +307,7 @@ class Odt {
                 resFlows.push({
                     source: {
                         x: currParentX,
-                        y: link.parent.y,
+                        y: link.parent.y + 80, // TODO: Define the size of decision nodes
                         width: childWidthArr[idx],
                     },
                     target: {
