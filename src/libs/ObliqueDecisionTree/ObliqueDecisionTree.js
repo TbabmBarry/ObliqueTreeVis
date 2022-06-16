@@ -50,7 +50,8 @@ class Odt {
                 stateResizeTolerance: 2,
                 pxPerChar: 7,
                 nodeTextDx: 10,
-                nodeRectWidth: 5,
+                nodeRectRatio: 20,
+                nodeRectWidth: 240,
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -78,7 +79,7 @@ class Odt {
     }
 
     draw() {
-        const { data, opts, computed, parts, height, width, constants: { minZoom, maxZoom, treeMargins } } = this;
+        const { data, opts, computed, parts, height, width, constants: { nodeRectRatio } } = this;
 
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
@@ -163,7 +164,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio } } = this;
 
         const node = parts.svgGroup.selectAll(".node")
                                     .data(nodes)
@@ -178,12 +179,12 @@ class Odt {
         
         // Add a rectangle to each node
         node.append("rect")
-            .attr("width", 240)
-            .attr("height", 240)
-            .attr("x",-120)
+            .attr("width", nodeRectWidth)
+            .attr("height", nodeRectWidth)
+            .attr("x",- 0.5 * nodeRectWidth)
             .attr("y",0)
-            .attr("rx",20)
-            .attr("ry",20)
+            .attr("rx", nodeRectRatio)
+            .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", "steelblue")
             .style("stroke-width", "3px");
@@ -283,7 +284,8 @@ class Odt {
      * @param {links} links
      */
     generateFlows(links) {
-        const widthFlow = 200;
+        const { constants: { nodeRectWidth, nodeRectRatio } } = this;
+        const widthFlow = nodeRectWidth - 2 * nodeRectRatio;
         let currParentWidth = widthFlow, currChildWidth = widthFlow;
         let currParentSize, currChildSize;
         const fullsize = links[0].parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
@@ -304,7 +306,7 @@ class Odt {
                 resFlows.push({
                     source: {
                         x: currParentX,
-                        y: link.parent.y + 240, // TODO: Define the size of decision nodes
+                        y: link.parent.y + nodeRectWidth, // TODO: Define the size of decision nodes
                         width: childWidthArr[idx],
                     },
                     target: {
