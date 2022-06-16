@@ -90,15 +90,15 @@ class Odt {
         let i = 0;
         parts.svgGroup = parts.baseSvg
                             .append('g')
-                            .attr("transform",
-                                `translate(${50},${50})`)
+                            // .attr("transform",
+                            //     `translate(${50},${50})`)
                             .attr('class', 'treeGroup')
 
         parts.treeMap = d3.tree().size([width, height]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
-        
+        console.log("Nodes: ", nodes.descendants());
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -178,9 +178,9 @@ class Odt {
         
         // Add a rectangle to each node
         node.append("rect")
-            .attr("width", 80)
-            .attr("height", 80)
-            .attr("x",-30)
+            .attr("width", 240)
+            .attr("height", 240)
+            .attr("x",-100)
             .attr("y",0)
             .attr("rx",6)
             .attr("ry",6)
@@ -283,7 +283,7 @@ class Odt {
      * @param {links} links
      */
     generateFlows(links) {
-        const widthFlow = 40;
+        const widthFlow = 80;
         let currParentWidth = widthFlow, currChildWidth = widthFlow;
         let currParentSize, currChildSize;
         const fullsize = links[0].parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
@@ -304,7 +304,7 @@ class Odt {
                 resFlows.push({
                     source: {
                         x: currParentX,
-                        y: link.parent.y + 80, // TODO: Define the size of decision nodes
+                        y: link.parent.y + 240, // TODO: Define the size of decision nodes
                         width: childWidthArr[idx],
                     },
                     target: {
@@ -335,8 +335,8 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
-    // curr.height *= 2;
-    // curr.width *= 2;
+    curr.width *= 2;
+    curr.height *= 2;
     return curr;
 };
 
