@@ -193,18 +193,25 @@ class Odt {
         
         const x = d3.scaleLinear()
                     .domain([0, 10])
-                    .range([0.5 * scatterPlotPadding, nodeRectWidth - 0.5 * scatterPlotPadding]);
+                    .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
         const y = d3.scaleLinear()
                     .domain([0, 10])
-                    .range([0.5 * scatterPlotPadding, nodeRectWidth - 0.5 * scatterPlotPadding]);
+                    .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
 
+        node.append("g")
+            .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
+            .call(d3.axisBottom(x));
+
+        node.append("g")
+            .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${-scatterPlotPadding})`)
+            .call(d3.axisLeft(y));
         node.each((nodeData, index) => {
             d3.select(node._groups[0][index]).selectAll("circle")
                 .data(nodeData.data.samples)
                 .enter()
                 .append("circle")
                     .attr("cx", (d) => {
-                        return x(d["Length"]) - 120;
+                        return x(d["Length"]) - 0.5 * nodeRectWidth;
                     })
                     .attr("cy", (d) => {
                         return y(d["Height"]);
