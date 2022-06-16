@@ -128,10 +128,9 @@ class Odt {
     renderLinks(links) {
         const { parts, height, width } = this;
         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-        const testArr = this.generateFlows(links);
-        console.log("Processed links: ", testArr);
+        const flowLinks = this.generateFlows(links);
         parts.svgGroup.selectAll(".link")
-                .data(testArr)
+                .data(flowLinks)
                 .enter().append("path")
                 .attr("class", "link")
                 .attr("d", (d) => {
