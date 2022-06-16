@@ -52,7 +52,7 @@ class Odt {
                 nodeTextDx: 10,
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
-                scatterPlotPadding: 10,
+                scatterPlotPadding: 20,
                 colorScale: d3.scaleOrdinal(d3.schemeCategory10),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
@@ -195,12 +195,12 @@ class Odt {
         this.drawScatterPlot(node);
 
         // Add texts to each node
-        node.append("text")
-            .attr("dy", ".35em")
-            .attr("y", (d) => { return d.children ? -20 : 20; })
-            .style("text-anchor", "middle")
-            .style("font", "12px sans-serif")
-            .text((d) => { return d.data.name; });
+        // node.append("text")
+        //     .attr("dy", ".35em")
+        //     .attr("y", (d) => { return d.children ? -20 : 20; })
+        //     .style("text-anchor", "middle")
+        //     .style("font", "12px sans-serif")
+        //     .text((d) => { return d.data.name; });
     }
 
     /**
@@ -216,7 +216,7 @@ class Odt {
                     .domain([0, 10])
                     .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
         const y = d3.scaleLinear()
-                    .domain([0, 10])
+                    .domain([10, 0])
                     .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
 
         // Allow X and Y axis generators to be called
@@ -226,7 +226,7 @@ class Odt {
             .call(d3.axisBottom(x));
         node.append("g")
             .attr("class", "scatterplot y-axis")
-            .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${-scatterPlotPadding})`)
+            .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${0})`)
             .call(d3.axisLeft(y));
 
         // Add dots in each decision node
