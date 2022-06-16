@@ -166,7 +166,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
 
         const node = parts.svgGroup.selectAll(".node")
             .data(nodes)
@@ -179,6 +179,19 @@ class Odt {
                 return "translate(" + d.x + "," + d.y + ")"; 
             });
         
+        // Add a rectangle to each node
+        node.append("rect")
+            .attr("class", "node-rect")
+            .attr("width", nodeRectWidth)
+            .attr("height", nodeRectWidth)
+            .attr("x",- 0.5 * nodeRectWidth)
+            .attr("y",0)
+            .attr("rx", nodeRectRatio)
+            .attr("ry", nodeRectRatio)
+            .style("fill", "#fff")
+            .style("stroke", "steelblue")
+            .style("stroke-width", "3px");    
+
         this.drawScatterPlot(node);
 
         // Add texts to each node
@@ -197,17 +210,6 @@ class Odt {
      */
     drawScatterPlot(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
-        // Add a rectangle to each node
-        node.append("rect")
-            .attr("width", nodeRectWidth)
-            .attr("height", nodeRectWidth)
-            .attr("x",- 0.5 * nodeRectWidth)
-            .attr("y",0)
-            .attr("rx", nodeRectRatio)
-            .attr("ry", nodeRectRatio)
-            .style("fill", "#fff")
-            .style("stroke", "steelblue")
-            .style("stroke-width", "3px");
         
         // Map two feature variables into visual representations
         const x = d3.scaleLinear()
@@ -219,9 +221,11 @@ class Odt {
 
         // Allow X and Y axis generators to be called
         node.append("g")
+            .attr("class", "scatterplot x-axis")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
             .call(d3.axisBottom(x));
         node.append("g")
+            .attr("class", "scatterplot y-axis")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${-scatterPlotPadding})`)
             .call(d3.axisLeft(y));
 
@@ -231,6 +235,7 @@ class Odt {
                 .data(nodeData.data.samples)
                 .enter()
                 .append("circle")
+                    .attr("class", "scatterplot dot")
                     .attr("cx", (d) => {
                         return x(d["Length"]) - 0.5 * nodeRectWidth;
                     })
