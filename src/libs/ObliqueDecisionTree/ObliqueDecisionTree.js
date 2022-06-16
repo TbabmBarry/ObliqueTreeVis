@@ -166,19 +166,37 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding } } = this;
+        const { parts } = this;
 
         const node = parts.svgGroup.selectAll(".node")
-                                    .data(nodes)
-                                    .enter().append("g")
-                                    .attr("class", (d) => { 
-                                        return "node" + 
-                                        (d.children ? " node--internal" : " node--leaf"); 
-                                    })
-                                    .attr("transform", (d) => { 
-                                        return "translate(" + d.x + "," + d.y + ")"; 
-                                    });
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", (d) => { 
+                return "node" + 
+                (d.children ? " node--internal" : " node--leaf"); 
+            })
+            .attr("transform", (d) => { 
+                return "translate(" + d.x + "," + d.y + ")"; 
+            });
         
+        this.drawScatterPlot(node);
+
+        // Add texts to each node
+        node.append("text")
+            .attr("dy", ".35em")
+            .attr("y", (d) => { return d.children ? -20 : 20; })
+            .style("text-anchor", "middle")
+            .style("font", "12px sans-serif")
+            .text((d) => { return d.data.name; });
+    }
+
+    /**
+     * Draw scatter plot in each decision node
+     * @date 2022-06-16
+     * @param {node} node
+     */
+    drawScatterPlot(node) {
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding } } = this;
         // Add a rectangle to each node
         node.append("rect")
             .attr("width", nodeRectWidth)
@@ -191,6 +209,7 @@ class Odt {
             .style("stroke", "steelblue")
             .style("stroke-width", "3px");
         
+        // Map two feature variables into visual representations
         const x = d3.scaleLinear()
                     .domain([0, 10])
                     .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
@@ -198,13 +217,15 @@ class Odt {
                     .domain([0, 10])
                     .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]);
 
+        // Allow X and Y axis generators to be called
         node.append("g")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
             .call(d3.axisBottom(x));
-
         node.append("g")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${-scatterPlotPadding})`)
             .call(d3.axisLeft(y));
+
+        // Add dots in each decision node
         node.each((nodeData, index) => {
             d3.select(node._groups[0][index]).selectAll("circle")
                 .data(nodeData.data.samples)
@@ -222,14 +243,6 @@ class Odt {
                     })
                     .style("fill", "#ff0000");
         })
-
-        // Add texts to each node
-        node.append("text")
-            .attr("dy", ".35em")
-            .attr("y", (d) => { return d.children ? -20 : 20; })
-            .style("text-anchor", "middle")
-            .style("font", "12px sans-serif")
-            .text((d) => { return d.data.name; });
     }
 
     /**
