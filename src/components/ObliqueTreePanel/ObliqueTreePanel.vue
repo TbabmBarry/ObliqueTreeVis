@@ -6,7 +6,7 @@
             </div>
         </div>
         <hr style="height:1px" /> -->
-        <div class="w-full h-screen inline-block" id="vis"></div>
+        <div class="w-full h-screen inline-block overflow-auto hover:overflow-scroll" id="vis"></div>
     </div>
 </template>
 <script setup>

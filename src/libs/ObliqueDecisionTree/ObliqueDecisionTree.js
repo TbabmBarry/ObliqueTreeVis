@@ -94,13 +94,12 @@ class Odt {
                                 `translate(${50},${50})`)
                             .attr('class', 'treeGroup')
 
-        parts.treeMap = d3.tree().size([width - 200, height - 200]);
+        parts.treeMap = d3.tree().size([width, height]);
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
         
         // Render Oblique Tree Links and Nodes
-        console.log("Input links: ", nodes.descendants().slice(1));
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
 
@@ -138,7 +137,6 @@ class Odt {
                     //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
                     //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
                     //     + " " + d.parent.x + "," + d.parent.y;
-                    // TODO: Consider add color scale according to its class distribution
                     return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                         {
                             x0: d.source.x - 0.5 * d.source.width,
@@ -337,6 +335,8 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
+    // curr.height *= 2;
+    // curr.width *= 2;
     return curr;
 };
 
