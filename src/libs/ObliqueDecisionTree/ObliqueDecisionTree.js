@@ -80,7 +80,8 @@ class Odt {
 
     draw() {
         const { data, opts, computed, parts, height, width, constants: { nodeRectRatio } } = this;
-
+        
+        // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
             .attr('id', this.id)
@@ -88,7 +89,7 @@ class Odt {
             .attr('width', width)
             .attr('height', height);
 
-        let i = 0;
+        // Create a container to group other tree diagram related svg elements
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             // .attr("transform",
@@ -99,7 +100,7 @@ class Odt {
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
-        console.log("Nodes: ", nodes.descendants());
+
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -306,7 +307,7 @@ class Odt {
                 resFlows.push({
                     source: {
                         x: currParentX,
-                        y: link.parent.y + nodeRectWidth, // TODO: Define the size of decision nodes
+                        y: link.parent.y + nodeRectWidth,
                         width: childWidthArr[idx],
                     },
                     target: {
@@ -337,6 +338,7 @@ const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
+    // TODO: define inner svg width and height according to returned DOMRect size
     curr.width *= 2;
     curr.height *= 2;
     return curr;
