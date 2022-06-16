@@ -52,6 +52,7 @@ class Odt {
                 nodeTextDx: 10,
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
+                scatterPlotPadding: 10,
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -165,7 +166,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding } } = this;
 
         const node = parts.svgGroup.selectAll(".node")
                                     .data(nodes)
@@ -192,10 +193,10 @@ class Odt {
         
         const x = d3.scaleLinear()
                     .domain([0, 10])
-                    .range([10, 80]);
+                    .range([0.5 * scatterPlotPadding, nodeRectWidth - 0.5 * scatterPlotPadding]);
         const y = d3.scaleLinear()
                     .domain([0, 10])
-                    .range([10, 80]);
+                    .range([0.5 * scatterPlotPadding, nodeRectWidth - 0.5 * scatterPlotPadding]);
 
         node.each((nodeData, index) => {
             d3.select(node._groups[0][index]).selectAll("circle")
@@ -203,7 +204,7 @@ class Odt {
                 .enter()
                 .append("circle")
                     .attr("cx", (d) => {
-                        return x(d["Length"]);
+                        return x(d["Length"]) - 120;
                     })
                     .attr("cy", (d) => {
                         return y(d["Height"]);
