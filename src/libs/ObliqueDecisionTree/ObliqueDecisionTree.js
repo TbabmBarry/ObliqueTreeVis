@@ -174,9 +174,11 @@ class Odt {
         function clicked(event, data) {
             if (event.shiftKey) {
                 let parentNodeGroup = select(this);
-                if (parentNodeGroup.node().querySelector(".scatterplot") !== null) {
-                    parentNodeGroup.selectAll(".scatterplot").remove();
+                if (parentNodeGroup.node().querySelector(".detailed") !== null) {
+                    parentNodeGroup.selectAll(".detailed").remove();
+                    _this.renderSummaryView(parentNodeGroup);
                 } else {
+                    parentNodeGroup.selectAll(".summary").remove();
                     _this.renderDetailedView(parentNodeGroup);
                 }
             }
@@ -221,8 +223,8 @@ class Odt {
             .style("stroke", "steelblue")
             .style("stroke-width", "3px")
 
-
-        this.renderDetailedView(node);
+        this.renderSummaryView(node);
+        // this.renderDetailedView(node);
 
         // Add texts to each node
         // node.append("text")
@@ -240,8 +242,41 @@ class Odt {
      */
     renderSummaryView(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
-
+        
         // TODO: draw class distribution, histograms
+        // Draw class distribution
+        node.each(function(nodeData, index) {
+            console.log("nodeData: ", nodeData);
+            let x = d3.scaleLinear()
+                .domain([0, nodeData.data.distribution.reduce((a, b) => a + b)])
+                .range([0, nodeRectWidth - 2 * nodeRectRatio]);
+            let currStart, currEnd = 0, nextStart = 0;
+            const classData = [];
+            nodeData.data.distribution.forEach((ele, idx) => {
+                currStart = nextStart;
+                currEnd += ele;
+                nextStart += ele;
+                classData.push({
+                    start: currStart,
+                    end: currEnd,
+                    label: idx,
+                });
+            });
+            console.log(classData);
+            let bar = d3.select(this).selectAll("g")
+                .data(classData)
+                .enter()
+                .append("g")
+                .attr("class", "summary bar")
+                .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
+
+            bar.append("rect")
+                .attr("class", "summary class-rect")
+                .attr("width", (d) => x(d.end - d.start))
+                .attr("height", nodeRectRatio)
+                .attr("x", (d) => - 0.5 * (nodeRectWidth) + x(d.start))
+                .style("fill", (d) => colorScale(d.label));
+        })
     }
 
     /**
@@ -262,21 +297,21 @@ class Odt {
 
         // Allow X and Y axis generators to be called
         node.append("g")
-            .attr("class", "scatterplot x-axis")
+            .attr("class", "detailed x-axis")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
             .call(d3.axisBottom(x));
         node.append("g")
-            .attr("class", "scatterplot y-axis")
+            .attr("class", "detailed y-axis")
             .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${0})`)
             .call(d3.axisLeft(y));
 
         // Add dots in each decision node
-        node.each((nodeData, index) => {
-            d3.select(node._groups[0][index]).selectAll("circle")
+        node.each(function (nodeData, index) {
+            d3.select(this).selectAll("circle")
                 .data(nodeData.data.samples)
                 .enter()
                 .append("circle")
-                    .attr("class", "scatterplot dot")
+                    .attr("class", "detailed dot")
                     .attr("cx", (d) => {
                         return x(d["Length"]) - 0.5 * nodeRectWidth;
                     })
