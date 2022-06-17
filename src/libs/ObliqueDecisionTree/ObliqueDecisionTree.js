@@ -244,7 +244,7 @@ class Odt {
         node.each(function(nodeData, index) {
             // Encode current decision node class distribution into the range of node rect width
             let x = d3.scaleLinear()
-                .domain([0, nodeData.data.distribution.reduce((a, b) => a + b)])
+                .domain([0, _.sum(nodeData.data.distribution)])
                 .range([0, nodeRectWidth - 2 * nodeRectRatio]);
             
             // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
@@ -409,15 +409,17 @@ class Odt {
      */
     generateFlows(links) {
         const { constants: { nodeRectWidth, nodeRectRatio } } = this;
+
+        // Width of flow should not be larger than (node rect width - 2 * node rect ratio)
         const widthFlow = nodeRectWidth - 2 * nodeRectRatio;
         let currParentWidth = widthFlow, currChildWidth = widthFlow;
         let currParentSize, currChildSize;
-        const fullsize = links[0].parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
+        const fullsize = _.sum(links[0].parent.data.distribution);
         const resFlows = [];
         let currParentX, currChildX;
         for (const link of links) {
-            currParentSize = link.parent.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
-            currChildSize = link.data.distribution.reduce((partialSum, ele) => partialSum + ele, 0);
+            currParentSize = _.sum(link.parent.data.distribution);
+            currChildSize = _.sum(link.data.distribution);
             currParentWidth = Math.ceil((currParentSize / fullsize) * widthFlow);
             currChildWidth = Math.ceil((currChildSize / fullsize) * widthFlow);
             const parentWidthArr = link.parent.data.distribution.map(ele => Math.ceil((ele / currParentSize) * currParentWidth));
@@ -425,8 +427,8 @@ class Odt {
             currParentX = link.parent.x;
             currChildX = link.x;
             parentWidthArr.forEach((val, idx) => {
-                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (parentWidthArr.reduce((a,b) => a+b) - parentWidthArr[idx]);
-                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (childWidthArr.reduce((a,b) => a+b) - childWidthArr[idx]);
+                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (_.sum(parentWidthArr) - parentWidthArr[idx]);
+                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (_.sum(childWidthArr) - childWidthArr[idx]);
                 resFlows.push({
                     source: {
                         x: currParentX,
