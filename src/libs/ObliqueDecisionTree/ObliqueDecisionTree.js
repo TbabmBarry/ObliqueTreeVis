@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { select } from 'd3';
 import _ from 'lodash';
 
 const ID = 'id';
@@ -167,6 +168,19 @@ class Odt {
      */
     renderNodes(nodes) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
+        let _this = this;
+
+        // Click event to switch between summary and detailed views
+        function clicked(event, data) {
+            if (event.shiftKey) {
+                let parentNodeGroup = select(this);
+                if (parentNodeGroup.node().querySelector(".scatterplot") !== null) {
+                    parentNodeGroup.selectAll(".scatterplot").remove();
+                } else {
+                    _this.drawScatterPlot(parentNodeGroup);
+                }
+            }
+        }
 
         const node = parts.svgGroup.selectAll(".node")
             .data(nodes)
@@ -177,7 +191,8 @@ class Odt {
             })
             .attr("transform", (d) => { 
                 return "translate(" + d.x + "," + d.y + ")"; 
-            });
+            })
+            .on("click", clicked);
         
         // Add a rectangle to each node
         node.append("rect")
@@ -190,7 +205,8 @@ class Odt {
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", "steelblue")
-            .style("stroke-width", "3px");    
+            .style("stroke-width", "3px")
+
 
         this.drawScatterPlot(node);
 
@@ -210,7 +226,7 @@ class Odt {
      */
     drawScatterPlot(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
-        
+
         // Map two feature variables into visual representations
         const x = d3.scaleLinear()
                     .domain([0, 10])
@@ -243,9 +259,6 @@ class Odt {
                         return y(d["Height"]);
                     })
                     .attr("r", 3.5)
-                    .attr("class", (d) => {
-                        return `${d["Year"]}--${index}}`;
-                    })
                     .style("fill", d => colorScale(d["Year"]));
         })
     }
