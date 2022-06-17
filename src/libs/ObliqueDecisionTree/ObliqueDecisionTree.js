@@ -224,6 +224,7 @@ class Odt {
             .style("stroke", "#005CAB")
             .style("stroke-width", nodeRectStrokeWidth)
 
+        
         this.renderPathSummaryView(node);
         this.renderSummaryView(node);
         // this.renderDetailedView(node);
@@ -424,8 +425,8 @@ class Odt {
             currParentX = link.parent.x;
             currChildX = link.x;
             parentWidthArr.forEach((val, idx) => {
-                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (widthFlow - parentWidthArr[idx]);
-                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (widthFlow - childWidthArr[idx]);
+                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (parentWidthArr.reduce((a,b) => a+b) - parentWidthArr[idx]);
+                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (childWidthArr.reduce((a,b) => a+b) - childWidthArr[idx]);
                 resFlows.push({
                     source: {
                         x: currParentX,
