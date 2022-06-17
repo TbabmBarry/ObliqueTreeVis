@@ -198,6 +198,7 @@ class Odt {
             select(this).select(".node-rect").style("fill", "#fff");
         }
 
+        // Create svg group binding decision and leaf nodes
         const node = parts.svgGroup.selectAll(".node")
             .data(nodes)
             .enter().append("g")
@@ -227,13 +228,6 @@ class Odt {
         this.renderSummaryView(node);
         // this.renderDetailedView(node);
 
-        // Add texts to each node
-        // node.append("text")
-        //     .attr("dy", ".35em")
-        //     .attr("y", (d) => { return d.children ? -20 : 20; })
-        //     .style("text-anchor", "middle")
-        //     .style("font", "12px sans-serif")
-        //     .text((d) => { return d.data.name; });
     }
 
     /**
@@ -328,6 +322,11 @@ class Odt {
         })
     }
 
+    /**
+     * Render path summary view, including feature contributions
+     * @date 2022-06-17
+     * @param {node} node
+     */
     renderPathSummaryView(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
         // Add a rectangle under each leaf node
