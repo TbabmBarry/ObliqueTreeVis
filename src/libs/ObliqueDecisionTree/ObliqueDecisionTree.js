@@ -53,7 +53,9 @@ class Odt {
                 nodeTextDx: 10,
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
+                pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
+                nodeRectStrokeWidth: 3,
                 colorScale: d3.scaleOrdinal(d3.schemeCategory10),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
@@ -167,7 +169,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -218,8 +220,22 @@ class Odt {
             .attr("rx", nodeRectRatio)
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
-            .style("stroke", "steelblue")
-            .style("stroke-width", "3px")
+            .style("stroke", "#005CAB")
+            .style("stroke-width", nodeRectStrokeWidth)
+
+        // Add a rectangle under each leaf node
+        node.append("rect")
+            .filter((d) => d.children == null)
+            .attr("class", 'node-rect leaf-node')
+            .attr("width", nodeRectWidth)
+            .attr("height", pathSummaryHeight)
+            .attr("x", - 0.5 * nodeRectWidth)
+            .attr("y", nodeRectWidth + nodeRectStrokeWidth)
+            .attr("rx", nodeRectRatio)
+            .attr("ry", nodeRectRatio)
+            .style("fill", "#fff")
+            .style("stroke", "#E31B23")
+            .style("stroke-width", nodeRectStrokeWidth);
 
         this.renderSummaryView(node);
         // this.renderDetailedView(node);
