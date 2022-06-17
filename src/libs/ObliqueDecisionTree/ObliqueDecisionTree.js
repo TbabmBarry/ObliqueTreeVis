@@ -223,20 +223,7 @@ class Odt {
             .style("stroke", "#005CAB")
             .style("stroke-width", nodeRectStrokeWidth)
 
-        // Add a rectangle under each leaf node
-        node.append("rect")
-            .filter((d) => d.children == null)
-            .attr("class", 'node-rect leaf-node')
-            .attr("width", nodeRectWidth)
-            .attr("height", pathSummaryHeight)
-            .attr("x", - 0.5 * nodeRectWidth)
-            .attr("y", nodeRectWidth + nodeRectStrokeWidth)
-            .attr("rx", nodeRectRatio)
-            .attr("ry", nodeRectRatio)
-            .style("fill", "#fff")
-            .style("stroke", "#E31B23")
-            .style("stroke-width", nodeRectStrokeWidth);
-
+        this.renderPathSummaryView(node);
         this.renderSummaryView(node);
         // this.renderDetailedView(node);
 
@@ -341,7 +328,24 @@ class Odt {
         })
     }
 
+    renderPathSummaryView(node) {
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
+        // Add a rectangle under each leaf node
+        node.append("rect")
+            .filter((d) => d.children == null)
+            .attr("class", 'node-rect leaf-node')
+            .attr("width", nodeRectWidth)
+            .attr("height", pathSummaryHeight)
+            .attr("x", - 0.5 * nodeRectWidth)
+            .attr("y", nodeRectWidth + nodeRectStrokeWidth)
+            .attr("rx", nodeRectRatio)
+            .attr("ry", nodeRectRatio)
+            .style("fill", "#fff")
+            .style("stroke", "#E31B23")
+            .style("stroke-width", nodeRectStrokeWidth);
 
+        // TODO: draw boxplot/violinplot/histogram for feature contribution
+    }
 
     /**
      * Zooming is performed by either double clickiing on an empty part
