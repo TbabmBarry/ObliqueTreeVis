@@ -177,7 +177,7 @@ class Odt {
                 if (parentNodeGroup.node().querySelector(".scatterplot") !== null) {
                     parentNodeGroup.selectAll(".scatterplot").remove();
                 } else {
-                    _this.drawScatterPlot(parentNodeGroup);
+                    _this.renderDetailedView(parentNodeGroup);
                 }
             }
         }
@@ -222,7 +222,7 @@ class Odt {
             .style("stroke-width", "3px")
 
 
-        this.drawScatterPlot(node);
+        this.renderDetailedView(node);
 
         // Add texts to each node
         // node.append("text")
@@ -234,11 +234,22 @@ class Odt {
     }
 
     /**
-     * Draw scatter plot in each decision node
+     * Render summary view in each decision node
+     * @date 2022-06-17
+     * @param {node} node
+     */
+    renderSummaryView(node) {
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
+
+        // TODO: draw class distribution, histograms
+    }
+
+    /**
+     * Render detailed view in each decision node
      * @date 2022-06-16
      * @param {node} node
      */
-    drawScatterPlot(node) {
+    renderDetailedView(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
 
         // Map two feature variables into visual representations
@@ -276,6 +287,8 @@ class Odt {
                     .style("fill", d => colorScale(d["Year"]));
         })
     }
+
+
 
     /**
      * Zooming is performed by either double clickiing on an empty part
