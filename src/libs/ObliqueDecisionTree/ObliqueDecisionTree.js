@@ -88,7 +88,7 @@ class Odt {
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
             .attr('id', this.id)
-            .attr('class', 'svg-content-responsive')
+            .attr('class', 'oblique-tree-view')
             .attr('width', width)
             .attr('height', height);
 
@@ -97,7 +97,7 @@ class Odt {
                             .append('g')
                             // .attr("transform",
                             //     `translate(${50},${50})`)
-                            .attr('class', 'treeGroup')
+                            .attr('class', 'oblique-tree')
 
         parts.treeMap = d3.tree().size([width, height]);
 
@@ -203,9 +203,7 @@ class Odt {
                 return "node" + 
                 (d.children ? " node--internal" : " node--leaf"); 
             })
-            .attr("transform", (d) => { 
-                return "translate(" + d.x + "," + d.y + ")"; 
-            })
+            .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
             .on("mouseover", mouseOver)
             .on("mouseout", mouseOut)
             .on("click", clicked);
@@ -246,10 +244,12 @@ class Odt {
         // TODO: draw class distribution, histograms
         // Draw class distribution
         node.each(function(nodeData, index) {
-            console.log("nodeData: ", nodeData);
+            // Encode current decision node class distribution into the range of node rect width
             let x = d3.scaleLinear()
                 .domain([0, nodeData.data.distribution.reduce((a, b) => a + b)])
                 .range([0, nodeRectWidth - 2 * nodeRectRatio]);
+            
+            // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
             let currStart, currEnd = 0, nextStart = 0;
             const classData = [];
             nodeData.data.distribution.forEach((ele, idx) => {
@@ -262,7 +262,8 @@ class Odt {
                     label: idx,
                 });
             });
-            console.log(classData);
+
+            // Create a svg group to bind each individual class rect
             let bar = d3.select(this).selectAll("g")
                 .data(classData)
                 .enter()
@@ -270,6 +271,7 @@ class Odt {
                 .attr("class", "summary bar")
                 .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
 
+            // Append each class rect into bar svg group
             bar.append("rect")
                 .attr("class", "summary class-rect")
                 .attr("width", (d) => x(d.end - d.start))
