@@ -170,7 +170,7 @@ class Odt {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
         let _this = this;
 
-        // Click event to switch between summary and detailed views
+        // Click event listener to switch between summary and detailed views
         function clicked(event, data) {
             if (event.shiftKey) {
                 let parentNodeGroup = select(this);
@@ -180,6 +180,18 @@ class Odt {
                     _this.drawScatterPlot(parentNodeGroup);
                 }
             }
+        }
+
+        // Mouse over event listener to highlight hover effects
+        function mouseOver(event, data) {
+            if (event.shiftKey) {
+                select(this).select(".node-rect").transition().duration(100).style("fill", "red");
+            }
+        }
+
+        // Mouse out event listener to recover node style
+        function mouseOut(event, data) {
+            select(this).select(".node-rect").style("fill", "#fff");
         }
 
         const node = parts.svgGroup.selectAll(".node")
@@ -192,6 +204,8 @@ class Odt {
             .attr("transform", (d) => { 
                 return "translate(" + d.x + "," + d.y + ")"; 
             })
+            .on("mouseover", mouseOver)
+            .on("mouseout", mouseOut)
             .on("click", clicked);
         
         // Add a rectangle to each node
