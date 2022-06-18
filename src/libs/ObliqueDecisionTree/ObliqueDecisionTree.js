@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { select } from 'd3';
 import _ from 'lodash';
+import BivariateDecisionTreeExporter from '../ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 
 const ID = 'id';
 const NAME = 'name';
@@ -32,6 +33,28 @@ class Odt {
         this.registeredStateListeners.forEach(dergisterFn => dergisterFn());
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
+
+        const builder = {
+            trainingSet: [],
+            nodeTreePath: ["root", "l", "lr", "lrl"],
+            decisionNodes: [
+                [0, -0.699623, 0, 1.000000, 0, -0.464679],
+                [-3.413128, 0, 0, 0, 1.000000, 0.388552],
+                [-1.185092, 0, 0, 0, 1.000000, 0.296273],
+                [0, 1.000000, 0, 0, 0, -0.145013]
+            ],
+            splitDistributions: [
+                { left: [115,0,52], right: [0,99,0] },
+                { left: [0,0,49], right: [115,0,3] },
+                { left: [1,0,3], right: [114,0,0] },
+                { left: [0,0,3], right: [1,0,0] },
+            ]
+        };
+
+        // Test exporter
+        const exporter = new BivariateDecisionTreeExporter(builder);
+        console.log("Exporter: ", exporter.root);
+
 
         // Reset container dimensions
         this.updateContainerDimensions();
