@@ -34,26 +34,32 @@ class Odt {
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
 
-        const builder = {
-            trainingSet: [],
-            nodeTreePath: ["root", "l", "lr", "lrl"],
-            decisionNodes: [
-                [0, -0.699623, 0, 1.000000, 0, -0.464679],
-                [-3.413128, 0, 0, 0, 1.000000, 0.388552],
-                [-1.185092, 0, 0, 0, 1.000000, 0.296273],
-                [0, 1.000000, 0, 0, 0, -0.145013]
-            ],
-            splitDistributions: [
-                { left: [115,0,52], right: [0,99,0] },
-                { left: [0,0,49], right: [115,0,3] },
-                { left: [1,0,3], right: [114,0,0] },
-                { left: [0,0,3], right: [1,0,0] },
-            ]
-        };
-
-        // Test exporter
-        const exporter = new BivariateDecisionTreeExporter(builder);
-        console.log("Exporter: ", exporter.root);
+        d3.csv("http://127.0.0.1:8080/train_x.csv")
+            .then(function (rows) {
+                
+                const values = rows.map(row => Object.keys(row).map(key => parseFloat(row[key])));
+                const builder = {
+                    trainingSet: values.map(row => row.slice()),
+                    nodeTreePath: ["root", "l", "lr", "lrl"],
+                    decisionNodes: [
+                        [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
+                        [-3.413128, 0, 0, 0, 1.000000, 0, 0, 0, 0.388552],
+                        [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
+                        [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
+                    ],
+                    splitDistributions: [
+                        { left: [115,0,52], right: [0,99,0] },
+                        { left: [0,0,49], right: [115,0,3] },
+                        { left: [1,0,3], right: [114,0,0] },
+                        { left: [0,0,3], right: [1,0,0] },
+                    ]
+                };
+                // Test exporter
+                const exporter = new BivariateDecisionTreeExporter(builder);
+                console.log("Exporter: ", exporter.root);
+            }).catch(function (error) {
+                console.log("ERROR: ", error);
+            })
 
 
         // Reset container dimensions

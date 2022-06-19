@@ -30,7 +30,6 @@
  * 
  */
 
-
  class Node {
     constructor(sv = null) {
         this.split = sv.slice();
