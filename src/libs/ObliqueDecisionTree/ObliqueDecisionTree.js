@@ -33,7 +33,7 @@ class Odt {
         this.registeredStateListeners.forEach(dergisterFn => dergisterFn());
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
-
+        let _this = this;
         const promiseTrainX = d3.csv("http://127.0.0.1:8080/train_x.csv");
         const promiseTrainY = d3.csv("http://127.0.0.1:8080/train_y.csv");
         Promise.all([promiseTrainX, promiseTrainY])
@@ -49,12 +49,12 @@ class Odt {
                         [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
                     ]
                 };
-                // Test exporter
+                // Re-classify
                 const exporter = new BivariateDecisionTreeExporter(builder);
-
-                // re-classify
                 exporter.classify();
-                console.log("Root node: ", exporter.root);
+
+                // Bind re-classified tree object into Odt this
+                _this.rootNode = exporter.root;
             }).catch(function (error) {
                 console.log("ERROR: ", error);
             })
@@ -65,6 +65,7 @@ class Odt {
         _.assign(this, {
             // plotState: new PlotState(),
             data: null,
+            rootNode: null,
             opts: null,
             registeredStateListeners: [],
             computed: {},
