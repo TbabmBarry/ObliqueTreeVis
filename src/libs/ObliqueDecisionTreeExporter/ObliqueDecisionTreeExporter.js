@@ -33,13 +33,13 @@
  class Node {
     constructor(sv = null) {
         this.split = sv.slice();
-        this.subTrainingSet = []
-        this.left = null
-        this.right = null
-        this.leftCount = [0, 0, 0]
-        this.rightCount = [0, 0, 0]
-        this.leftTrainingSet = []
-        this.rightTrainingSet = []
+        this.subTrainingSet = [];
+        this.left = null;
+        this.right = null;
+        this.leftCount = new Array(3).fill(0);
+        this.rightCount = new Array(3).fill(0);
+        this.leftTrainingSet = [];
+        this.rightTrainingSet = [];
     }
 }
 
@@ -112,7 +112,6 @@ class BivariateDecisionTree {
                     currNode.leftTrainingSet.push(idx);
                     if (currNode.left != null) {
                         currNode = currNode.left;
-                        // TODO: store this point into sub training set at current decision node
                     } else {
                         // TODO: think about what to do with leaf nodes
                         break;
@@ -126,7 +125,6 @@ class BivariateDecisionTree {
                     currNode.rightTrainingSet.push(idx);
                     if (currNode.right != null) {
                         currNode = currNode.right;
-                        // TODO: store this point into sub training set at current decision node
                     } else {
                         // TODO: think about what to do with leaf nodes
                         break;
