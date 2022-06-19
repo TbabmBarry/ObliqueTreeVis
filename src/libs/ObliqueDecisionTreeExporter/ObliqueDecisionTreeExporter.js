@@ -47,6 +47,7 @@ class BivariateDecisionTree {
 
     constructor(builder) {
         this.trainingSet = builder.trainingSet;
+        this.labelSet = builder.labelSet;
         this.nodeTreePath = builder.nodeTreePath;
         this.decisionNodes = builder.decisionNodes.map(arr => arr.slice());
         this.numFeature = this.decisionNodes[0].length - 1;

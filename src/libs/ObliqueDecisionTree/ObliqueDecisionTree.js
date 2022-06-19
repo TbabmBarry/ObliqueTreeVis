@@ -34,12 +34,13 @@ class Odt {
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
 
-        d3.csv("http://127.0.0.1:8080/train_x.csv")
-            .then(function (rows) {
-                
-                const values = rows.map(row => Object.keys(row).map(key => parseFloat(row[key])));
+        const promiseTrainX = d3.csv("http://127.0.0.1:8080/train_x.csv");
+        const promiseTrainY = d3.csv("http://127.0.0.1:8080/train_y.csv");
+        Promise.all([promiseTrainX, promiseTrainY])
+            .then(function (bundle) {
                 const builder = {
-                    trainingSet: values.map(row => row.slice()),
+                    trainingSet: parseCSV(bundle[0]).map(row => row.slice()),
+                    labelSet: parseCSV(bundle[1]).map(row => row.slice()),
                     nodeTreePath: ["root", "l", "lr", "lrl"],
                     decisionNodes: [
                         [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
@@ -497,6 +498,12 @@ const adjustedClientRect = (node) => {
     curr.height *= 2;
     return curr;
 };
+
+const parseCSV = (data, type = "int") => {
+    return type == "int"
+        ? data.map(row => Object.keys(row).map(key => parseInt(row[key]))) 
+        : data.map(row => Object.keys(row).map(key => parseFloat(row[key])));
+}
 
 Odt.initClass();
 export default Odt;
