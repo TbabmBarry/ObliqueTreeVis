@@ -33,31 +33,6 @@ class Odt {
         this.registeredStateListeners.forEach(dergisterFn => dergisterFn());
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
-        let _this = this;
-        const promiseTrainX = d3.csv("http://127.0.0.1:8080/train_x.csv");
-        const promiseTrainY = d3.csv("http://127.0.0.1:8080/train_y.csv");
-        Promise.all([promiseTrainX, promiseTrainY])
-            .then(function (bundle) {
-                const builder = {
-                    trainingSet: parseCSV(bundle[0]).map(row => row.slice(), "float"),
-                    labelSet: parseCSV(bundle[1]).map(row => row.slice(), "int"),
-                    nodeTreePath: ["root", "l", "lr", "lrl"],
-                    decisionNodes: [
-                        [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
-                        [-3.413128, 0, 0, 0, 1.000000, 0, 0, 0, 0.388552],
-                        [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
-                        [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
-                    ]
-                };
-                // Re-classify
-                const exporter = new BivariateDecisionTreeExporter(builder);
-                exporter.classify();
-
-                // Bind re-classified tree object into Odt this
-                _this.rootNode = exporter.root;
-            }).catch(function (error) {
-                console.log("ERROR: ", error);
-            })
 
         // Reset container dimensions
         this.updateContainerDimensions();
@@ -139,6 +114,8 @@ class Odt {
 
         // Enable zooming
         this.enableZooming();
+
+        console.log(this);
     }
 
     /**
@@ -495,12 +472,6 @@ const adjustedClientRect = (node) => {
     curr.height *= 2;
     return curr;
 };
-
-const parseCSV = (data, type) => {
-    return type == "int"
-        ? data.map(row => Object.keys(row).map(key => parseInt(row[key]))) 
-        : data.map(row => Object.keys(row).map(key => parseFloat(row[key])));
-}
 
 Odt.initClass();
 export default Odt;

@@ -48,7 +48,7 @@
     }
 }
 
-class BivariateDecisionTree {
+export default class BivariateDecisionTree {
 
     constructor(builder) {
         this.trainingSet = builder.trainingSet;
@@ -145,6 +145,12 @@ class BivariateDecisionTree {
         });
 
     }
-}
+};
 
-export default BivariateDecisionTree;
+export const parseCSV = (data, type) => {
+    return type == "int"
+        ? data.map(row => Object.keys(row).map(key => parseInt(row[key]))) 
+        : data.map(row => Object.keys(row).map(key => parseFloat(row[key])));
+};
+
+
