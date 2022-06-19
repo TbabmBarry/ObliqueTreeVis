@@ -376,22 +376,9 @@ class Odt {
      * @param {data} data
      */
     processData(opts, data) {
-        let curr_index = 1;
-
-        const helper = (curr_node) => {
-            console.log(curr_node);
-            return curr_node;
-
-            // TODO: think about data for tooltip and other detailed visualization
-            // return {
-            //     name: curr_node[opts.name || NAME],
-            //     [VALUE]: curr_node[opts.value || VALUE],
-            //     [CHILDREN]: _(curr_node[opts.childrenName] || curr_node[CHILDREN] || curr_node._children).map(helper).value(),
-                
-            // };
-        };
-
-        return helper(data);
+        console.log(data);
+        // TODO: Return structured object for d3-hierarchy
+        return data;
     }
 
     /**
