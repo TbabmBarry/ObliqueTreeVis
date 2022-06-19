@@ -39,8 +39,8 @@ class Odt {
         Promise.all([promiseTrainX, promiseTrainY])
             .then(function (bundle) {
                 const builder = {
-                    trainingSet: parseCSV(bundle[0]).map(row => row.slice()),
-                    labelSet: parseCSV(bundle[1]).map(row => row.slice()),
+                    trainingSet: parseCSV(bundle[0]).map(row => row.slice(), "float"),
+                    labelSet: parseCSV(bundle[1]).map(row => row.slice(), "int"),
                     nodeTreePath: ["root", "l", "lr", "lrl"],
                     decisionNodes: [
                         [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
@@ -57,11 +57,13 @@ class Odt {
                 };
                 // Test exporter
                 const exporter = new BivariateDecisionTreeExporter(builder);
-                console.log("Exporter: ", exporter.root);
+
+                // re-classify
+                exporter.classify();
+                console.log("Exporter: ", exporter);
             }).catch(function (error) {
                 console.log("ERROR: ", error);
             })
-
 
         // Reset container dimensions
         this.updateContainerDimensions();
@@ -499,7 +501,7 @@ const adjustedClientRect = (node) => {
     return curr;
 };
 
-const parseCSV = (data, type = "int") => {
+const parseCSV = (data, type) => {
     return type == "int"
         ? data.map(row => Object.keys(row).map(key => parseInt(row[key]))) 
         : data.map(row => Object.keys(row).map(key => parseFloat(row[key])));

@@ -36,8 +36,8 @@
         this.subTrainingSet = []
         this.left = null
         this.right = null
-        this.leftCount = []
-        this.rightCount = []
+        this.leftCount = [0, 0, 0]
+        this.rightCount = [0, 0, 0]
         this.leftTrainingSet = []
         this.rightTrainingSet = []
     }
@@ -96,9 +96,20 @@ class BivariateDecisionTree {
         this.trainingSet.forEach((point, idx) => {
             let currNode = this.root, sum = 0;
             while (currNode != null) {
-                sum = currNode.split[numFeature];
+                // Store each training point passing through the current node
+                currNode.subTrainingSet.push(idx);
+
+                // Oblique split test: element-wise multiplication
+                sum = currNode.split[this.numFeature];
                 sum += point.map((val, i) => val*currNode.split[i]).reduce((a, b) => a+b);
+                
+                // When current point is classified into left hand side
                 if (sum < 0) {
+                    // Count the number of training point by true labels classified into lhs
+                    currNode.leftCount[this.labelSet[idx]]++;
+
+                    // Store each training point classified into lhs passing the current node
+                    currNode.leftTrainingSet.push(idx);
                     if (currNode.left != null) {
                         currNode = currNode.left;
                         // TODO: store this point into sub training set at current decision node
@@ -106,7 +117,13 @@ class BivariateDecisionTree {
                         // TODO: think about what to do with leaf nodes
                         break;
                     }
+                // When current point is classified into right hand side
                 } else {
+                    // Count the number of training point by true labels classified into rhs
+                    currNode.rightCount[this.labelSet[idx]]++;
+
+                    // Store each training point classified into rhs passing the current node
+                    currNode.rightTrainingSet.push(idx);
                     if (currNode.right != null) {
                         currNode = currNode.right;
                         // TODO: store this point into sub training set at current decision node
