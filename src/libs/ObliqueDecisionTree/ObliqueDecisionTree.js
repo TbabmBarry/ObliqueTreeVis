@@ -3,11 +3,11 @@ import { select } from 'd3';
 import _ from 'lodash';
 import BivariateDecisionTreeExporter from '../ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 
-const ID = 'id';
-const NAME = 'name';
-const VALUE = 'value';
-const CHILDREN = 'odtChildren';
-const STATE_VERSION = 1;
+// const ID = 'id';
+// const NAME = 'name';
+// const VALUE = 'value';
+// const CHILDREN = 'odtChildren';
+// const STATE_VERSION = 1;
 
 class Odt {
     static initClass() {
@@ -379,12 +379,12 @@ class Odt {
         let curr_index = 1;
 
         const helper = (curr_node) => {
+            console.log(curr_node);
             return curr_node;
 
             // TODO: think about data for tooltip and other detailed visualization
             // return {
-            //     [ID]: `${(curr_node[opts.id || ID] || curr_index++)}`.replace(/ /g, ''),
-            //     [NAME]: curr_node[opts.name || NAME],
+            //     name: curr_node[opts.name || NAME],
             //     [VALUE]: curr_node[opts.value || VALUE],
             //     [CHILDREN]: _(curr_node[opts.childrenName] || curr_node[CHILDREN] || curr_node._children).map(helper).value(),
                 

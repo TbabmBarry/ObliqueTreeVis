@@ -25,7 +25,8 @@
  */
 
  class Node {
-    constructor(sv) {
+    constructor(sv, name) {
+        this.name = name;
         this.split = sv.slice();
         this.subTrainingSet = [];
         this.left = null;
@@ -68,7 +69,7 @@ export default class BivariateDecisionTree {
         let rootNode, currNode;
         this.nodeTreePath.forEach((pathStr, nodeIdx) => {
             if (pathStr == "root") {
-                rootNode = new Node(this.decisionNodes[nodeIdx]);
+                rootNode = new Node(this.decisionNodes[nodeIdx], pathStr);
             } else {
                 let pathArr = pathStr.split(""), i = 0;
                 const k = pathArr.length;
@@ -78,8 +79,8 @@ export default class BivariateDecisionTree {
                     i++;
                 }
                 pathArr[i] == "l" 
-                    ? currNode.left = new Node(this.decisionNodes[nodeIdx])
-                    : currNode.right = new Node(this.decisionNodes[nodeIdx]);
+                    ? currNode.left = new Node(this.decisionNodes[nodeIdx], pathStr)
+                    : currNode.right = new Node(this.decisionNodes[nodeIdx], pathStr);
             }
         })
         return rootNode;
