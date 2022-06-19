@@ -20,26 +20,31 @@
  *      [-1.185092, 0, 0, 0, 1.000000, 0.296273],
  *      [0, 1.000000, 0, 0, 0, -0.145013]
  *  ],
- *  splitDistributions: [
- *      { left: [115,0,52], right: [0,99,0] },
- *      { left: [0,0,49], right: [115,0,3] },
- *      { left: [1,0,3], right: [114,0,0] },
- *      { left: [0,0,3], right: [1,0,0] },
- *  ]
  * }
  * 
  */
 
  class Node {
-    constructor(sv = null) {
+    constructor(sv) {
         this.split = sv.slice();
         this.subTrainingSet = [];
         this.left = null;
         this.right = null;
+        this.totalCount = new Array(3).fill(0);
         this.leftCount = new Array(3).fill(0);
         this.rightCount = new Array(3).fill(0);
         this.leftTrainingSet = [];
         this.rightTrainingSet = [];
+        this.leafNodes = {
+            left: {
+                labelCount: new Array(3).fill(0),
+                points: []
+            },
+            right: {
+                labelCount: new Array(3).fill(0),
+                points: []
+            }
+        };
     }
 }
 
@@ -51,7 +56,6 @@ class BivariateDecisionTree {
         this.nodeTreePath = builder.nodeTreePath;
         this.decisionNodes = builder.decisionNodes.map(arr => arr.slice());
         this.numFeature = this.decisionNodes[0].length - 1;
-        this.splitDistributions = builder.splitDistributions;
         this.root = this.build();
     }
 
@@ -73,7 +77,9 @@ class BivariateDecisionTree {
                     pathArr[i] == "l" ? currNode = currNode.left : currNode = currNode.right;
                     i++;
                 }
-                pathArr[i] == "l" ? currNode.left = new Node(this.decisionNodes[nodeIdx]) : currNode.right = new Node(this.decisionNodes[nodeIdx]);
+                pathArr[i] == "l" 
+                    ? currNode.left = new Node(this.decisionNodes[nodeIdx])
+                    : currNode.right = new Node(this.decisionNodes[nodeIdx]);
             }
         })
         return rootNode;
@@ -98,7 +104,8 @@ class BivariateDecisionTree {
             while (currNode != null) {
                 // Store each training point passing through the current node
                 currNode.subTrainingSet.push(idx);
-
+                // Count the true labels for training points passing through the current node
+                currNode.totalCount[this.labelSet[idx]]++;
                 // Oblique split test: element-wise multiplication
                 sum = currNode.split[this.numFeature];
                 sum += point.map((val, i) => val*currNode.split[i]).reduce((a, b) => a+b);
@@ -113,7 +120,9 @@ class BivariateDecisionTree {
                     if (currNode.left != null) {
                         currNode = currNode.left;
                     } else {
-                        // TODO: think about what to do with leaf nodes
+                        // Count leaf node labels and store points
+                        currNode.leafNodes.left.labelCount[this.labelSet[idx]]++;
+                        currNode.leafNodes.left.points.push(idx);
                         break;
                     }
                 // When current point is classified into right hand side
@@ -126,12 +135,15 @@ class BivariateDecisionTree {
                     if (currNode.right != null) {
                         currNode = currNode.right;
                     } else {
-                        // TODO: think about what to do with leaf nodes
+                        // Count leaf node labels and store points
+                        currNode.leafNodes.right.labelCount[this.labelSet[idx]]++;
+                        currNode.leafNodes.right.points.push(idx);
                         break;
                     }
                 }
             }
-        })
+        });
+
     }
 }
 

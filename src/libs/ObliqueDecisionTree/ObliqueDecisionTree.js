@@ -47,12 +47,6 @@ class Odt {
                         [-3.413128, 0, 0, 0, 1.000000, 0, 0, 0, 0.388552],
                         [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
                         [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
-                    ],
-                    splitDistributions: [
-                        { left: [115,0,52], right: [0,99,0] },
-                        { left: [0,0,49], right: [115,0,3] },
-                        { left: [1,0,3], right: [114,0,0] },
-                        { left: [0,0,3], right: [1,0,0] },
                     ]
                 };
                 // Test exporter
@@ -60,7 +54,7 @@ class Odt {
 
                 // re-classify
                 exporter.classify();
-                console.log("Exporter: ", exporter);
+                console.log("Root node: ", exporter.root);
             }).catch(function (error) {
                 console.log("ERROR: ", error);
             })
