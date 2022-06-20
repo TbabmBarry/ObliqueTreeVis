@@ -103,6 +103,8 @@ export default class BivariateDecisionTree {
             currNode.left && res.push({
                 name: currNode.left.name,
                 type: currNode.left.type,
+                leftCount: currNode.left.type === "decision" ? currNode.left.leftCount.slice() : [],
+                rightCount: currNode.left.type === "decision" ? currNode.left.rightCount.slice() : [],
                 totalCount: currNode.left.totalCount.slice(),
                 subTrainingSet: currNode.left.subTrainingSet.slice(),
                 featureIdx: this.getFeatureIndex(currNode.left), 
@@ -111,6 +113,8 @@ export default class BivariateDecisionTree {
             currNode.right && res.push({
                 name: currNode.right.name,
                 type: currNode.right.type,
+                leftCount: currNode.right.type === "decision" ? currNode.right.leftCount.slice() : [],
+                rightCount: currNode.right.type === "decision" ? currNode.right.rightCount.slice() : [],
                 totalCount: currNode.right.totalCount.slice(),
                 subTrainingSet: currNode.right.subTrainingSet.slice(),
                 featureIdx: this.getFeatureIndex(currNode.right),
@@ -121,6 +125,8 @@ export default class BivariateDecisionTree {
         this.output = {
             name: this.root.name,
             type: this.root.type,
+            leftCount: this.root.leftCount.slice(),
+            rightCount: this.root.rightCount.slice(),
             totalCount: this.root.totalCount.slice(),
             subTrainingSet: this.root.subTrainingSet.slice(),
             featureIdx: this.getFeatureIndex(this.root),

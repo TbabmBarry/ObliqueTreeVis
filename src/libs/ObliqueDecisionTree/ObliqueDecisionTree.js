@@ -380,6 +380,7 @@ class Odt {
      * @param {data} data
      */
     setDataAndOpts(opts, data, trainingData) {
+        console.log(data);
         this.opts = opts;
         this.data = data;
         this.trainX = trainingData.trainingSet;
