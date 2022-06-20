@@ -48,7 +48,19 @@ export default class BivariateDecisionTree {
         this.nodeTreePath = builder.nodeTreePath;
         this.decisionNodes = builder.decisionNodes.map(arr => arr.slice());
         this.numFeature = this.decisionNodes[0].length - 1;
-        this.root = this.build();
+        this.root = null;
+        this.output = null;
+    }
+
+    /**
+     * Build bivariate decision tree, re-classify all the training points, and output
+     * target data structure.
+     * @date 2022-06-20
+     */
+    init() {
+        this.build();
+        this.classify();
+        this.export();
     }
 
     /**
@@ -57,14 +69,14 @@ export default class BivariateDecisionTree {
      * @date 2022-06-18
      */
     build() {
-        let rootNode, currNode;
+        let currNode;
         this.nodeTreePath.forEach((pathStr, nodeIdx) => {
             if (pathStr == "root") {
-                rootNode = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
+                this.root = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
             } else {
                 let pathArr = pathStr.split(""), i = 0;
                 const k = pathArr.length;
-                currNode = rootNode;
+                currNode = this.root;
                 while (i < k-1) {
                     pathArr[i] == "l" ? currNode = currNode.left : currNode = currNode.right;
                     i++;
@@ -74,7 +86,6 @@ export default class BivariateDecisionTree {
                     : currNode.right = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
             }
         })
-        return rootNode;
     }
 
     /**
@@ -82,7 +93,32 @@ export default class BivariateDecisionTree {
      * @date 2022-06-18
      */
     export() {
-        
+        const helper = (currNode) => {
+            if (currNode == null) return;
+            const res = [];
+            currNode.left && res.push({
+                name: currNode.left.name,
+                type: currNode.left.type,
+                totalCount: currNode.left.totalCount.slice(),
+                subTrainingSet: currNode.left.subTrainingSet.slice(),
+                children: helper(currNode.left),
+            });
+            currNode.right && res.push({
+                name: currNode.right.name,
+                type: currNode.right.type,
+                totalCount: currNode.right.totalCount.slice(),
+                subTrainingSet: currNode.right.subTrainingSet.slice(),
+                children: helper(currNode.right),
+            });
+            return res;
+        };
+        this.output = {
+            name: this.root.name,
+            type: this.root.type,
+            totalCount: this.root.totalCount.slice(),
+            subTrainingSet: this.root.subTrainingSet.slice(),
+            children: helper(this.root)
+        }
     }
 
     /**
