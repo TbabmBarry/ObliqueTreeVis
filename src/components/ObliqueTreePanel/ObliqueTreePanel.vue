@@ -95,6 +95,7 @@ onMounted(async () => {
             // Re-classify
             const exporter = new BivariateDecisionTree(builder);
             exporter.classify();
+            console.log("Root: ", exporter.root);
             return exporter.root;
         }).catch(function (error) {
             console.log("ERROR: ", error);

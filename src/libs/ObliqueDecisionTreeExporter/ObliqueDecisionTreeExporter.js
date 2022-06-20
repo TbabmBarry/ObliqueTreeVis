@@ -25,8 +25,9 @@
  */
 
  class TreeNode {
-    constructor(sv, name) {
+    constructor(sv, name, type) {
         this.name = name;
+        this.type = type;
         this.split = sv.slice();
         this.subTrainingSet = [];
         this.left = null;
@@ -36,16 +37,6 @@
         this.rightCount = new Array(3).fill(0);
         this.leftTrainingSet = [];
         this.rightTrainingSet = [];
-        this.leafNodes = {
-            left: {
-                labelCount: new Array(3).fill(0),
-                points: []
-            },
-            right: {
-                labelCount: new Array(3).fill(0),
-                points: []
-            }
-        };
     }
 }
 
@@ -69,7 +60,7 @@ export default class BivariateDecisionTree {
         let rootNode, currNode;
         this.nodeTreePath.forEach((pathStr, nodeIdx) => {
             if (pathStr == "root") {
-                rootNode = new TreeNode(this.decisionNodes[nodeIdx], pathStr);
+                rootNode = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
             } else {
                 let pathArr = pathStr.split(""), i = 0;
                 const k = pathArr.length;
@@ -79,8 +70,8 @@ export default class BivariateDecisionTree {
                     i++;
                 }
                 pathArr[i] == "l" 
-                    ? currNode.left = new TreeNode(this.decisionNodes[nodeIdx], pathStr)
-                    : currNode.right = new TreeNode(this.decisionNodes[nodeIdx], pathStr);
+                    ? currNode.left = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision")
+                    : currNode.right = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
             }
         })
         return rootNode;
@@ -112,22 +103,22 @@ export default class BivariateDecisionTree {
                 sum += point.map((val, i) => val*currNode.split[i]).reduce((a, b) => a+b);
                 
                 // When current point is classified into left hand side
-                if (sum < 0) {
+                if (sum < 0 && currNode.type !== "leaf") {
                     // Count the number of training point by true labels classified into lhs
                     currNode.leftCount[this.labelSet[idx]]++;
-
                     // Store each training point classified into lhs passing the current node
                     currNode.leftTrainingSet.push(idx);
-                    if (currNode.left != null) {
+                    if (currNode.left != null && currNode.type === "decision") {
                         currNode = currNode.left;
                     } else {
                         // Count leaf node labels and store points
-                        currNode.leafNodes.left.labelCount[this.labelSet[idx]]++;
-                        currNode.leafNodes.left.points.push(idx);
+                        currNode.left = new TreeNode(new Array(8).fill(0), currNode.name + "-ll", "leaf");
+                        currNode.left.totalCount[this.labelSet[idx]]++;
+                        currNode.left.subTrainingSet.push(idx);
                         break;
                     }
                 // When current point is classified into right hand side
-                } else {
+                } else if (sum >= 0 && currNode.type !== "leaf") {
                     // Count the number of training point by true labels classified into rhs
                     currNode.rightCount[this.labelSet[idx]]++;
 
@@ -137,10 +128,13 @@ export default class BivariateDecisionTree {
                         currNode = currNode.right;
                     } else {
                         // Count leaf node labels and store points
-                        currNode.leafNodes.right.labelCount[this.labelSet[idx]]++;
-                        currNode.leafNodes.right.points.push(idx);
+                        currNode.right = new TreeNode(new Array(8).fill(0), currNode.name + "-rl", "leaf");
+                        currNode.right.totalCount[this.labelSet[idx]]++;
+                        currNode.right.subTrainingSet.push(idx);
                         break;
                     }
+                } else {
+                    break;
                 }
             }
         });
