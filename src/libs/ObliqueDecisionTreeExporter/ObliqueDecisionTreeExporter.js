@@ -91,7 +91,7 @@ export default class BivariateDecisionTree {
      * @date 2022-06-18
      */
     export() {
-
+        
     }
 
     /**
@@ -145,6 +145,11 @@ export default class BivariateDecisionTree {
             }
         });
 
+    }
+
+    maxDepth(currNode) {
+        if (currNode == null) return 0;
+        return 1 + Math.max(this.maxDepth(currNode.left), this.maxDepth(currNode.right));
     }
 };
 
