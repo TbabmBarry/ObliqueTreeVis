@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 import { select } from 'd3';
 import _ from 'lodash';
-import BivariateDecisionTreeExporter from '../ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 
 // const ID = 'id';
 // const NAME = 'name';
@@ -375,17 +374,6 @@ class Odt {
     }
 
     /**
-     * Process data according to options and return d3.hierarchy() compatible object.  
-     * @date 2022-06-14
-     * @param {opts} opts
-     * @param {data} data
-     */
-    processData(opts, data) {
-        // TODO: Return structured object for d3-hierarchy
-        return data;
-    }
-
-    /**
      * Set preprocessed data and options.
      * @date 2022-06-14
      * @param {opts} opts
@@ -393,7 +381,7 @@ class Odt {
      */
     setDataAndOpts(opts, data, trainingData) {
         this.opts = opts;
-        this.data = this.processData(this.opts, data);
+        this.data = data;
         this.trainX = trainingData.trainingSet;
         this.trainY = trainingData.labelSet;
     }
