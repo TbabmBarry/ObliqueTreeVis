@@ -21,7 +21,7 @@ onMounted(async () => {
     // rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
     rootNode.value = getTrainingData()
         .then(function (bundle) {
-            const { trainingSet, labelSet } = parseCSV(bundle);
+            const { trainingSet, labelSet } = bundle;
             const builder = {
                 trainingSet,
                 labelSet,
@@ -43,7 +43,7 @@ onMounted(async () => {
     // trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
     trainingData.value = getTrainingData()
         .then(function (bundle) {
-            let { trainingSet, labelSet } = parseCSV(bundle);
+            let { trainingSet, labelSet } = bundle;
             trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));
             return { trainingSet, labelSet };
         });
