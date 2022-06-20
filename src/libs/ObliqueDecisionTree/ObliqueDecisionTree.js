@@ -210,8 +210,8 @@ class Odt {
                 (d.children ? " node--internal" : " node--leaf"); 
             })
             .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
-            .on("mouseover", mouseOver)
-            .on("mouseout", mouseOut)
+            // .on("mouseover", mouseOver)
+            // .on("mouseout", mouseOut)
             .on("click", clicked);
         
         // Add a rectangle to each node
