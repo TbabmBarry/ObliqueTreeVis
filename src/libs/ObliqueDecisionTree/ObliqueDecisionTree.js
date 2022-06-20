@@ -282,10 +282,10 @@ class Odt {
 
             if (nodeData.data.type == "decision") {
                 let xRight = d3.scaleLinear()
-                    .domain([0, _.sum(nodeData.data.rightCount)])
+                    .domain([0, _.sum(nodeData.data.totalCount)])
                     .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
                     xLeft = d3.scaleLinear()
-                    .domain([_.sum(nodeData.data.leftCount), 0])
+                    .domain([_.sum(nodeData.data.totalCount), 0])
                     .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]);
                 let yBand = d3.scaleBand()
                     .range([0, nodeRectWidth - 4 * nodeRectRatio])
@@ -293,7 +293,7 @@ class Odt {
                     .padding(.1);
 
                 const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
-                let splitDistribution = d3.select(this).selectAll("g")
+                d3.select(this).selectAll("g")
                     .data(splitData)
                     .enter()
                     .append("g")
