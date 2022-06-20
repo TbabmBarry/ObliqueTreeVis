@@ -375,6 +375,7 @@ class Odt {
      * @param {data} data
      */
     processData(opts, data) {
+        console.log(data);
         // TODO: Return structured object for d3-hierarchy
         return data;
     }

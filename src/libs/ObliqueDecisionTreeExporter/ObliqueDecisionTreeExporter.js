@@ -32,6 +32,7 @@ import { csvParseRows } from "d3-dsv";
         this.type = type;
         this.split = sv.slice();
         this.subTrainingSet = [];
+        this.featureIdx = [];
         this.left = null;
         this.right = null;
         this.totalCount = new Array(3).fill(0);
@@ -75,6 +76,7 @@ export default class BivariateDecisionTree {
         this.nodeTreePath.forEach((pathStr, nodeIdx) => {
             if (pathStr == "root") {
                 this.root = new TreeNode(this.decisionNodes[nodeIdx], pathStr, "decision");
+                currNode = this.root;
             } else {
                 let pathArr = pathStr.split(""), i = 0;
                 const k = pathArr.length;
@@ -103,6 +105,7 @@ export default class BivariateDecisionTree {
                 type: currNode.left.type,
                 totalCount: currNode.left.totalCount.slice(),
                 subTrainingSet: currNode.left.subTrainingSet.slice(),
+                featureIdx: this.getFeatureIndex(currNode.left), 
                 children: helper(currNode.left),
             });
             currNode.right && res.push({
@@ -110,6 +113,7 @@ export default class BivariateDecisionTree {
                 type: currNode.right.type,
                 totalCount: currNode.right.totalCount.slice(),
                 subTrainingSet: currNode.right.subTrainingSet.slice(),
+                featureIdx: this.getFeatureIndex(currNode.right),
                 children: helper(currNode.right),
             });
             return res;
@@ -119,6 +123,7 @@ export default class BivariateDecisionTree {
             type: this.root.type,
             totalCount: this.root.totalCount.slice(),
             subTrainingSet: this.root.subTrainingSet.slice(),
+            featureIdx: this.getFeatureIndex(this.root),
             children: helper(this.root)
         }
     }
@@ -176,12 +181,19 @@ export default class BivariateDecisionTree {
                 }
             }
         });
-
     }
 
     maxDepth(currNode) {
         if (currNode == null) return 0;
         return 1 + Math.max(this.maxDepth(currNode.left), this.maxDepth(currNode.right));
+    }
+
+    getFeatureIndex(currNode) {
+        const res = [];
+        for (let i = 0; i < this.numFeature; i++) {
+            if (currNode.split[i] !== 0) res.push(i);
+        }
+        return res;
     }
 };
 
