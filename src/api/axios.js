@@ -31,7 +31,7 @@ export default function (config, options) {
             // } else {
             //     !messageStatus || ElMessage.warning(res.message)
             // }
-            return data;
+            return res;
         }],
         // `paramsSerializer` is a function responsible for the serialization of `params`
         // (e.g. https://www.npmjs.com/package/qs, http://api.jquery.com/jquery.param/)

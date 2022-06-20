@@ -2,7 +2,7 @@ import request from "./axios";
 
 export function getTrainingData(data) {
     return request({
-        url: "/dataset",
+        url: "/api/dataset",
         method: "get",
         paramas: data
     })

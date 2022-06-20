@@ -19,9 +19,9 @@ onMounted(async () => {
     // const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
     // const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
     // rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
-    rootNode.value = getTrainingData()
+    rootNode.value = await getTrainingData()
         .then(function (bundle) {
-            const { trainingSet, labelSet } = bundle;
+            const { trainingSet, labelSet } = bundle.data;
             const builder = {
                 trainingSet,
                 labelSet,
@@ -41,9 +41,9 @@ onMounted(async () => {
             console.log("ERROR: ", error);
         });
     // trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
-    trainingData.value = getTrainingData()
+    trainingData.value = await getTrainingData()
         .then(function (bundle) {
-            let { trainingSet, labelSet } = bundle;
+            let { trainingSet, labelSet } = bundle.data;
             trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));
             return { trainingSet, labelSet };
         });
