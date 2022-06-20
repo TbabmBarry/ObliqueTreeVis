@@ -77,13 +77,15 @@ onMounted(async () => {
     //         {"Year": "2007", "Height": "2.69", "Length": "5.44"},
     //     ]
     // };
-    const promiseTrainX = d3.csv("http://127.0.0.1:8080/train_x.csv");
-    const promiseTrainY = d3.csv("http://127.0.0.1:8080/train_y.csv");
+    const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
+    const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
     rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
         .then(function (bundle) {
+            const { trainingSet, labelSet } = parseCSV(bundle);
+            // console.log(trainingSet, labelSet);
             const builder = {
-                trainingSet: parseCSV(bundle[0]).map(row => row.slice(), "float"),
-                labelSet: parseCSV(bundle[1]).map(row => row.slice(), "int"),
+                trainingSet,
+                labelSet,
                 nodeTreePath: ["root", "l", "lr", "lrl"],
                 decisionNodes: [
                     [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],

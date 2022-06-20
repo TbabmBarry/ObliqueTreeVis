@@ -1,3 +1,5 @@
+import { csvParseRows } from "d3-dsv";
+
 
 /**
  * Example input: builder
@@ -183,10 +185,14 @@ export default class BivariateDecisionTree {
     }
 };
 
-export const parseCSV = (data, type) => {
-    return type == "int"
-        ? data.map(row => Object.keys(row).map(key => parseInt(row[key]))) 
-        : data.map(row => Object.keys(row).map(key => parseFloat(row[key])));
+export const parseCSV = (data) => {
+    let trainingSet, labelSet;
+    trainingSet = csvParseRows(data[0]).map(row => row.map(element => parseFloat(element)));
+    labelSet = csvParseRows(data[1]).map(element => parseInt(element));
+    return {
+        trainingSet,
+        labelSet
+    };
 };
 
 
