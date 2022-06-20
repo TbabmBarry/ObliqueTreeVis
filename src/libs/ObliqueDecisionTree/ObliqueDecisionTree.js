@@ -179,7 +179,9 @@ class Odt {
         function clicked(event, data) {
             if (event.shiftKey) {
                 let parentNodeGroup = select(this);
-                if (parentNodeGroup.node().querySelector(".detailed") !== null) {
+                if (parentNodeGroup.node().querySelector(".detailed") !== null || 
+                    (parentNodeGroup.node().querySelector(".detailed") === null &&
+                        parentNodeGroup.node().querySelector(".summary") === null)) {
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
                 } else {
@@ -299,20 +301,20 @@ class Odt {
         const y = x.map(x => x.copy()
             .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]));
 
-        // Allow X and Y axis generators to be called
-        // node.append("g")
-        //     .attr("class", "detailed x-axis")
-        //     .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
-        //     .call(d3.axisBottom(x));
-        // node.append("g")
-        //     .attr("class", "detailed y-axis")
-        //     .attr("transform", `translate(${- 0.5 * nodeRectWidth + scatterPlotPadding}, ${0})`)
-        //     .call(d3.axisLeft(y));
-
         // Add dots in each decision node
         node.each(function (nodeData, index) {
             let currFeatureIdx = nodeData.data.featureIdx;
             if (currFeatureIdx.length === 2) {
+                // Allow X and Y axis generators to be called
+                node.append("g")
+                    .attr("class", "detailed x-axis")
+                    .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
+                    .call(d3.axisBottom(x[currFeatureIdx[0]]));
+                node.append("g")
+                    .attr("class", "detailed y-axis")
+                    .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
+                    .call(d3.axisLeft(y[currFeatureIdx[1]]));
+
                 d3.select(this).selectAll("circle")
                     .data(nodeData.data.subTrainingSet)
                     .enter()
@@ -322,7 +324,7 @@ class Odt {
                             return x[currFeatureIdx[0]](_this.trainX[d][featureArr[currFeatureIdx[0]]]) - 0.5 * nodeRectWidth;
                         })
                         .attr("cy", (d) => {
-                            return x[currFeatureIdx[1]](_this.trainX[d][featureArr[currFeatureIdx[1]]]);
+                            return y[currFeatureIdx[1]](_this.trainX[d][featureArr[currFeatureIdx[1]]]);
                         })
                         .attr("r", 3.5)
                         .style("fill", d => colorScale(_this.trainY[d]));
