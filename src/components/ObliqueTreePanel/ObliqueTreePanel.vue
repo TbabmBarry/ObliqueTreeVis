@@ -1,19 +1,13 @@
 <template>
     <div class="w-full h-screen">
-        <!-- <div class="m-2">
-            <div class="col-span-1 titles">
-                Oblique Tree View
-            </div>
-        </div>
-        <hr style="height:1px" /> -->
         <div class="w-full h-screen inline-block overflow-auto" id="vis"></div>
     </div>
 </template>
 <script setup>
-import { onMounted, inject, ref, toRaw } from "vue";
-import Odt from '../../libs/ObliqueDecisionTree/ObliqueDecisionTree';
-import BivariateDecisionTree, { parseCSV } from '../../libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
-
+import { onMounted, inject, ref } from "vue";
+import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
+import BivariateDecisionTree, { parseCSV } from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
+import { getTrainingData } from "@/api/dataset.js";
 
 let d3 = inject("d3");
 
@@ -22,9 +16,10 @@ const trainingData = ref({});
 
 onMounted(async () => {
     let opts = null;
-    const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
-    const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
-    rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
+    // const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
+    // const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
+    // rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
+    rootNode.value = getTrainingData()
         .then(function (bundle) {
             const { trainingSet, labelSet } = parseCSV(bundle);
             const builder = {
@@ -45,7 +40,8 @@ onMounted(async () => {
         }).catch(function (error) {
             console.log("ERROR: ", error);
         });
-    trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
+    // trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
+    trainingData.value = getTrainingData()
         .then(function (bundle) {
             let { trainingSet, labelSet } = parseCSV(bundle);
             trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));

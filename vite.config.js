@@ -10,5 +10,16 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  server: {
+    cors: true,
+    proxy: {
+        '^/api/': {
+            target: 'https://oblique-tree-vercel.vercel.app',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/api/, '/api')
+        }
+    },
+},
 })
