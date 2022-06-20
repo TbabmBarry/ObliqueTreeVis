@@ -247,7 +247,7 @@ class Odt {
         // Draw class distribution
         node.each(function(nodeData, index) {
             // Encode current decision node class distribution into the range of node rect width
-            let x = d3.scaleLinear()
+            let xTotal = d3.scaleLinear()
                 .domain([0, _.sum(nodeData.data.totalCount)])
                 .range([0, nodeRectWidth - 2 * nodeRectRatio]);
             
@@ -266,20 +266,62 @@ class Odt {
             });
 
             // Create a svg group to bind each individual class rect
-            let bar = d3.select(this).selectAll("g")
+            let classDistribution = d3.select(this).selectAll("g")
                 .data(classData)
                 .enter()
                 .append("g")
-                .attr("class", "summary bar")
+                .attr("class", "summary class-distribution")
                 .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
-
-            // Append each class rect into bar svg group
-            bar.append("rect")
+            // Append each class rect into classDistribution svg group
+            classDistribution.append("rect")
                 .attr("class", "summary class-rect")
-                .attr("width", (d) => x(d.end - d.start))
+                .attr("width", (d) => xTotal(d.end - d.start))
                 .attr("height", nodeRectRatio)
-                .attr("x", (d) => - 0.5 * (nodeRectWidth) + x(d.start))
+                .attr("x", (d) => - 0.5 * (nodeRectWidth) + xTotal(d.start))
                 .style("fill", (d) => colorScale(d.label));
+
+            if (nodeData.data.type == "decision") {
+                let xRight = d3.scaleLinear()
+                    .domain([0, _.sum(nodeData.data.rightCount)])
+                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
+                    xLeft = d3.scaleLinear()
+                    .domain([_.sum(nodeData.data.leftCount), 0])
+                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]);
+                let yBand = d3.scaleBand()
+                    .range([0, nodeRectWidth - 4 * nodeRectRatio])
+                    .domain([0,1,2])
+                    .padding(.1);
+
+                const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
+                let splitDistribution = d3.select(this).selectAll("g")
+                    .data(splitData)
+                    .enter()
+                    .append("g")
+                    .attr("class", "summary split-distribution")
+                    .attr("transform", `translate(${0.5 * nodeRectWidth}, ${nodeRectRatio})`);
+                
+                // Append left and right split distribution into splitDistribution svg group
+                classDistribution.append("rect")
+                    .attr("class", "summary split-rect")
+                    .attr("width", (d) => {
+                        return xRight(d[1]);
+                    })
+                    .attr("height", yBand.bandwidth())
+                    .attr("x", - nodeRectRatio)
+                    .attr("y", (d, i) => yBand(i) + 2 * nodeRectRatio)
+                    .attr("fill", (d, i) => colorScale(i));
+
+                classDistribution.append("rect")
+                    .attr("class", "summary split-rect")
+                    .attr("width", (d) => {
+                        return 0.5 * (nodeRectWidth - 2 * nodeRectRatio) - xLeft(d[0]);
+                    })
+                    .attr("height", yBand.bandwidth())
+                    .attr("x", (d) => - 0.5 * nodeRectWidth + xLeft(d[0]))
+                    .attr("y", (d, i) => yBand(i) + 2 * nodeRectRatio)
+                    .attr("fill", (d, i) => colorScale(i));
+            }
+            
         })
     }
 
@@ -380,7 +422,6 @@ class Odt {
      * @param {data} data
      */
     setDataAndOpts(opts, data, trainingData) {
-        console.log(data);
         this.opts = opts;
         this.data = data;
         this.trainX = trainingData.trainingSet;
