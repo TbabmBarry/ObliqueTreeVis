@@ -18,71 +18,15 @@ import BivariateDecisionTree, { parseCSV } from '../../libs/ObliqueDecisionTreeE
 let d3 = inject("d3");
 
 const rootNode = ref({});
+const trainingData = ref({});
 
 onMounted(async () => {
     let opts = null;
-    // let data = {
-    //     "name": "Top Level",
-    //     "distribution": [115,99,52],
-    //     "children": [
-    //         { 
-    //             "name": "Level 2: A",
-    //             "distribution": [115,0,52],
-    //             "children": [
-    //                 { 
-    //                     "name": "Son of A",
-    //                     "distribution": [115,0,0],
-    //                     "samples": [
-    //                         {"Year": "2001", "Height": "4.41", "Length": "3.17"},
-    //                         {"Year": "2003", "Height": "3.81", "Length": "7.33"},
-    //                         {"Year": "2004", "Height": "2.11", "Length": "6.75"},
-    //                     ]     
-    //                 },
-    //                 {
-    //                     "name": "Daughter of A",
-    //                     "distribution": [0,0,52],
-    //                     "samples": [
-    //                         {"Year": "2002", "Height": "3.21", "Length": "4.51"},
-    //                         {"Year": "1998", "Height": "3.89", "Length": "8.05"},
-    //                         {"Year": "2007", "Height": "2.69", "Length": "5.44"},
-    //                     ]
-    //                 }
-    //             ],
-    //             "samples": [
-    //                 {"Year": "2002", "Height": "3.21", "Length": "4.51"},
-    //                 {"Year": "2001", "Height": "4.41", "Length": "3.17"},
-    //                 {"Year": "2003", "Height": "3.81", "Length": "7.33"},
-    //                 {"Year": "2004", "Height": "2.11", "Length": "6.75"},
-    //                 {"Year": "1998", "Height": "3.89", "Length": "8.05"},
-    //                 {"Year": "2007", "Height": "2.69", "Length": "5.44"},
-    //             ]
-    //         },
-    //         { 
-    //             "name": "Level 2: B",
-    //             "distribution": [0,99,0],
-    //             "samples": [
-    //                 {"Year": "1997", "Height": "4.11", "Length": "2.34"},
-    //                 {"Year": "2000", "Height": "5.21", "Length": "2.38"},
-    //             ]
-    //         }
-    //     ],
-    //     "samples": [
-    //         {"Year": "1997", "Height": "4.11", "Length": "2.34"},
-    //         {"Year": "2000", "Height": "5.21", "Length": "2.38"},
-    //         {"Year": "2002", "Height": "3.21", "Length": "4.51"},
-    //         {"Year": "2001", "Height": "4.41", "Length": "3.17"},
-    //         {"Year": "2003", "Height": "3.81", "Length": "7.33"},
-    //         {"Year": "2004", "Height": "2.11", "Length": "6.75"},
-    //         {"Year": "1998", "Height": "3.89", "Length": "8.05"},
-    //         {"Year": "2007", "Height": "2.69", "Length": "5.44"},
-    //     ]
-    // };
     const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
     const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
     rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
         .then(function (bundle) {
             const { trainingSet, labelSet } = parseCSV(bundle);
-            // console.log(trainingSet, labelSet);
             const builder = {
                 trainingSet,
                 labelSet,
@@ -101,9 +45,15 @@ onMounted(async () => {
         }).catch(function (error) {
             console.log("ERROR: ", error);
         });
+    trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
+        .then(function (bundle) {
+            let { trainingSet, labelSet } = parseCSV(bundle);
+            trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));
+            return { trainingSet, labelSet };
+        });
     let odt = new Odt(["#vis"]);
     odt.init();
-    odt.setDataAndOpts(opts, rootNode.value);
+    odt.setDataAndOpts(opts, rootNode.value, trainingData.value);
     odt.draw();
 })
 </script>

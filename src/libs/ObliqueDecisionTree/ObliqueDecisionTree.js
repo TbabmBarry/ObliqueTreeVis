@@ -40,7 +40,8 @@ class Odt {
         _.assign(this, {
             // plotState: new PlotState(),
             data: null,
-            rootNode: null,
+            trainX: null,
+            trainY: null,
             opts: null,
             registeredStateListeners: [],
             computed: {},
@@ -106,7 +107,6 @@ class Odt {
         parts.treeMap = d3.tree().size([width, height]);
 
         let nodes = d3.hierarchy(this.data);
-        console.log(nodes.descendants().slice(1));
         nodes = parts.treeMap(nodes);
 
         // Render Oblique Tree Links and Nodes
@@ -115,8 +115,6 @@ class Odt {
 
         // Enable zooming
         this.enableZooming();
-
-        console.log(this);
     }
 
     /**
@@ -377,7 +375,6 @@ class Odt {
      * @param {data} data
      */
     processData(opts, data) {
-        console.log(data);
         // TODO: Return structured object for d3-hierarchy
         return data;
     }
@@ -388,9 +385,11 @@ class Odt {
      * @param {opts} opts
      * @param {data} data
      */
-    setDataAndOpts(opts, data) {
+    setDataAndOpts(opts, data, trainingData) {
         this.opts = opts;
         this.data = this.processData(this.opts, data);
+        this.trainX = trainingData.trainingSet;
+        this.trainY = trainingData.labelSet;
     }
 
     /**
