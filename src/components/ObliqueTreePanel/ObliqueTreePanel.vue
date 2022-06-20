@@ -104,7 +104,7 @@ onMounted(async () => {
     let odt = new Odt(["#vis"]);
     odt.init();
     odt.setDataAndOpts(opts, rootNode.value);
-
+    odt.draw();
 })
 </script>
 <style scoped>

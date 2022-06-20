@@ -106,6 +106,7 @@ class Odt {
         parts.treeMap = d3.tree().size([width, height]);
 
         let nodes = d3.hierarchy(this.data);
+        console.log(nodes.descendants().slice(1));
         nodes = parts.treeMap(nodes);
 
         // Render Oblique Tree Links and Nodes
@@ -248,13 +249,13 @@ class Odt {
         node.each(function(nodeData, index) {
             // Encode current decision node class distribution into the range of node rect width
             let x = d3.scaleLinear()
-                .domain([0, _.sum(nodeData.data.distribution)])
+                .domain([0, _.sum(nodeData.data.totalCount)])
                 .range([0, nodeRectWidth - 2 * nodeRectRatio]);
             
             // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
             let currStart, currEnd = 0, nextStart = 0;
             const classData = [];
-            nodeData.data.distribution.forEach((ele, idx) => {
+            nodeData.data.totalCount.forEach((ele, idx) => {
                 currStart = nextStart;
                 currEnd += ele;
                 nextStart += ele;
@@ -405,16 +406,16 @@ class Odt {
         const widthFlow = nodeRectWidth - 2 * nodeRectRatio;
         let currParentWidth = widthFlow, currChildWidth = widthFlow;
         let currParentSize, currChildSize;
-        const fullsize = _.sum(links[0].parent.data.distribution);
+        const fullsize = _.sum(links[0].parent.data.totalCount);
         const resFlows = [];
         let currParentX, currChildX;
         for (const link of links) {
-            currParentSize = _.sum(link.parent.data.distribution);
-            currChildSize = _.sum(link.data.distribution);
+            currParentSize = _.sum(link.parent.data.totalCount);
+            currChildSize = _.sum(link.data.totalCount);
             currParentWidth = Math.ceil((currParentSize / fullsize) * widthFlow);
             currChildWidth = Math.ceil((currChildSize / fullsize) * widthFlow);
-            const parentWidthArr = link.parent.data.distribution.map(ele => Math.ceil((ele / currParentSize) * currParentWidth));
-            const childWidthArr = link.data.distribution.map(ele => Math.ceil((ele / currChildSize) * currChildWidth));
+            const parentWidthArr = link.parent.data.totalCount.map(ele => Math.ceil((ele / currParentSize) * currParentWidth));
+            const childWidthArr = link.data.totalCount.map(ele => Math.ceil((ele / currChildSize) * currChildWidth));
             currParentX = link.parent.x;
             currChildX = link.x;
             parentWidthArr.forEach((val, idx) => {
