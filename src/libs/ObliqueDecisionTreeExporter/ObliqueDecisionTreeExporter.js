@@ -64,6 +64,7 @@ export default class BivariateDecisionTree {
         this.build();
         this.classify();
         this.export();
+        console.log(this.treePaths());
     }
 
     /**
@@ -186,6 +187,29 @@ export default class BivariateDecisionTree {
     computeFeatureContribution() {
 
     }
+
+    /**
+     * Return all the paths from the root to every leaf node recursively
+     * @date 2022-06-21
+     */
+    treePaths() {
+        let path = "";
+        const res = [];
+        const helper = (node, path) => {
+            if (!node) return;
+            path += node.name;
+            if (node.left === null && node.right === null) {
+                res.push(path);
+            } else {
+                path += "->";
+                helper(node.left, path);
+                helper(node.right, path);
+            }
+        }   
+        helper(this.root, path);
+        return res;
+    }
+
 
     maxDepth(currNode) {
         if (currNode == null) return 0;
