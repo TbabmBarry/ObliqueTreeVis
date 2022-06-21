@@ -1,4 +1,6 @@
 import { csvParseRows } from "d3-dsv";
+import _ from 'lodash';
+
 
 
 /**
@@ -40,6 +42,7 @@ import { csvParseRows } from "d3-dsv";
         this.rightCount = new Array(3).fill(0);
         this.leftTrainingSet = [];
         this.rightTrainingSet = [];
+        this.featureContribution = [];
     }
 }
 
@@ -51,6 +54,7 @@ export default class BivariateDecisionTree {
         this.nodeTreePath = builder.nodeTreePath;
         this.decisionNodes = builder.decisionNodes.map(arr => arr.slice());
         this.numFeature = this.decisionNodes[0].length - 1;
+        this.numLabel = new Set(this.labelSet).size;
         this.root = null;
         this.output = null;
     }
@@ -63,8 +67,8 @@ export default class BivariateDecisionTree {
     init() {
         this.build();
         this.classify();
+        this.computeFeatureContribution();
         this.export();
-        console.log(this.treePaths());
     }
 
     /**
@@ -185,7 +189,38 @@ export default class BivariateDecisionTree {
      * @date 2022-06-21
      */
     computeFeatureContribution() {
+        const results = Array(this.numFeature).fill(null).map(() => Array(this.numLabel).fill(0));
 
+        const normalizeArr = (count) => {
+            const absCount = count.map(element => Math.abs(element));
+            const n = _.sum(absCount);
+            return absCount.map(element => element / n);
+        }
+
+        const helper = (node, prevNode, prevMeanY, localFC) => {
+            if (!node) return;
+            const currMeanY = normalizeArr(node.totalCount);
+            const localIncre = currMeanY.map((val, i) => val - prevMeanY[i]);
+            const currFeatureIdx = this.getFeatureIndex(prevNode);
+            const featureCoeff = currFeatureIdx.map((idx) => prevNode.split[idx]);
+            const featureWeight = normalizeArr(featureCoeff);
+            let tmpLocalIncre;
+            const currLocalFC = localFC.map(arr => arr.slice());
+            featureWeight.forEach((val, i) => {
+                tmpLocalIncre = localIncre.map(li => li * val);
+                currLocalFC[currFeatureIdx[i]] = localFC[currFeatureIdx[i]].map((fc, j) => fc + tmpLocalIncre[j]);
+            });
+            if (node.left === null && node.right === null) {
+                node.featureContribution = currLocalFC.map(arr => arr.slice());
+            } else {
+                helper(node.left, node, currMeanY, currLocalFC);
+                helper(node.right, node, currMeanY, currLocalFC);
+            };
+        };
+
+        const prevProportion = normalizeArr(this.root.totalCount);
+        helper(this.root.left, this.root, prevProportion, results);
+        helper(this.root.right, this.root, prevProportion, results);
     }
 
     /**

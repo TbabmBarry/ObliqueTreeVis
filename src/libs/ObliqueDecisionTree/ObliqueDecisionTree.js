@@ -104,7 +104,6 @@ class Odt {
                             .attr('class', 'oblique-tree')
 
         parts.treeMap = d3.tree().size([width, height]);
-
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
         // Modify element for each node recursively
