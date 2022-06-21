@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { select } from 'd3';
-import _ from 'lodash';
+import _, { random } from 'lodash';
 
 // const ID = 'id';
 // const NAME = 'name';
@@ -360,6 +360,19 @@ class Odt {
                     .attr("class", "detailed y-axis")
                     .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
                     .call(d3.axisLeft(y[currFeatureIdx[1]]));
+                
+                const randomPoints = getRandomSplitPoint(currFeatureIdx, featureArr, nodeData, _this);
+                const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
+
+                d3.select(this)
+                    .append("path")
+                    .datum(randomPoints)
+                        .attr("class", "detailed split-line")
+                        .attr("d", (d) => lineHelper(d))
+                        .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
+                        .style('fill', 'none')
+                        .style('stroke', 'black')
+                        .style('stroke-width', '1px');
 
                 d3.select(this).selectAll("circle")
                     .data(nodeData.data.subTrainingSet)
@@ -500,6 +513,32 @@ const adjustedClientRect = (node) => {
     curr.height *= 2;
     return curr;
 };
+
+
+/**
+ * Return random points on current split
+ * @date 2022-06-21
+ * @param {featureIdxArr} featureIdxArr
+ * @param {featureArr} featureArr
+ * @param {currNode} currNode
+ * @param {that} that
+ */
+const getRandomSplitPoint = (featureIdxArr, featureArr, currNode, that) => {
+    const getRandomFloat = (range, decimals) => {
+        const str = (Math.random() * (range[1] - range[0]) + range[0]).toFixed(decimals);
+        return parseFloat(str);
+    }
+    const sv = currNode.data.split;
+    const rangeX = d3.extent(that.trainX, d => d[featureArr[featureIdxArr[0]]]);
+    const randomX = Array.from({ length: 10 }, (_, i) => getRandomFloat(rangeX, 4));
+    const randomY = randomX.map((elelemnt) => (sv[featureIdxArr[0]] * elelemnt + sv[sv.length-1]) / (- sv[featureIdxArr[1]]));
+    return randomX.map((val, i) => { 
+        return {
+            x: val, 
+            y: randomY[i]
+        }; 
+    });
+}
 
 Odt.initClass();
 export default Odt;

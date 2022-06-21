@@ -103,6 +103,7 @@ export default class BivariateDecisionTree {
             currNode.left && res.push({
                 name: currNode.left.name,
                 type: currNode.left.type,
+                split: currNode.left.split.slice(),
                 leftCount: currNode.left.type === "decision" ? currNode.left.leftCount.slice() : [],
                 rightCount: currNode.left.type === "decision" ? currNode.left.rightCount.slice() : [],
                 totalCount: currNode.left.totalCount.slice(),
@@ -113,6 +114,7 @@ export default class BivariateDecisionTree {
             currNode.right && res.push({
                 name: currNode.right.name,
                 type: currNode.right.type,
+                split: currNode.right.split.slice(),
                 leftCount: currNode.right.type === "decision" ? currNode.right.leftCount.slice() : [],
                 rightCount: currNode.right.type === "decision" ? currNode.right.rightCount.slice() : [],
                 totalCount: currNode.right.totalCount.slice(),
@@ -125,6 +127,7 @@ export default class BivariateDecisionTree {
         this.output = {
             name: this.root.name,
             type: this.root.type,
+            split: this.root.split.slice(),
             leftCount: this.root.leftCount.slice(),
             rightCount: this.root.rightCount.slice(),
             totalCount: this.root.totalCount.slice(),
