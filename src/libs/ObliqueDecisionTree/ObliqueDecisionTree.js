@@ -286,9 +286,9 @@ class Odt {
                     .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
                     xLeft = d3.scaleLinear()
                     .domain([_.sum(nodeData.data.totalCount), 0])
-                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]);
-                let yBand = d3.scaleBand()
-                    .range([0, nodeRectWidth - 4 * nodeRectRatio])
+                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
+                    yBand = d3.scaleBand()
+                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)])
                     .domain([0,1,2])
                     .padding(.1);
 
@@ -308,7 +308,7 @@ class Odt {
                     })
                     .attr("height", yBand.bandwidth())
                     .attr("x", - nodeRectRatio)
-                    .attr("y", (d, i) => yBand(i) + 2 * nodeRectRatio)
+                    .attr("y", (d, i) => yBand(i) + 0.5 * (nodeRectWidth - 2 * nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
 
                 classDistribution.append("rect")
@@ -318,11 +318,12 @@ class Odt {
                     })
                     .attr("height", yBand.bandwidth())
                     .attr("x", (d) => - 0.5 * nodeRectWidth + xLeft(d[0]))
-                    .attr("y", (d, i) => yBand(i) + 2 * nodeRectRatio)
+                    .attr("y", (d, i) => yBand(i) + 0.5 * (nodeRectWidth - 2 * nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
+                // Append centered axis
                 classDistribution.append("g")
                     .attr("class", "summary center-axis")
-                    .attr("transform", `translate(${- nodeRectRatio}, ${2 * nodeRectRatio})`)
+                    .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
                     .call(d3.axisLeft(yBand).tickSize(2));
             }
             
