@@ -107,6 +107,7 @@ class Odt {
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
+        // Modify element for each node recursively
         traverseTree(nodes);
         
         // Render Oblique Tree Links and Nodes
@@ -234,6 +235,12 @@ class Odt {
         this.renderSummaryView(node);
         // this.renderDetailedView(node);
 
+        node.append("text")
+            .filter((d) => d.data.name === "root")
+            .attr("x", - 2.5 * nodeRectWidth)
+            .attr("y", 0.25 * nodeRectWidth)
+            .attr("class", "text node-rect")
+            .text("Press Shift and click decision nodes to see their detailed view")
     }
 
     /**
