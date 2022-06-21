@@ -97,6 +97,7 @@ export default class BivariateDecisionTree {
      * @date 2022-06-18
      */
     export() {
+        // Create data structure for n-ary tree nodes
         const exportNaryTreeNode = (node) => {
             return {
                 name: node.name,
@@ -107,17 +108,19 @@ export default class BivariateDecisionTree {
                 totalCount: node.totalCount.slice(),
                 subTrainingSet: node.subTrainingSet.slice(),
                 featureIdx: this.getFeatureIndex(node), 
-                children: helper(node),
+                children: traverse(node),
             };
-        }
+        };
 
-        const helper = (currNode) => {
+        // Traverse the original binary tree recursively
+        const traverse = (currNode) => {
             if (currNode == null) return;
             const res = [];
             currNode.left && res.push(exportNaryTreeNode(currNode.left));
             currNode.right && res.push(exportNaryTreeNode(currNode.right));
             return res;
         };
+
         this.output = exportNaryTreeNode(this.root);
     }
 
@@ -174,6 +177,14 @@ export default class BivariateDecisionTree {
                 }
             }
         });
+    }
+
+    /**
+     * Compute feature contribution and store results into tree nodes
+     * @date 2022-06-21
+     */
+    computeFeatureContribution() {
+
     }
 
     maxDepth(currNode) {
