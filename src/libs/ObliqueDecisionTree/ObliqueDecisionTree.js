@@ -58,7 +58,7 @@ class Odt {
                 pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
                 nodeRectStrokeWidth: 3,
-                colorScale: d3.scaleOrdinal(d3.schemeCategory10),
+                colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -345,7 +345,7 @@ class Odt {
             .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]));
 
         const y = x.map(x => x.copy()
-            .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]));
+            .range([nodeRectWidth - scatterPlotPadding, scatterPlotPadding]));
 
         // Add dots in each decision node
         node.each(function (nodeData, index) {
@@ -372,7 +372,7 @@ class Odt {
                         .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
                         .style('fill', 'none')
                         .style('stroke', 'black')
-                        .style('stroke-width', '1px');
+                        .style('stroke-width', '2px');
 
                 d3.select(this).selectAll("circle")
                     .data(nodeData.data.subTrainingSet)
@@ -510,7 +510,7 @@ const adjustedClientRect = (node) => {
     curr.x += window.scrollX;
     // TODO: define inner svg width and height according to returned DOMRect size
     curr.width *= 1.5;
-    curr.height *= 2;
+    curr.height *= 2.5;
     return curr;
 };
 
