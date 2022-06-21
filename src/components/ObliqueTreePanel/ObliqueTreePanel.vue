@@ -1,12 +1,12 @@
 <template>
     <div class="w-full h-screen">
-        <div class="w-full h-screen inline-block overflow-auto" id="vis"></div>
+        <div class="w-full h-screen overflow-auto" id="vis"></div>
     </div>
 </template>
 <script setup>
 import { onMounted, inject, ref } from "vue";
 import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
-import BivariateDecisionTree, { parseCSV } from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
+import BivariateDecisionTree from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 import { getTrainingData } from "@/api/dataset.js";
 
 let d3 = inject("d3");
