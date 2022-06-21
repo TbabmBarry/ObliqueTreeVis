@@ -530,14 +530,20 @@ const getRandomSplitPoint = (featureIdxArr, featureArr, currNode, that) => {
     }
     const sv = currNode.data.split;
     const rangeX = d3.extent(that.trainX, d => d[featureArr[featureIdxArr[0]]]);
-    const randomX = Array.from({ length: 10 }, (_, i) => getRandomFloat(rangeX, 4));
-    const randomY = randomX.map((elelemnt) => (sv[featureIdxArr[0]] * elelemnt + sv[sv.length-1]) / (- sv[featureIdxArr[1]]));
-    return randomX.map((val, i) => { 
-        return {
-            x: val, 
-            y: randomY[i]
-        }; 
-    });
+    const rangeY = d3.extent(that.trainX, d => d[featureArr[featureIdxArr[1]]]);
+    const randomXYPairs = [];
+    let tmpRandomX, tmpRandomY;
+    while (randomXYPairs.length < 10) {
+        tmpRandomX = getRandomFloat(rangeX, 4);
+        tmpRandomY = (sv[featureIdxArr[0]] * tmpRandomX + sv[sv.length-1]) / (- sv[featureIdxArr[1]]);
+        if (tmpRandomY >= rangeY[0] && tmpRandomY <= rangeY[1]) {
+            randomXYPairs.push({
+                x: tmpRandomX,
+                y: tmpRandomY
+            })
+        }
+    };
+    return randomXYPairs;
 }
 
 Odt.initClass();
