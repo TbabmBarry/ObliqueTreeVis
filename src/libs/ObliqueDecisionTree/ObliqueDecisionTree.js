@@ -107,7 +107,8 @@ class Odt {
 
         let nodes = d3.hierarchy(this.data);
         nodes = parts.treeMap(nodes);
-
+        traverseTree(nodes);
+        
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -514,7 +515,6 @@ const adjustedClientRect = (node) => {
     return curr;
 };
 
-
 /**
  * Return random points on current split
  * @date 2022-06-21
@@ -544,6 +544,14 @@ const getRandomSplitPoint = (featureIdxArr, featureArr, currNode, that) => {
         }
     };
     return randomXYPairs;
+}
+
+const traverseTree = (node) => {
+    if (!node) return;
+    node.x -= 500;
+    if (node.children && node.children.length > 0) {
+        node.children.map(child => traverseTree(child));
+    }
 }
 
 Odt.initClass();
