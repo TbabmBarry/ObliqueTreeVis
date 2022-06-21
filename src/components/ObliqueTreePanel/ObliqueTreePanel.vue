@@ -16,9 +16,6 @@ const trainingData = ref({});
 
 onMounted(async () => {
     let opts = null;
-    // const promiseTrainX = d3.text("http://127.0.0.1:8080/train_x.csv");
-    // const promiseTrainY = d3.text("http://127.0.0.1:8080/train_y.csv");
-    // rootNode.value = await Promise.all([promiseTrainX, promiseTrainY])
     rootNode.value = await getTrainingData()
         .then(function (bundle) {
             const { trainingSet, labelSet } = bundle.data;
@@ -40,7 +37,6 @@ onMounted(async () => {
         }).catch(function (error) {
             console.log("ERROR: ", error);
         });
-    // trainingData.value = await Promise.all([promiseTrainX, promiseTrainY])
     trainingData.value = await getTrainingData()
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;

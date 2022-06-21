@@ -320,6 +320,10 @@ class Odt {
                     .attr("x", (d) => - 0.5 * nodeRectWidth + xLeft(d[0]))
                     .attr("y", (d, i) => yBand(i) + 2 * nodeRectRatio)
                     .attr("fill", (d, i) => colorScale(i));
+                classDistribution.append("g")
+                    .attr("class", "summary center-axis")
+                    .attr("transform", `translate(${- nodeRectRatio}, ${2 * nodeRectRatio})`)
+                    .call(d3.axisLeft(yBand).tickSize(2));
             }
             
         })
