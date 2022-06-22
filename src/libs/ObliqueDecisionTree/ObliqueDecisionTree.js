@@ -227,7 +227,7 @@ class Odt {
             .attr("rx", nodeRectRatio)
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
-            .style("stroke", "#005CAB")
+            .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
             .style("stroke-width", nodeRectStrokeWidth)
 
         
