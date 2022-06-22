@@ -407,24 +407,34 @@ class Odt {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
         let _this = this;
         // Add a rectangle under each leaf node
-        node.append("rect")
-            .filter((d) => d.children == null)
-            .attr("class", 'node-rect leaf-node')
-            .attr("width", nodeRectWidth)
-            .attr("height", pathSummaryHeight)
-            .attr("x", - 0.5 * nodeRectWidth)
-            .attr("y", nodeRectWidth + nodeRectStrokeWidth)
-            .attr("rx", nodeRectRatio)
-            .attr("ry", nodeRectRatio)
-            .style("fill", "#fff")
-            .style("stroke", "#E31B23")
-            .style("stroke-width", nodeRectStrokeWidth);
+        // node.append("rect")
+        //     .filter((d) => d.children == null)
+        //     .attr("class", 'node-rect leaf-node')
+        //     .attr("width", nodeRectWidth)
+        //     .attr("height", pathSummaryHeight)
+        //     .attr("x", - 0.5 * nodeRectWidth)
+        //     .attr("y", nodeRectWidth + nodeRectStrokeWidth)
+        //     .attr("rx", nodeRectRatio)
+        //     .attr("ry", nodeRectRatio)
+        //     .style("fill", "#fff")
+        //     .style("stroke", "#E31B23")
+        //     .style("stroke-width", nodeRectStrokeWidth);
 
         // TODO: draw boxplot/violinplot/histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
                 const fcArr = getEffectiveFeatureContribution(nodeData, _this);
-                console.log(fcArr);
+                d3.select(this).selectAll("text")
+                    .data(fcArr)
+                    .enter()
+                    .append("text")
+                        .attr("class", "path-summary text")
+                        .attr("x", - 0.4 * nodeRectWidth)
+                        .attr("y", (d, i) => (0.25*nodeRectWidth) + (2 * i * nodeRectRatio))
+                        .attr("fill", "#000")
+                        .text((d) => {
+                            return `${d.featureName}: ` + d.featureContribution;
+                        })
                 // TODO: determine scale for feature contribution
 
             }
