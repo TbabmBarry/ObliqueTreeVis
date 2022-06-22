@@ -7,7 +7,7 @@
 import { onMounted, inject, ref } from "vue";
 import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
 import BivariateDecisionTree from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
-import { getTrainingData } from "@/api/dataset.js";
+import { getDataset } from "@/api/dataset.js";
 
 let d3 = inject("d3");
 
@@ -16,7 +16,7 @@ const trainingData = ref({});
 
 onMounted(async () => {
     let opts = null;
-    rootNode.value = await getTrainingData()
+    rootNode.value = await getDataset()
         .then(function (bundle) {
             const { trainingSet, labelSet } = bundle.data;
             const builder = {
@@ -37,7 +37,7 @@ onMounted(async () => {
         }).catch(function (error) {
             console.log("ERROR: ", error);
         });
-    trainingData.value = await getTrainingData()
+    trainingData.value = await getDataset()
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
             trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));
