@@ -405,6 +405,7 @@ class Odt {
      */
     renderPathSummaryView(node) {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
+        let _this = this;
         // Add a rectangle under each leaf node
         node.append("rect")
             .filter((d) => d.children == null)
@@ -420,7 +421,14 @@ class Odt {
             .style("stroke-width", nodeRectStrokeWidth);
 
         // TODO: draw boxplot/violinplot/histogram for feature contribution
+        node.each(function (nodeData, index) {
+            if (nodeData.data.type === "leaf") {
+                const fcArr = getEffectiveFeatureContribution(nodeData, _this);
+                console.log(fcArr);
+                // TODO: determine scale for feature contribution
 
+            }
+        });
     }
 
     /**
@@ -550,6 +558,25 @@ const getRandomSplitPoint = (featureIdxArr, currNode, that) => {
         }
     };
     return randomXYPairs;
+}
+
+/**
+ * Return effective feature contribution array with index and array of values
+ * @date 2022-06-22
+ * @param {currNode} currNode
+ * @param {that} that
+ */
+const getEffectiveFeatureContribution = (currNode, that) => {
+    const effectiveFeatureArr = [];
+    currNode.data.featureContribution.forEach((val, i) => {
+        if (!val.every(element => element === 0)) {
+            effectiveFeatureArr.push({
+                featureName: that.constants.featureArr[i],
+                featureContribution: val.slice(),
+            });
+        }
+    });
+    return effectiveFeatureArr;
 }
 
 const traverseTree = (node) => {
