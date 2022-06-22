@@ -59,6 +59,7 @@ class Odt {
                 scatterPlotPadding: 20,
                 nodeRectStrokeWidth: 3,
                 colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]),
+                featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -343,10 +344,9 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale, featureArr } } = this;
         let _this = this;
         // Map two feature variables into visual representations
-        const featureArr = Array.from({length: 8}, (_, i) => `f_${i+1}`);
         const x = featureArr.map(f => d3.scaleLinear()
             .domain(d3.extent(this.trainX, d => d[f]))
             .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]));
@@ -368,7 +368,7 @@ class Odt {
                     .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
                     .call(d3.axisLeft(y[currFeatureIdx[1]]));
                 
-                const randomPoints = getRandomSplitPoint(currFeatureIdx, featureArr, nodeData, _this);
+                const randomPoints = getRandomSplitPoint(currFeatureIdx, nodeData, _this);
                 const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
 
                 d3.select(this)
@@ -420,6 +420,7 @@ class Odt {
             .style("stroke-width", nodeRectStrokeWidth);
 
         // TODO: draw boxplot/violinplot/histogram for feature contribution
+
     }
 
     /**
@@ -525,18 +526,17 @@ const adjustedClientRect = (node) => {
  * Return random points on current split
  * @date 2022-06-21
  * @param {featureIdxArr} featureIdxArr
- * @param {featureArr} featureArr
  * @param {currNode} currNode
  * @param {that} that
  */
-const getRandomSplitPoint = (featureIdxArr, featureArr, currNode, that) => {
+const getRandomSplitPoint = (featureIdxArr, currNode, that) => {
     const getRandomFloat = (range, decimals) => {
         const str = (Math.random() * (range[1] - range[0]) + range[0]).toFixed(decimals);
         return parseFloat(str);
     }
     const sv = currNode.data.split;
-    const rangeX = d3.extent(that.trainX, d => d[featureArr[featureIdxArr[0]]]);
-    const rangeY = d3.extent(that.trainX, d => d[featureArr[featureIdxArr[1]]]);
+    const rangeX = d3.extent(that.trainX, d => d[that.constants.featureArr[featureIdxArr[0]]]);
+    const rangeY = d3.extent(that.trainX, d => d[that.constants.featureArr[featureIdxArr[1]]]);
     const randomXYPairs = [];
     let tmpRandomX, tmpRandomY;
     while (randomXYPairs.length < 10) {
@@ -554,7 +554,11 @@ const getRandomSplitPoint = (featureIdxArr, featureArr, currNode, that) => {
 
 const traverseTree = (node) => {
     if (!node) return;
+    // Move tree diagram to let by 500
     node.x -= 500;
+
+    // TODO: Filter effective feature contribution in leaf nodes
+
     if (node.children && node.children.length > 0) {
         node.children.map(child => traverseTree(child));
     }
