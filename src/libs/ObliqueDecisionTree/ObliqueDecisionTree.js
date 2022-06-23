@@ -356,10 +356,10 @@ class Odt {
                     .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
                     .call(d3.axisLeft(yBand).tickFormat(""));
 
-                // classDistribution.append("g")
-                //     .attr("class", "summary center-axis")
-                //     .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
-                //     .call(d3.axisRight(yBand).tickFormat(""));
+                classDistribution.append("g")
+                    .attr("class", "summary center-axis")
+                    .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
+                    .call(d3.axisRight(yBand).tickFormat(""));
             }
             
         })
