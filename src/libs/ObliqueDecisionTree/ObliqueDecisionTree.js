@@ -328,11 +328,38 @@ class Odt {
                     .attr("x", (d) => - 0.5 * nodeRectWidth + xLeft(d[0]))
                     .attr("y", (d, i) => yBand(i) + 0.5 * (nodeRectWidth - 2 * nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
+
+                // Append left and right split distribution text into splitDistribution svg group
+                classDistribution.append("text")
+                    .attr("class", "summary split-text")
+                    .text( (d) => d[1])
+                    .attr("text-anchor", "start")
+                    .attr("font-size", "11px")
+                    .attr("fill", "black")
+                    .attr("transform", (d, i) => {
+                        return `translate(${-nodeRectRatio+xRight(d[1])+10}, ${5 + 0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                    })
+                
+                classDistribution.append("text")
+                    .attr("class", "summary split-text")
+                    .text( (d) => d[0])
+                    .attr("text-anchor", "end")
+                    .attr("font-size", "11px")
+                    .attr("fill", "black")
+                    .attr("transform", (d, i) => {
+                        return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-10}, ${5 + 0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                    })
+
                 // Append centered axis
                 classDistribution.append("g")
                     .attr("class", "summary center-axis")
                     .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
-                    .call(d3.axisLeft(yBand).tickSize(2));
+                    .call(d3.axisLeft(yBand).tickFormat(""));
+
+                // classDistribution.append("g")
+                //     .attr("class", "summary center-axis")
+                //     .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
+                //     .call(d3.axisRight(yBand).tickFormat(""));
             }
             
         })
