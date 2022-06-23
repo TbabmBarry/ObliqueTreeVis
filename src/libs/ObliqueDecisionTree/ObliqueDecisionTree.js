@@ -221,7 +221,7 @@ class Odt {
         node.append("rect")
             .attr("class", "node-rect")
             .attr("width", nodeRectWidth)
-            .attr("height", nodeRectWidth)
+            .attr("height", (d) => d.data.type === "leaf" ? nodeRectWidth+2*nodeRectRatio : nodeRectWidth)
             .attr("x",- 0.5 * nodeRectWidth)
             .attr("y",0)
             .attr("rx", nodeRectRatio)
@@ -458,9 +458,9 @@ class Odt {
                 // TODO: determine scale for feature contribution
                 let x = d3.scaleLinear()
                     .domain(fcRange)
-                    .range([0, nodeRectWidth-2*nodeRectRatio]),
+                    .range([0, nodeRectWidth-4*nodeRectRatio]),
                     yBand = d3.scaleBand()
-                    .range([0, (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio)-10])
+                    .range([0, (1/(fcArr.length))*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
                     .domain([0,1,2])
                     .padding(.1);
                 fcArr.forEach((fc, idx) => {
@@ -471,7 +471,7 @@ class Odt {
                         .append("rect")
                             .attr("class", "path-summary feature-contribution-rect")
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
-                            .attr("y", (d) => 2*nodeRectRatio + yBand(d.label) + idx * (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("y", (d) => 3*nodeRectRatio + yBand(d.label) + idx * (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
                             .attr("fill", (d) => colorScale(d.label));
