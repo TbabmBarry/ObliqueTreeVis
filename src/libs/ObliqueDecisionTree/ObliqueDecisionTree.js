@@ -143,10 +143,6 @@ class Odt {
                 .enter().append("path")
                 .attr("class", "link")
                 .attr("d", (d) => {
-                    // return "M" + d.x + "," + d.y
-                    //     + "C" + d.x + "," + (d.y + d.parent.y) / 2
-                    //     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
-                    //     + " " + d.parent.x + "," + d.parent.y;
                     return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                         {
                             x0: d.source.x - 0.5 * d.source.width,
@@ -438,18 +434,6 @@ class Odt {
         const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
         let _this = this;
         // Add a rectangle under each leaf node
-        // node.append("rect")
-        //     .filter((d) => d.children == null)
-        //     .attr("class", 'node-rect leaf-node')
-        //     .attr("width", nodeRectWidth)
-        //     .attr("height", pathSummaryHeight)
-        //     .attr("x", - 0.5 * nodeRectWidth)
-        //     .attr("y", nodeRectWidth + nodeRectStrokeWidth)
-        //     .attr("rx", nodeRectRatio)
-        //     .attr("ry", nodeRectRatio)
-        //     .style("fill", "#fff")
-        //     .style("stroke", "#E31B23")
-        //     .style("stroke-width", nodeRectStrokeWidth);
 
         // TODO: draw boxplot/violinplot/histogram for feature contribution
         node.each(function (nodeData, index) {
