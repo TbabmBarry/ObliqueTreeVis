@@ -237,8 +237,8 @@ class Odt {
 
         node.append("text")
             .filter((d) => d.data.name === "root")
-            .attr("x", - 2.5 * nodeRectWidth)
-            .attr("y", 0.25 * nodeRectWidth)
+            .attr("x", -2.5*nodeRectWidth)
+            .attr("y", 0.25*nodeRectWidth)
             .attr("class", "text node-rect")
             .text("Press Shift and click decision nodes to see their detailed view")
     }
@@ -257,7 +257,7 @@ class Odt {
             // Encode current decision node class distribution into the range of node rect width
             let xTotal = d3.scaleLinear()
                 .domain([0, _.sum(nodeData.data.totalCount)])
-                .range([0, nodeRectWidth - 2 * nodeRectRatio]);
+                .range([0, nodeRectWidth-2*nodeRectRatio]);
             
             // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
             let currStart, currEnd = 0, nextStart = 0;
@@ -283,20 +283,20 @@ class Odt {
             // Append each class rect into classDistribution svg group
             classDistribution.append("rect")
                 .attr("class", "summary class-rect")
-                .attr("width", (d) => xTotal(d.end - d.start))
+                .attr("width", (d) => xTotal(d.end-d.start))
                 .attr("height", nodeRectRatio)
-                .attr("x", (d) => - 0.5 * (nodeRectWidth) + xTotal(d.start))
+                .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
                 .style("fill", (d) => colorScale(d.label));
 
             if (nodeData.data.type == "decision") {
                 let xRight = d3.scaleLinear()
                     .domain([0, _.sum(nodeData.data.totalCount)])
-                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
+                    .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
                     xLeft = d3.scaleLinear()
                     .domain([_.sum(nodeData.data.totalCount), 0])
-                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)]),
+                    .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
                     yBand = d3.scaleBand()
-                    .range([0, 0.5 * (nodeRectWidth - 2 * nodeRectRatio)])
+                    .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
                     .domain([0,1,2])
                     .padding(.1);
 
@@ -380,10 +380,10 @@ class Odt {
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
             .domain(d3.extent(this.trainX, d => d[f]))
-            .range([scatterPlotPadding, nodeRectWidth - scatterPlotPadding]));
+            .range([scatterPlotPadding, nodeRectWidth-scatterPlotPadding]));
 
         const y = x.map(x => x.copy()
-            .range([nodeRectWidth - scatterPlotPadding, scatterPlotPadding]));
+            .range([nodeRectWidth-scatterPlotPadding, scatterPlotPadding]));
 
         // Add dots in each decision node
         node.each(function (nodeData, index) {
@@ -392,11 +392,11 @@ class Odt {
                 // Allow X and Y axis generators to be called
                 node.append("g")
                     .attr("class", "detailed x-axis")
-                    .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${nodeRectWidth - scatterPlotPadding})`)
+                    .attr("transform", `translate(${-0.5*nodeRectWidth}, ${nodeRectWidth-scatterPlotPadding})`)
                     .call(d3.axisBottom(x[currFeatureIdx[0]]));
                 node.append("g")
                     .attr("class", "detailed y-axis")
-                    .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
+                    .attr("transform", `translate(${-0.5*nodeRectWidth}, ${0})`)
                     .call(d3.axisLeft(y[currFeatureIdx[1]]));
                 
                 const randomPoints = getRandomSplitPoint(currFeatureIdx, nodeData, _this);
@@ -418,7 +418,7 @@ class Odt {
                     .append("circle")
                         .attr("class", "detailed dot")
                         .attr("cx", (d) => {
-                            return x[currFeatureIdx[0]](_this.trainX[d][featureArr[currFeatureIdx[0]]]) - 0.5 * nodeRectWidth;
+                            return x[currFeatureIdx[0]](_this.trainX[d][featureArr[currFeatureIdx[0]]])-0.5*nodeRectWidth;
                         })
                         .attr("cy", (d) => {
                             return y[currFeatureIdx[1]](_this.trainX[d][featureArr[currFeatureIdx[1]]]);
@@ -454,20 +454,32 @@ class Odt {
         // TODO: draw boxplot/violinplot/histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
-                const fcArr = getEffectiveFeatureContribution(nodeData, _this);
-                d3.select(this).selectAll("text")
-                    .data(fcArr)
-                    .enter()
-                    .append("text")
-                        .attr("class", "path-summary text")
-                        .attr("x", - 0.4 * nodeRectWidth)
-                        .attr("y", (d, i) => (0.25*nodeRectWidth) + (2 * i * nodeRectRatio))
-                        .attr("fill", "#000")
-                        .text((d) => {
-                            return `${d.featureName}: ` + d.featureContribution;
-                        })
+                const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
                 // TODO: determine scale for feature contribution
-
+                const featureContributionDistribution = d3.select(this).selectAll("g")
+                        .attr("class", "path-summary feature-contribution");
+                let x = d3.scaleLinear()
+                    .domain(fcRange)
+                    .range([0, nodeRectWidth-2*nodeRectRatio]),
+                    yBand = d3.scaleBand()
+                    .range([0, (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio)])
+                    .domain([0,1,2])
+                    .padding(.1);
+                fcArr.forEach((fc, idx) => {
+                    
+                    featureContributionDistribution.append("g")
+                        .data(fc.featureContribution)
+                        .enter()
+                        .append("rect")
+                            .attr("class", "path-summary feature-contribution-rect")
+                            .attr("x", (d) => {
+                                return x(Math.min(0, d.value));
+                            })
+                            .attr("y", (d) => 2*nodeRectRatio + yBand(d.label) + idx * (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("width", (d) => Math.abs(x(d.value) - x(0)))
+                            .attr("height", yBand.bandwidth())
+                            .attr("fill", (d) => colorScale(d.label));
+                })
             }
         });
     }
@@ -609,15 +621,32 @@ const getRandomSplitPoint = (featureIdxArr, currNode, that) => {
  */
 const getEffectiveFeatureContribution = (currNode, that) => {
     const effectiveFeatureArr = [];
+    let range;
+    let currRange;
     currNode.data.featureContribution.forEach((val, i) => {
+        currRange = d3.extent(val);
+        if (i === 0) range = currRange.slice();
+        else {
+            range[0] = Math.min(range[0], currRange[0]);
+            range[1] = Math.max(range[1], currRange[1]);
+        };
         if (!val.every(element => element === 0)) {
+            const featureContributionArr = val.map((ele, idx) => {
+                return {
+                    label: idx,
+                    value: ele
+                };
+            });
             effectiveFeatureArr.push({
                 featureName: that.constants.featureArr[i],
-                featureContribution: val.slice(),
+                featureContribution: featureContributionArr,
             });
         }
     });
-    return effectiveFeatureArr;
+    return {
+        fcArr: effectiveFeatureArr, 
+        fcRange: range
+    };
 }
 
 const traverseTree = (node) => {
