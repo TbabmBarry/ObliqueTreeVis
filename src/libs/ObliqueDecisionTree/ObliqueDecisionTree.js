@@ -456,25 +456,21 @@ class Odt {
             if (nodeData.data.type === "leaf") {
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
                 // TODO: determine scale for feature contribution
-                const featureContributionDistribution = d3.select(this).selectAll("g")
-                        .attr("class", "path-summary feature-contribution");
                 let x = d3.scaleLinear()
                     .domain(fcRange)
                     .range([0, nodeRectWidth-2*nodeRectRatio]),
                     yBand = d3.scaleBand()
-                    .range([0, (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio)])
+                    .range([0, (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio)-10])
                     .domain([0,1,2])
                     .padding(.1);
                 fcArr.forEach((fc, idx) => {
                     
-                    featureContributionDistribution.append("g")
+                    d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
                         .enter()
                         .append("rect")
                             .attr("class", "path-summary feature-contribution-rect")
-                            .attr("x", (d) => {
-                                return x(Math.min(0, d.value));
-                            })
+                            .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
                             .attr("y", (d) => 2*nodeRectRatio + yBand(d.label) + idx * (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
