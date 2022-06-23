@@ -306,7 +306,7 @@ class Odt {
                     .enter()
                     .append("g")
                     .attr("class", "summary split-distribution")
-                    .attr("transform", `translate(${0.5 * nodeRectWidth}, ${nodeRectRatio})`);
+                    .attr("transform", `translate(${0.5*nodeRectWidth},${nodeRectRatio})`);
                 
                 // Append left and right split distribution into splitDistribution svg group
                 classDistribution.append("rect")
@@ -316,17 +316,17 @@ class Odt {
                     })
                     .attr("height", yBand.bandwidth())
                     .attr("x", - nodeRectRatio)
-                    .attr("y", (d, i) => yBand(i) + 0.5 * (nodeRectWidth - 2 * nodeRectRatio))
+                    .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
 
                 classDistribution.append("rect")
                     .attr("class", "summary split-rect")
                     .attr("width", (d) => {
-                        return 0.5 * (nodeRectWidth - 2 * nodeRectRatio) - xLeft(d[0]);
+                        return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
                     })
                     .attr("height", yBand.bandwidth())
-                    .attr("x", (d) => - 0.5 * nodeRectWidth + xLeft(d[0]))
-                    .attr("y", (d, i) => yBand(i) + 0.5 * (nodeRectWidth - 2 * nodeRectRatio))
+                    .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
+                    .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
 
                 // Append left and right split distribution text into splitDistribution svg group
@@ -337,7 +337,8 @@ class Odt {
                     .attr("font-size", "11px")
                     .attr("fill", "black")
                     .attr("transform", (d, i) => {
-                        return `translate(${-nodeRectRatio+xRight(d[1])+10}, ${5 + 0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                        return `translate(${-nodeRectRatio+xRight(d[1])+10},
+                            ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
                     })
                 
                 classDistribution.append("text")
@@ -347,18 +348,21 @@ class Odt {
                     .attr("font-size", "11px")
                     .attr("fill", "black")
                     .attr("transform", (d, i) => {
-                        return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-10}, ${5 + 0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                        return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-10},
+                            ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
                     })
 
                 // Append centered axis
                 classDistribution.append("g")
                     .attr("class", "summary center-axis")
-                    .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
+                    .attr("transform", `translate(${-nodeRectRatio},
+                        ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
                     .call(d3.axisLeft(yBand).tickFormat(""));
 
                 classDistribution.append("g")
                     .attr("class", "summary center-axis")
-                    .attr("transform", `translate(${- nodeRectRatio}, ${0.5 * (nodeRectWidth - 2 * nodeRectRatio)})`)
+                    .attr("transform", `translate(${-nodeRectRatio},
+                        ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
                     .call(d3.axisRight(yBand).tickFormat(""));
             }
             
