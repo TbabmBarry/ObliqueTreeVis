@@ -525,7 +525,13 @@ class Odt {
             currChildX = link.x;
             currLinkWidthArr.forEach((val, idx) => {
                 currParentX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
-                currChildX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
+                currChildX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (currWidth - currLinkWidthArr[idx].value);
+                let emptySpace = 0;
+                for (let i = 0; i <= idx; i++) {
+                    if (link.data.totalCount[currLinkWidthArr[i].label] !== currParentCountArr[i]) {
+                        emptySpace += currLinkWidthArr[i].value;
+                    }
+                }
                 if (link.data.totalCount[val.label] === currParentCountArr[idx]) {
                     resFlows.push({
                         source: {
@@ -534,7 +540,7 @@ class Odt {
                             width: currLinkWidthArr[idx].value,
                         },
                         target: {
-                            x: currChildX,
+                            x: currChildX - emptySpace,
                             y: link.y,
                             width: currLinkWidthArr[idx].value,
                         },
