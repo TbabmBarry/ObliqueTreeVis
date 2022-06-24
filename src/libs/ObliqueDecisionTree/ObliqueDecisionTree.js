@@ -448,14 +448,14 @@ class Odt {
                     .domain([0,1,2])
                     .padding(.1);
                 fcArr.forEach((fc, idx) => {
-                    
                     d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
                         .enter()
                         .append("rect")
                             .attr("class", "path-summary feature-contribution-rect")
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
-                            .attr("y", (d) => 3*nodeRectRatio + yBand(d.label) + idx * (1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("y", (d) => 3*nodeRectRatio
+                                 +yBand(d.label)+idx*(1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
                             .attr("fill", (d) => colorScale(d.label));
@@ -506,36 +506,41 @@ class Odt {
 
         // Width of flow should not be larger than (node rect width - 2 * node rect ratio)
         const widthFlow = nodeRectWidth - 2 * nodeRectRatio;
-        let currParentWidth = widthFlow, currChildWidth = widthFlow;
-        let currParentSize, currChildSize;
+        let currSize, currWidth;
         const fullsize = _.sum(links[0].parent.data.totalCount);
         const resFlows = [];
         let currParentX, currChildX;
         for (const link of links) {
-            currParentSize = _.sum(link.parent.data.totalCount);
-            currChildSize = _.sum(link.data.totalCount);
-            currParentWidth = Math.ceil((currParentSize / fullsize) * widthFlow);
-            currChildWidth = Math.ceil((currChildSize / fullsize) * widthFlow);
-            const parentWidthArr = link.parent.data.totalCount.map(ele => Math.ceil((ele / currParentSize) * currParentWidth));
-            const childWidthArr = link.data.totalCount.map(ele => Math.ceil((ele / currChildSize) * currChildWidth));
+            currSize = _.sum(link.data.totalCount);
+            currWidth = (currSize / fullsize) * widthFlow;
+            const currLinkWidthArr = [];
+            const currParentCountArr = link.parent.data.leftCount.concat(link.parent.data.rightCount);
+            currParentCountArr.forEach((ele, idx) => {
+                currLinkWidthArr.push({
+                    label: idx > 2 ? idx - 3 : idx,
+                    value: (ele / currSize) * currWidth
+                });
+            });
             currParentX = link.parent.x;
             currChildX = link.x;
-            parentWidthArr.forEach((val, idx) => {
-                currParentX += idx > 0 ? 0.5 * (parentWidthArr[idx-1] + parentWidthArr[idx]) : - 0.5 * (_.sum(parentWidthArr) - parentWidthArr[idx]);
-                currChildX += idx > 0 ? 0.5 * (childWidthArr[idx-1] + childWidthArr[idx]) : - 0.5 * (_.sum(childWidthArr) - childWidthArr[idx]);
-                resFlows.push({
-                    source: {
-                        x: currParentX,
-                        y: link.parent.y + nodeRectWidth,
-                        width: childWidthArr[idx],
-                    },
-                    target: {
-                        x: currChildX,
-                        y: link.y,
-                        width: childWidthArr[idx],
-                    },
-                    class: idx,
-                });
+            currLinkWidthArr.forEach((val, idx) => {
+                currParentX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
+                currChildX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
+                if (link.data.totalCount[val.label] === currParentCountArr[idx]) {
+                    resFlows.push({
+                        source: {
+                            x: currParentX,
+                            y: link.parent.y + nodeRectWidth,
+                            width: currLinkWidthArr[idx].value,
+                        },
+                        target: {
+                            x: currChildX,
+                            y: link.y,
+                            width: currLinkWidthArr[idx].value,
+                        },
+                        class: val.label,
+                    })
+                }
             })
         }
         return resFlows;
