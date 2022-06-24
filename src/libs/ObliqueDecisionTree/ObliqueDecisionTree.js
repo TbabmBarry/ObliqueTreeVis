@@ -173,8 +173,8 @@ class Odt {
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
-        function clicked(event, data) {
-            if (event.shiftKey) {
+        function clicked(event, node) {
+            if (event.shiftKey && node.data.type === "decision") {
                 let parentNodeGroup = select(this);
                 if (parentNodeGroup.node().querySelector(".detailed") !== null || 
                     (parentNodeGroup.node().querySelector(".detailed") === null &&
