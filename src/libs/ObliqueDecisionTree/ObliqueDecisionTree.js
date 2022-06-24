@@ -454,6 +454,7 @@ class Odt {
                         .append("rect")
                             .attr("class", "path-summary feature-contribution-rect")
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
+                            .attr('rx', 5)
                             .attr("y", (d) => 3*nodeRectRatio
                                  +yBand(d.label)+idx*(1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
