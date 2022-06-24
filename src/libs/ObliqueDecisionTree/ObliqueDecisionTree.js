@@ -189,15 +189,17 @@ class Odt {
         }
 
         // Mouse over event listener to highlight hover effects
-        function mouseOver(event, data) {
+        function mouseOver(event, node) {
             if (event.shiftKey) {
-                select(this).select(".node-rect").transition().duration(100).style("fill", "red");
+                select(this).select(".node-rect")
+                .attr("transform", `scale(${1.7})`);
             }
         }
 
         // Mouse out event listener to recover node style
-        function mouseOut(event, data) {
-            select(this).select(".node-rect").style("fill", "#fff");
+        function mouseOut(event, node) {
+            select(this).select(".node-rect")
+                .attr("transform", `scale(${1})`);
         }
 
         // Create svg group binding decision and leaf nodes
@@ -209,8 +211,8 @@ class Odt {
                 (d.children ? " node--internal" : " node--leaf"); 
             })
             .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
-            // .on("mouseover", mouseOver)
-            // .on("mouseout", mouseOut)
+            .on("mouseover", mouseOver)
+            .on("mouseout", mouseOut)
             .on("click", clicked);
         
         // Add a rectangle to each node
