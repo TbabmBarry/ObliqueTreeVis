@@ -1,7 +1,19 @@
 <template>
 <div class="container m-auto p-2 w-full min-h-screen min-w-full max-w-screen-2xl">
-    <div class="border border-gray-800/100 h-screen">
-        <ObliqueTreePanel />
+    <div class="grid grid-cols-3 gap-2 min-h-screen">
+        <div class="col-start-1 col-end-3 border border-gray-800/100">
+            <ObliqueTreePanel />
+        </div>
+        <div class="col-start-3 col-end-4 border border-gray-800/100">
+            <div class="grid grid-rows-2 grid-flow-col gap-2 h-screen">
+                <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
+                    <ProjectionPanel />
+                </div>
+                <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
+                    <TableDataPanel />
+                </div>
+            </div>
+        </div>
     </div>
     <!-- <div class="grid grid-cols-4 gap-2 min-h-screen">
         <div class="col-start-1 col-end-2">
@@ -35,8 +47,8 @@
 <script setup>
 import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
 // import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
-// import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
-// import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
+import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
+import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
 // import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
 </script>
 <style scoped>

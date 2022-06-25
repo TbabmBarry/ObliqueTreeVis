@@ -661,7 +661,7 @@ const getEffectiveFeatureContribution = (currNode, that) => {
 const traverseTree = (node) => {
     if (!node) return;
     // Move tree diagram to let by 500
-    node.x -= 500;
+    node.x -= 320;
 
     // TODO: Filter effective feature contribution in leaf nodes
 
