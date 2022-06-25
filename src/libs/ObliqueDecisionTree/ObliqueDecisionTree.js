@@ -513,11 +513,13 @@ class Odt {
         const fullsize = _.sum(links[0].parent.data.totalCount);
         const resFlows = [];
         let currParentX, currChildX;
+        // Loop through each link and generate flow
         for (const link of links) {
             currSize = _.sum(link.data.totalCount);
             currWidth = (currSize / fullsize) * widthFlow;
             const currLinkWidthArr = [];
             const currParentCountArr = link.parent.data.leftCount.concat(link.parent.data.rightCount);
+            // Loop through left and right count of parent node
             currParentCountArr.forEach((ele, idx) => {
                 currLinkWidthArr.push({
                     label: idx > 2 ? idx - 3 : idx,
@@ -526,15 +528,23 @@ class Odt {
             });
             currParentX = link.parent.x;
             currChildX = link.x;
+            // Generate flow for each link
             currLinkWidthArr.forEach((val, idx) => {
-                currParentX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
-                currChildX += idx > 0 ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) : - 0.5 * (currWidth - currLinkWidthArr[idx].value);
+                // Update x position of parent and child node
+                currParentX += idx > 0
+                    ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) 
+                    : - 0.5 * (_.sum(currLinkWidthArr.map(ele => ele.value)) - currLinkWidthArr[idx].value);
+                currChildX += idx > 0 
+                    ? 0.5 * (currLinkWidthArr[idx-1].value + currLinkWidthArr[idx].value) 
+                    : - 0.5 * (currWidth - currLinkWidthArr[idx].value);
                 let emptySpace = 0;
+                // Calculate invalid movement for each child node on x axis
                 for (let i = 0; i <= idx; i++) {
                     if (link.data.totalCount[currLinkWidthArr[i].label] !== currParentCountArr[i]) {
                         emptySpace += currLinkWidthArr[i].value;
                     }
                 }
+                // Store valid flow into resFlows to be rendered
                 if (link.data.totalCount[val.label] === currParentCountArr[idx]) {
                     resFlows.push({
                         source: {
@@ -643,6 +653,11 @@ const getEffectiveFeatureContribution = (currNode, that) => {
     };
 }
 
+/**
+ * Traverse the n-ary tree and update the position of each node
+ * @date 2022-06-25
+ * @param {node} node
+ */
 const traverseTree = (node) => {
     if (!node) return;
     // Move tree diagram to let by 500
