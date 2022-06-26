@@ -4,7 +4,7 @@
         <div class="col-start-1 col-end-3 border border-gray-800/100">
             <ObliqueTreePanel />
         </div>
-        <div class="col-start-3 col-end-4 border border-gray-800/100">
+        <div class="col-start-3 col-end-4">
             <div class="grid grid-rows-2 grid-flow-col gap-2 h-screen">
                 <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
                     <ProjectionPanel />
