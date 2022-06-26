@@ -5,7 +5,7 @@ module.exports = (req, res) => {
 
     // proxy target url
     if (req.url.startsWith("/api")) {
-        target = "https://oblique-tree-vercel.vercel.app";
+        target = "https://vercel-flask-oblique-tree.vercel.app";
     }
 
     createProxyMiddleware({
