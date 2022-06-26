@@ -15,3 +15,12 @@ export function getAvailDatasetsList(data) {
         params: data
     })
 };
+
+export function getProjection(data) {
+    return request({
+        url: "/api/get_projection",
+        method: "get",
+        params: data
+    })
+};
+

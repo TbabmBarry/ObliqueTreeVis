@@ -11,17 +11,17 @@
 </template>
 <script setup>
 import { onMounted, inject, ref } from "vue";
-import { getDataset } from "@/api/dataset.js";
+import { getProjection } from "@/api/metrics.js";
 let d3 = inject("d3");
 
 // const rootNode = ref({});
 // const trainingData = ref({});
 
 onMounted(async() => {
-    await getDataset()
-        .then(function (bundle) {
-            const { trainingSet, labelSet } = bundle.data;
-            console.log(trainingSet, labelSet);
+    await getProjection()
+        .then(function (res) {
+            const projections = res.data;
+            console.log(projections);
         }).catch((error) => {
             console.log("ERROR: ", error);
         });
