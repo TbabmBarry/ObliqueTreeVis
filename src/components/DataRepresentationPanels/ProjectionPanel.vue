@@ -11,13 +11,14 @@
 </template>
 <script setup>
 import _ from 'lodash';
-import { onMounted, inject, ref } from "vue";
+import { onMounted, inject, ref, watch } from "vue";
 import { getProjection } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
 const projections = ref([]);
 const rootElement = ref({});
+const selectedPoints = ref([]);
 
 onMounted(async() => {
     projections.value = await getProjection()
@@ -85,7 +86,6 @@ function initProjectionView (projectionData) {
         .attr("fill", d => colorScale(d.label));
 
     circleGroup.call(brush, circle, baseSvg, x, y, projectionData);
-
     baseSvg.property("value", []);
 }
 
@@ -114,10 +114,10 @@ function brush (cell, circle, svg, x, y, projectionData) {
             const [[x0, y0], [x1, y1]] = selection; // selection is a list of two lists of two numbers
             // Label unselected points as "unselected" and update their style
             circle.classed("unselected", d => 
-                    x0 > x(d.position[0]) 
-                    || x1 < x(d.position[0]) 
-                    || y0 > y(d.position[1]) 
-                    || y1 < y(d.position[1]));
+                x0 > x(d.position[0]) 
+                || x1 < x(d.position[0]) 
+                || y0 > y(d.position[1]) 
+                || y1 < y(d.position[1]));
             // Get the selected points
             selected = projectionData.filter(
                 d => x0 <= x(d.position[0]) 
@@ -126,17 +126,24 @@ function brush (cell, circle, svg, x, y, projectionData) {
                 && y1 >= y(d.position[1]));
         }
         
-        svg.property("value", selected).dispatch("input");
+        // svg.property("value", selected).dispatch("input");
+        selectedPoints.value = selected;
+
     }
 
     function brushEnded ({ selection }) {
         if (selection) return;
-        svg.property("value", []).dispatch("input");
+        // svg.property("value", []).dispatch("input");
+        selectedPoints.value = [];
         // Reset the unselected points to their original style
         circle.classed("unselected", false);
     }
 }
 
+watch(() => selectedPoints.value,
+    val => {
+        console.log("selectedPoints changed: ", val);
+    });
 </script>
 <style scoped>
 </style>
