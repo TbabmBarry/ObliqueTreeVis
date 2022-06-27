@@ -42,8 +42,11 @@ function initProjectionView (projectionData) {
             .attr('class', 'projection-view')
             .attr('width', width)
             .attr('height', height);
+    
     baseSvg.append("style")
-      .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
+      .text(`circle.unselected { fill: #000; fill-opacity: 1; r: 1px; }`);
+
+    
     // Create the circle svg group and append it to the base svg
     const circleGroup = baseSvg
             .append('g')
@@ -108,16 +111,17 @@ function brush (cell, circle, svg, x, y, projectionData) {
         let selected = [];
         if (selection) {
             const [[x0, y0], [x1, y1]] = selection; // selection is a list of two lists of two numbers
-            circle.classed("hidden", 
-            d => x0 > x(d.position[0]) || x(d.position[0]) > x1 ||
-                y0 > y(d.position[1]) || y(d.position[1]) > y1);
+            circle.classed("unselected", 
+            d => x0 > x(d.position[0])
+            || x1 < x(d.position[0])
+            || y0 > y(d.position[1])
+            || y1 < y(d.position[1]));
             
             selected = projectionData.filter(
                 d => x0 <= x(d.position[0]) 
-                && x(d.position[0]) <= x1 
+                && x1 >= x(d.position[0]) 
                 && y0 <= y(d.position[1]) 
-                && y(d.position[1]) <= y1
-            );
+                && y1 >= y(d.position[1]));
         }
         svg.property("value", selected).dispatch("input");
     }
@@ -125,7 +129,7 @@ function brush (cell, circle, svg, x, y, projectionData) {
     function brushEnded ({ selection }) {
         if (selection) return;
         svg.property("value", []).dispatch("input");
-        circle.classed("hidden", false);
+        circle.classed("unselected", false);
     }
 }
 
