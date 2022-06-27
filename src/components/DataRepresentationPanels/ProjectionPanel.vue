@@ -58,7 +58,7 @@ function initProjectionView (projectionData) {
     
     circleGroup.append("rect")
         .attr("fill", "none")
-        .attr("stroke", "#aaa")
+        .attr("stroke", "none")
         .attr("x", padding / 2 + 0.5)
         .attr("y", padding / 2 + 0.5)
         .attr("width", width - padding)
