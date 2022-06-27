@@ -16,17 +16,18 @@ import { getProjection } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
+const projections = ref([]);
 const rootElement = ref({});
 
 onMounted(async() => {
-    await getProjection()
+    projections.value = await getProjection()
         .then(function (res) {
-            const projections = res.data;
-            console.log(projections);
-            initProjectionView(projections);
+            // console.log(projections);
+            return res.data;
         }).catch((error) => {
             console.log("ERROR: ", error);
         });
+    initProjectionView(projections.value);
 })
 
 function initProjectionView (projectionData) {
