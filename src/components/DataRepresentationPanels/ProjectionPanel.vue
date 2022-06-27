@@ -1,11 +1,5 @@
 <template>
     <div class="h-full">
-        <!-- <div class="m-2">
-            <div class="col-span-1 titles">
-                Projection View
-            </div>
-        </div>
-        <hr style="height:1px" /> -->
         <div class="w-full h-full overflow-auto" id="projection"></div>
     </div>
 </template>
@@ -125,15 +119,14 @@ function brush (cell, circle, svg, x, y, projectionData) {
                 && y0 <= y(d.position[1]) 
                 && y1 >= y(d.position[1]));
         }
-        
-        // svg.property("value", selected).dispatch("input");
+        // Update the selected points
         selectedPoints.value = selected;
 
     }
 
     function brushEnded ({ selection }) {
         if (selection) return;
-        // svg.property("value", []).dispatch("input");
+        // Reset the selected points
         selectedPoints.value = [];
         // Reset the unselected points to their original style
         circle.classed("unselected", false);
