@@ -17,7 +17,6 @@ import { getProjection } from "@/api/metrics.js";
 let d3 = inject("d3");
 
 const rootElement = ref({});
-// const trainingData = ref({});
 
 onMounted(async() => {
     await getProjection()
@@ -41,10 +40,8 @@ function initProjectionView (projectionData) {
             .attr('width', width)
             .attr('height', height);
     
-    let svgGroup = baseSvg
+    let circleGroup = baseSvg
             .append('g')
-            // .attr("transform",
-            //     `translate(${50},${50})`)
             .attr('class', 'projection-view-group');
     let x = d3.scaleLinear()
             .domain(d3.extent(projectionData, (d) => d.position[0]))
@@ -53,19 +50,22 @@ function initProjectionView (projectionData) {
             .domain(d3.extent(projectionData, (d) => d.position[1]))
             .range([height, 0]);
     
-    svgGroup.selectAll("circle")
-                    .data(projectionData)
-                    .enter()
-                    .append("circle")
-                        .attr("class", "detailed dot")
-                        .attr("cx", (d) => {
-                            return x(d.position[0]);
-                        })
-                        .attr("cy", (d) => {
-                            return y(d.position[1]);
-                        })
-                        .attr("r", 3.5)
-                        .style("fill", d => colorScale(d.label));
+    circleGroup.selectAll("circle")
+        .data(projectionData)
+        .enter()
+        .append("circle")
+            .attr("class", "detailed dot")
+            .attr("cx", (d) => {
+                return x(d.position[0]);
+            })
+            .attr("cy", (d) => {
+                return y(d.position[1]);
+            });
+            
+    const circle = circleGroup.selectAll("circle")
+        .attr("r", 3.5)
+        .attr("fill-opacity", 0.7)
+        .attr("fill", d => colorScale(d.label));
 }
 
 </script>
