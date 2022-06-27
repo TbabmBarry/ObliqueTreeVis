@@ -102,7 +102,7 @@ class Odt {
                             .append('g')
                             // .attr("transform",
                             //     `translate(${50},${50})`)
-                            .attr('class', 'oblique-tree')
+                            .attr('class', 'oblique-tree-group')
 
         parts.treeMap = d3.tree().size([width, height]);
         let nodes = d3.hierarchy(this.data);
