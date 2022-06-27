@@ -33,6 +33,7 @@ onMounted(async() => {
 
 function initProjectionView (projectionData) {
     const { width, height } = _.pick(rootElement.value.getBoundingClientRect(), ['width', 'height']);
+    const padding = 20;
     const colorScale = d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]);
     // Create the base svg binding it to rootElement
     const baseSvg = d3.select(rootElement.value)
@@ -41,7 +42,8 @@ function initProjectionView (projectionData) {
             .attr('class', 'projection-view')
             .attr('width', width)
             .attr('height', height);
-    
+    baseSvg.append("style")
+      .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
     // Create the circle svg group and append it to the base svg
     const circleGroup = baseSvg
             .append('g')
@@ -50,16 +52,22 @@ function initProjectionView (projectionData) {
     // Create x and y value encodings for the circle group
     const x = d3.scaleLinear()
             .domain(d3.extent(projectionData, (d) => d.position[0]))
-            .range([0, width]),
+            .range([padding / 2, width - padding / 2]),
         y = d3.scaleLinear()
             .domain(d3.extent(projectionData, (d) => d.position[1]))
-            .range([height, 0]);
+            .range([height - padding / 2, padding / 2]);
     
+    circleGroup.append("rect")
+        .attr("fill", "none")
+        .attr("stroke", "#aaa")
+        .attr("x", padding / 2 + 0.5)
+        .attr("y", padding / 2 + 0.5)
+        .attr("width", width - padding)
+        .attr("height", height - padding);
+
     circleGroup.selectAll("circle")
         .data(projectionData)
-        .enter()
-        .append("circle")
-            .attr("class", "detailed dot")
+        .join("circle")
             .attr("cx", (d) => {
                 return x(d.position[0]);
             })
@@ -71,6 +79,54 @@ function initProjectionView (projectionData) {
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
         .attr("fill", d => colorScale(d.label));
+
+    circleGroup.call(brush, circle, baseSvg, x, y, projectionData);
+
+    baseSvg.property("value", []);
+}
+
+function brush (cell, circle, svg, x, y, projectionData) {
+    const { width, height } = _.pick(rootElement.value.getBoundingClientRect(), ['width', 'height']);
+    const padding = 20;
+    const brush = d3.brush()
+        .extent([[padding / 2, padding / 2], [width - padding / 2, height - padding / 2]])
+        .on("start", brushStarted)
+        .on("brush", brushed)
+        .on("end", brushEnded);
+    
+    cell.call(brush);
+    let brushCell;
+
+    function brushStarted () {
+        if (brushCell !== this) {
+            d3.select(brushCell).call(brush.move, null);
+            brushCell = this;
+        }
+    }
+
+    function brushed ({selection}) {
+        let selected = [];
+        if (selection) {
+            const [[x0, y0], [x1, y1]] = selection; // selection is a list of two lists of two numbers
+            circle.classed("hidden", 
+            d => x0 > x(d.position[0]) || x(d.position[0]) > x1 ||
+                y0 > y(d.position[1]) || y(d.position[1]) > y1);
+            
+            selected = projectionData.filter(
+                d => x0 <= x(d.position[0]) 
+                && x(d.position[0]) <= x1 
+                && y0 <= y(d.position[1]) 
+                && y(d.position[1]) <= y1
+            );
+        }
+        svg.property("value", selected).dispatch("input");
+    }
+
+    function brushEnded ({ selection }) {
+        if (selection) return;
+        svg.property("value", []).dispatch("input");
+        circle.classed("hidden", false);
+    }
 }
 
 </script>
