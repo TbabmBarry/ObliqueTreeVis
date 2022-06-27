@@ -27,13 +27,14 @@ onMounted(async() => {
         }).catch((error) => {
             console.log("ERROR: ", error);
         });
+    rootElement.value = document.querySelector("#projection");
     initProjectionView(projections.value);
 })
 
 function initProjectionView (projectionData) {
-    rootElement.value = document.querySelector("#projection");
     const { width, height } = _.pick(rootElement.value.getBoundingClientRect(), ['width', 'height']);
     const colorScale = d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]);
+    // Create the base svg binding it to rootElement
     let baseSvg = d3.select(rootElement.value)
             .append('svg')
             .attr('id', 'projection-svg')
@@ -41,6 +42,7 @@ function initProjectionView (projectionData) {
             .attr('width', width)
             .attr('height', height);
     
+    // Create the circle svg group and append it to the base svg
     let circleGroup = baseSvg
             .append('g')
             .attr('class', 'projection-view-group');
