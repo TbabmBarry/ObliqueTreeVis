@@ -9,10 +9,6 @@ import { onMounted, inject, reactive, watch } from "vue";
 import { getProjection } from "@/api/metrics.js";
 
 let d3 = inject("d3");
-
-// const projections = ref([]);
-// const rootElement = ref({});
-// const selectedPoints = ref([]);
 const state = reactive({
     projections: [],
     rootElement: {},
