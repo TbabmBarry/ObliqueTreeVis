@@ -418,7 +418,7 @@ class Odt {
                         .attr("r", 3.5)
                         .style("fill", d => colorScale(_this.trainY[d]));
 
-                // Set the parameters for the histogram
+                // Set the parameters for histograms
                 const histogram1 = d3.bin()
                         .value((d) => d.value)
                         .domain(x[currFeatureIdx[0]].domain())
@@ -427,7 +427,8 @@ class Odt {
                         .value((d) => d.value)
                         .domain(y[currFeatureIdx[1]].domain())
                         .thresholds(y[currFeatureIdx[1]].ticks(50));
-                
+
+                // Get the original data for histograms
                 const values1 = nodeData.data.subTrainingSet.map(idx => ({
                     value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
                     label: _this.trainY[idx],
@@ -436,33 +437,37 @@ class Odt {
                         value: _this.trainX[idx][featureArr[currFeatureIdx[1]]],
                         label: _this.trainY[idx],
                     }));
-                
+                // Get the histogram data according to predefined histogram functions
                 const bins1 = histogram1(values1),
                     bins2 = histogram2(values2);
-                    console.log(values2, bins2);
-                const yHistogram = d3.scaleLinear()
+
+                // Set up y-axis value encodings for histograms
+                const yHistogram1 = d3.scaleLinear()
                         .domain([0, d3.max(bins1, d => d.length)])
-                        .range([nodeRectWidth-scatterPlotPadding, scatterPlotPadding]);
+                        .range([0.5*(nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
+                    yHistogram2 = d3.scaleLinear()
+                        .domain([0, d3.max(bins2, d => d.length)])
+                        .range([0.5*(nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
+                // Draw histograms
                 d3.select(this).selectAll("rect.histogram.x-histogram")
                     .data(bins1)
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("x", 1)
-                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram(d.length)-nodeRectWidth+0.5*nodeRectRatio})`)
-                    .attr("width", d => x[currFeatureIdx[0]](d.x1) - x[currFeatureIdx[0]](d.x0) - 1)
-                    .attr("height", d => nodeRectWidth-scatterPlotPadding-yHistogram(d.length))
+                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*nodeRectWidth})`)
+                    .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
+                    .attr("height", d => 0.5*(nodeRectWidth-scatterPlotPadding)-yHistogram1(d.length))
                     .attr("fill", "#69b3a2");
 
                 d3.select(this).selectAll("rect.histogram.y-histogram")
-                        .data(bins2)
-                        .join("rect")
-                        .attr("class", "detailed histogram")
-                        .attr("y", 1)
-                        .attr("transform", d => `translate(${0.5*(nodeRectWidth + nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
-                        .attr("width", d => yHistogram(d.length))
-                        // .attr("width", nodeRectWidth-scatterPlotPadding)
-                        .attr("height", d => x[currFeatureIdx[1]](d.x1) - x[currFeatureIdx[1]](d.x0) - 1)
-                        .attr("fill", "#69b3a2");
+                    .data(bins2)
+                    .join("rect")
+                    .attr("class", "detailed histogram")
+                    .attr("y", 1)
+                    .attr("transform", d => `translate(${0.5*(nodeRectWidth+nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
+                    .attr("width", d => yHistogram2(d.length))
+                    .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
+                    .attr("fill", "#69b3a2");
             }
         })
     }
