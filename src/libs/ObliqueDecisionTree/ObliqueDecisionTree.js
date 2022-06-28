@@ -417,6 +417,41 @@ class Odt {
                         })
                         .attr("r", 3.5)
                         .style("fill", d => colorScale(_this.trainY[d]));
+
+                // Set the parameters for the histogram
+                const histogram1 = d3.bin()
+                        .value((d) => d.value)
+                        .domain(x[currFeatureIdx[0]].domain())
+                        .thresholds(x[currFeatureIdx[0]].ticks(50)),
+                    histogram2 = d3.bin()
+                        .value((d) => d.value)
+                        .domain(y[currFeatureIdx[1]].domain())
+                        .thresholds(y[currFeatureIdx[1]].ticks(50));
+                
+                const values1 = nodeData.data.subTrainingSet.map(idx => ({
+                    value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
+                    label: _this.trainY[idx],
+                })),
+                    values2 = nodeData.data.subTrainingSet.map(idx => ({
+                        value: _this.trainX[idx][featureArr[currFeatureIdx[1]]],
+                        label: _this.trainY[idx],
+                    }));
+                
+                const bins1 = histogram1(values1),
+                    bins2 = histogram2(values2);
+                    console.log(values2, bins2);
+                const yHistogram = d3.scaleLinear()
+                        .domain([0, d3.max(bins1, d => d.length)])
+                        .range([nodeRectWidth-scatterPlotPadding, scatterPlotPadding]);
+                // d3.select(this).selectAll("rect")
+                //         .data(bins1)
+                //         .join("rect")
+                //         .attr("class", "detailed histogram")
+                //         .attr("x", 1)
+                //         .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram(d.length)})`)
+                //         .attr("width", d => x[currFeatureIdx[0]](d.x1) - x[currFeatureIdx[0]](d.x0) - 1)
+                //         .attr("height", d => nodeRectWidth-scatterPlotPadding-yHistogram(d.length))
+                //         .attr("fill", "#69b3a2");
             }
         })
     }
