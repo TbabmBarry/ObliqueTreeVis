@@ -5,33 +5,42 @@
 </template>
 <script setup>
 import _ from 'lodash';
-import { onMounted, inject, ref, watch } from "vue";
+import { onMounted, inject, reactive, watch } from "vue";
 import { getProjection } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
-const projections = ref([]);
-const rootElement = ref({});
-const selectedPoints = ref([]);
+// const projections = ref([]);
+// const rootElement = ref({});
+// const selectedPoints = ref([]);
+const state = reactive({
+    projections: [],
+    rootElement: {},
+    selectedPoints: [],
+    width: 0,
+    height: 0,
+    padding: 20,
+    colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"])
+})
 
 onMounted(async() => {
-    projections.value = await getProjection()
+    state.projections = await getProjection()
         .then(function (res) {
             // console.log(projections);
             return res.data;
         }).catch((error) => {
             console.log("ERROR: ", error);
         });
-    rootElement.value = document.querySelector("#projection");
-    initProjectionView(projections.value);
+    state.rootElement = document.querySelector("#projection");
+    initProjectionView();
 })
 
-function initProjectionView (projectionData) {
-    const { width, height } = _.pick(rootElement.value.getBoundingClientRect(), ['width', 'height']);
-    const padding = 20;
-    const colorScale = d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]);
+function initProjectionView () {
+    const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
+    state.width = width;
+    state.height = height;
     // Create the base svg binding it to rootElement
-    const baseSvg = d3.select(rootElement.value)
+    const baseSvg = d3.select(state.rootElement)
             .append('svg')
             .attr('id', 'projection-svg')
             .attr('class', 'projection-view')
@@ -50,22 +59,22 @@ function initProjectionView (projectionData) {
 
     // Create x and y value encodings for the circle group
     const x = d3.scaleLinear()
-            .domain(d3.extent(projectionData, (d) => d.position[0]))
-            .range([padding / 2, width - padding / 2]),
+            .domain(d3.extent(state.projections, (d) => d.position[0]))
+            .range([state.padding / 2, state.width - state.padding / 2]),
         y = d3.scaleLinear()
-            .domain(d3.extent(projectionData, (d) => d.position[1]))
-            .range([height - padding / 2, padding / 2]);
+            .domain(d3.extent(state.projections, (d) => d.position[1]))
+            .range([state.height - state.padding / 2, state.padding / 2]);
     
     circleGroup.append("rect")
         .attr("fill", "none")
         .attr("stroke", "none")
-        .attr("x", padding / 2 + 0.5)
-        .attr("y", padding / 2 + 0.5)
-        .attr("width", width - padding)
-        .attr("height", height - padding);
+        .attr("x", state.padding / 2 + 0.5)
+        .attr("y", state.padding / 2 + 0.5)
+        .attr("width", state.width - state.padding)
+        .attr("height", state.height - state.padding);
 
     circleGroup.selectAll("circle")
-        .data(projectionData)
+        .data(state.projections)
         .join("circle")
             .attr("cx", (d) => {
                 return x(d.position[0]);
@@ -77,17 +86,15 @@ function initProjectionView (projectionData) {
     const circle = circleGroup.selectAll("circle")
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
-        .attr("fill", d => colorScale(d.label));
+        .attr("fill", d => state.colorScale(d.label));
 
-    circleGroup.call(brush, circle, baseSvg, x, y, projectionData);
+    circleGroup.call(brush, circle, baseSvg, x, y);
     baseSvg.property("value", []);
 }
 
-function brush (cell, circle, svg, x, y, projectionData) {
-    const { width, height } = _.pick(rootElement.value.getBoundingClientRect(), ['width', 'height']);
-    const padding = 20;
+function brush (cell, circle, svg, x, y) {
     const brush = d3.brush()
-        .extent([[padding / 2, padding / 2], [width - padding / 2, height - padding / 2]])
+        .extent([[state.padding / 2, state.padding / 2], [state.width - state.padding / 2, state.height - state.padding / 2]])
         .on("start", brushStarted)
         .on("brush", brushed)
         .on("end", brushEnded);
@@ -113,27 +120,27 @@ function brush (cell, circle, svg, x, y, projectionData) {
                 || y0 > y(d.position[1]) 
                 || y1 < y(d.position[1]));
             // Get the selected points
-            selected = projectionData.filter(
+            selected = state.projections.filter(
                 d => x0 <= x(d.position[0]) 
                 && x1 >= x(d.position[0]) 
                 && y0 <= y(d.position[1]) 
                 && y1 >= y(d.position[1]));
         }
         // Update the selected points
-        selectedPoints.value = selected;
+        state.selectedPoints = selected;
 
     }
 
     function brushEnded ({ selection }) {
         if (selection) return;
         // Reset the selected points
-        selectedPoints.value = [];
+        state.selectedPoints = [];
         // Reset the unselected points to their original style
         circle.classed("unselected", false);
     }
 }
 
-watch(() => selectedPoints.value,
+watch(() => state.selectedPoints,
     val => {
         console.log("selectedPoints changed: ", val);
     });
