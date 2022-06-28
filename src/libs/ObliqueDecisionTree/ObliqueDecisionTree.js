@@ -444,22 +444,22 @@ class Odt {
                         .domain([0, d3.max(bins1, d => d.length)])
                         .range([nodeRectWidth-scatterPlotPadding, scatterPlotPadding]);
                 d3.select(this).selectAll("rect.histogram.x-histogram")
-                        .data(bins1)
-                        .join("rect")
-                        .attr("class", "detailed histogram")
-                        .attr("x", 1)
-                        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram(d.length)-(nodeRectWidth-nodeRectRatio)})`)
-                        .attr("width", d => x[currFeatureIdx[0]](d.x1) - x[currFeatureIdx[0]](d.x0) - 1)
-                        .attr("height", d => nodeRectWidth-scatterPlotPadding-yHistogram(d.length))
-                        .attr("fill", "#69b3a2");
+                    .data(bins1)
+                    .join("rect")
+                    .attr("class", "detailed histogram")
+                    .attr("x", 1)
+                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram(d.length)-nodeRectWidth+0.5*nodeRectRatio})`)
+                    .attr("width", d => x[currFeatureIdx[0]](d.x1) - x[currFeatureIdx[0]](d.x0) - 1)
+                    .attr("height", d => nodeRectWidth-scatterPlotPadding-yHistogram(d.length))
+                    .attr("fill", "#69b3a2");
 
                 d3.select(this).selectAll("rect.histogram.y-histogram")
                         .data(bins2)
                         .join("rect")
                         .attr("class", "detailed histogram")
                         .attr("y", 1)
-                        .attr("transform", d => `translate(${yHistogram(d.length)-0.5*(nodeRectWidth-nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
-                        .attr("width", d => nodeRectWidth-scatterPlotPadding-yHistogram(d.length))
+                        .attr("transform", d => `translate(${0.5*(nodeRectWidth + nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
+                        .attr("width", d => yHistogram(d.length))
                         // .attr("width", nodeRectWidth-scatterPlotPadding)
                         .attr("height", d => x[currFeatureIdx[1]](d.x1) - x[currFeatureIdx[1]](d.x0) - 1)
                         .attr("fill", "#69b3a2");
