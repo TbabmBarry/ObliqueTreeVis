@@ -34,6 +34,11 @@ onMounted(async() => {
     initProjectionView();
 })
 
+/**
+ * Draw the projection view
+ *
+ * @returns {any}
+ */
 function initProjectionView () {
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
     state.width = width;
@@ -87,11 +92,19 @@ function initProjectionView () {
         .attr("fill-opacity", 0.7)
         .attr("fill", d => state.colorScale(d.label));
 
-    circleGroup.call(brush, circle, baseSvg, x, y);
+    circleGroup.call(brush, circle, x, y);
     baseSvg.property("value", []);
 }
 
-function brush (cell, circle, svg, x, y) {
+/**
+ * Brush function
+ * @param {any} cell
+ * @param {any} circle
+ * @param {any} x
+ * @param {any} y
+ * @returns {any}
+ */
+function brush (cell, circle, x, y) {
     const brush = d3.brush()
         .extent([[state.padding / 2, state.padding / 2], [state.width - state.padding / 2, state.height - state.padding / 2]])
         .on("start", brushStarted)

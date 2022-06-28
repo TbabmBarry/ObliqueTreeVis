@@ -2,12 +2,6 @@ import * as d3 from 'd3';
 import { select } from 'd3';
 import _, { random } from 'lodash';
 
-// const ID = 'id';
-// const NAME = 'name';
-// const VALUE = 'value';
-// const CHILDREN = 'odtChildren';
-// const STATE_VERSION = 1;
-
 class Odt {
     static initClass() {
         this.diagramIndex = 0;
