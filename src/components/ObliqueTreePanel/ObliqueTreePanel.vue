@@ -4,12 +4,19 @@
     </div>
 </template>
 <script setup>
-import { onMounted, inject, ref } from "vue";
+import { onMounted, inject, ref, watch } from "vue";
 import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
 import BivariateDecisionTree from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 import { getDataset } from "@/api/metrics.js";
 
 let d3 = inject("d3");
+
+const props = defineProps({
+    selectedPoints: {
+        type: Array,
+        default: () => []
+    },
+});
 
 const rootNode = ref({});
 const trainingData = ref({});
@@ -48,6 +55,10 @@ onMounted(async () => {
     odt.setDataAndOpts(opts, rootNode.value, trainingData.value);
     odt.draw();
 })
+
+watch(() => props.selectedPoints, (newValue, oldValue) => {
+    console.log("oblique tree got selectedPoints:", newValue, oldValue);
+});
 </script>
 <style scoped>
 </style>

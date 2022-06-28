@@ -9,6 +9,9 @@ import { onMounted, inject, reactive, watch } from "vue";
 import { getProjection } from "@/api/metrics.js";
 
 let d3 = inject("d3");
+
+const emit = defineEmits(["emitSelectedPointsChanged"]);
+
 const state = reactive({
     projections: [],
     rootElement: {},
@@ -138,8 +141,13 @@ function brush (cell, circle, svg, x, y) {
 
 watch(() => state.selectedPoints,
     val => {
-        console.log("selectedPoints changed: ", val);
-    });
+        emit("emitSelectedPointsChanged", state.selectedPoints);
+    },
+    { immediate: false }
+);
+
+
+
 </script>
 <style scoped>
 </style>
