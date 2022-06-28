@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { select } from 'd3';
 import _, { random } from 'lodash';
+import textures from 'textures';
 
 class Odt {
     static initClass() {
@@ -54,6 +55,10 @@ class Odt {
                 nodeRectStrokeWidth: 3,
                 colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]),
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
+                texture: textures.paths()
+                .d("crosses")
+                .lighter()
+                .thicker(),
                 maxLines: 5,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
@@ -367,7 +372,7 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale, featureArr } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale, featureArr, texture } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
@@ -422,11 +427,11 @@ class Odt {
                 const histogram1 = d3.bin()
                         .value((d) => d.value)
                         .domain(x[currFeatureIdx[0]].domain())
-                        .thresholds(x[currFeatureIdx[0]].ticks(50)),
+                        .thresholds(x[currFeatureIdx[0]].ticks(20)),
                     histogram2 = d3.bin()
                         .value((d) => d.value)
                         .domain(y[currFeatureIdx[1]].domain())
-                        .thresholds(y[currFeatureIdx[1]].ticks(50));
+                        .thresholds(y[currFeatureIdx[1]].ticks(20));
 
                 // Get the original data for histograms
                 const values1 = nodeData.data.subTrainingSet.map(idx => ({
@@ -449,25 +454,28 @@ class Odt {
                         .domain([0, d3.max(bins2, d => d.length)])
                         .range([0.5*(nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
                 // Draw histograms
+
+                d3.select(this).call(texture);
+
                 d3.select(this).selectAll("rect.histogram.x-histogram")
                     .data(bins1)
                     .join("rect")
                     .attr("class", "detailed histogram")
-                    .attr("x", 1)
+                    .attr("x", 2)
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*nodeRectWidth})`)
                     .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
                     .attr("height", d => 0.5*(nodeRectWidth-scatterPlotPadding)-yHistogram1(d.length))
-                    .attr("fill", "#69b3a2");
+                    .attr("fill", texture.url());
 
                 d3.select(this).selectAll("rect.histogram.y-histogram")
                     .data(bins2)
                     .join("rect")
                     .attr("class", "detailed histogram")
-                    .attr("y", 1)
+                    .attr("y", 2)
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth+nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
-                    .attr("fill", "#69b3a2");
+                    .attr("fill", texture.url());
             }
         })
     }

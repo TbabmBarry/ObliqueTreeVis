@@ -16,6 +16,7 @@
     "http-proxy-middleware": "^2.0.6",
     "lodash": "^4.17.21",
     "qs": "^6.10.5",
+    "textures": "^1.2.3",
     "validate-commit-message": "^3.2.0",
     "vue": "^3.2.33"
   },
