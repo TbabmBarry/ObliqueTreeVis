@@ -40,14 +40,10 @@ class Odt {
             registeredStateListeners: [],
             computed: {},
             constants: {
-                innerLabelPadding: 1,
                 nameFontSize: 10,
                 nameFontFamily: 'sans-serif',
                 minZoom: 0.1,
                 maxZoom: 50,
-                stateResizeTolerance: 2,
-                pxPerChar: 7,
-                nodeTextDx: 10,
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
                 detailedViewNodeRectWidth: 360,
@@ -55,12 +51,9 @@ class Odt {
                 scatterPlotPadding: 20,
                 nodeRectStrokeWidth: 3,
                 colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]),
+                featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
-                texture: textures.paths()
-                .d("crosses")
-                .lighter()
-                .thicker(),
-                maxLines: 5,
+                texture: textures.paths().d("crosses").lighter().thicker(),
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
                 treeMargins: { top: 5, left: 10, bottom: 5, right: 10 },
@@ -100,8 +93,6 @@ class Odt {
         // Create a container to group other tree diagram related svg elements
         parts.svgGroup = parts.baseSvg
                             .append('g')
-                            // .attr("transform",
-                            //     `translate(${50},${50})`)
                             .attr('class', 'oblique-tree-group')
 
         parts.treeMap = d3.tree().size([width, height]);
@@ -169,7 +160,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, colorScale, pathSummaryHeight } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -184,7 +175,7 @@ class Odt {
                     _this.renderSummaryView(parentNodeGroup);
                     select(this).select(".node-rect")
                     .transition()
-                    .duration(1500)
+                    .duration(transitionDuration)
                         .attr("x", - 0.5 * nodeRectWidth)
                         .attr("y", 0)
                         .attr("width", nodeRectWidth)
@@ -192,7 +183,7 @@ class Odt {
                 } else {
                     select(this).select(".node-rect")
                     .transition()
-                    .duration(1500)
+                    .duration(transitionDuration)
                         .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("width", detailedViewNodeRectWidth)
@@ -249,7 +240,7 @@ class Odt {
      * @param {node} node
      */
     renderSummaryView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale, featureColorScale } } = this;
         let _this = this;
         // TODO: draw class distribution, histograms
         // Draw class distribution
@@ -314,7 +305,7 @@ class Odt {
                             .attr("y", d => yCoefficient(d.weight)+0.2*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", xCoefficient.bandwidth())
                             .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
-                            .attr("fill", "#69b3a2");
+                            .attr("fill", d => featureColorScale(d.name));
                 }
                 // Draw split histogram
                 let xRight = d3.scaleLinear()
