@@ -520,7 +520,7 @@ class Odt {
         let _this = this;
         // Add a rectangle under each leaf node
 
-        // TODO: draw boxplot/violinplot/histogram for feature contribution
+        // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
@@ -754,7 +754,7 @@ const traverseTree = (node) => {
 }
 
 /**
- * Description
+ * Return normalized array of values
  * @date 2022-06-29
  * @param {any} count
  * @returns {any}
