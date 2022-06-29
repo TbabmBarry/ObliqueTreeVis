@@ -179,6 +179,7 @@ class Odt {
                 if (parentNodeGroup.node().querySelector(".detailed") !== null || 
                     (parentNodeGroup.node().querySelector(".detailed") === null &&
                         parentNodeGroup.node().querySelector(".summary") === null)) {
+                    // Fisrtly, remove the detailed view and render the summary view
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
                     select(this).select(".node-rect")
@@ -187,17 +188,20 @@ class Odt {
                         .attr("x", - 0.5 * nodeRectWidth)
                         .attr("y", 0)
                         .attr("width", nodeRectWidth)
-                        .attr("height", nodeRectWidth);
+                        .attr("height", nodeRectWidth)
                 } else {
-                    parentNodeGroup.selectAll(".summary").remove();
-                    _this.renderDetailedView(parentNodeGroup);
                     select(this).select(".node-rect")
                     .transition()
                     .duration(3000)
                         .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("width", detailedViewNodeRectWidth)
-                        .attr("height", detailedViewNodeRectWidth);
+                        .attr("height", detailedViewNodeRectWidth)
+                    .on("end", () => {
+                        // Remove the summary view and render the detailed view after the transition
+                        parentNodeGroup.selectAll(".summary").remove();
+                        _this.renderDetailedView(parentNodeGroup);
+                    });
                 }
             }
         }
