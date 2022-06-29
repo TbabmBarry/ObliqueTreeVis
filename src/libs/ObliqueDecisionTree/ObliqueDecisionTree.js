@@ -181,16 +181,30 @@ class Odt {
                         parentNodeGroup.node().querySelector(".summary") === null)) {
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
+                    select(this).select(".node-rect")
+                    .transition()
+                    .duration(1500)
+                        .attr("x", - 0.5 * nodeRectWidth)
+                        .attr("y", 0)
+                        .attr("width", nodeRectWidth)
+                        .attr("height", nodeRectWidth);
                 } else {
                     parentNodeGroup.selectAll(".summary").remove();
                     _this.renderDetailedView(parentNodeGroup);
+                    select(this).select(".node-rect")
+                    .transition()
+                    .duration(3000)
+                        .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
+                        .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
+                        .attr("width", detailedViewNodeRectWidth)
+                        .attr("height", detailedViewNodeRectWidth);
                 }
             }
         }
 
         // Mouse over event listener to highlight hover effects
         function mouseOver(event, node) {
-            if (event.shiftKey) {
+            if (event.shiftKey && node.data.type === "decision") {
                 select(this).select(".node-rect")
                 .transition()
                 .duration(3000)
@@ -198,6 +212,16 @@ class Odt {
                     .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                     .attr("width", detailedViewNodeRectWidth)
                     .attr("height", detailedViewNodeRectWidth);
+                let parentNodeGroup = select(this);
+                if (parentNodeGroup.node().querySelector(".detailed") !== null || 
+                    (parentNodeGroup.node().querySelector(".detailed") === null &&
+                        parentNodeGroup.node().querySelector(".summary") === null)) {
+                    parentNodeGroup.selectAll(".detailed").remove();
+                    _this.renderSummaryView(parentNodeGroup);
+                } else {
+                    parentNodeGroup.selectAll(".summary").remove();
+                    _this.renderDetailedView(parentNodeGroup);
+                }
             }
         }
 
@@ -210,6 +234,18 @@ class Odt {
                     .attr("y", 0)
                     .attr("width", nodeRectWidth)
                     .attr("height", nodeRectWidth);
+            if (node.data.type === "decision") {
+                let parentNodeGroup = select(this);
+                if (parentNodeGroup.node().querySelector(".detailed") !== null || 
+                    (parentNodeGroup.node().querySelector(".detailed") === null &&
+                        parentNodeGroup.node().querySelector(".summary") === null)) {
+                    parentNodeGroup.selectAll(".detailed").remove();
+                    _this.renderSummaryView(parentNodeGroup);
+                } else {
+                    parentNodeGroup.selectAll(".summary").remove();
+                    _this.renderDetailedView(parentNodeGroup);
+                }
+            }
         }
 
         // Create svg group binding decision and leaf nodes
@@ -221,8 +257,8 @@ class Odt {
                 (d.children ? " node--internal" : " node--leaf"); 
             })
             .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
-            .on("mouseover", mouseOver)
-            .on("mouseout", mouseOut)
+            // .on("mouseover", mouseOver)
+            // .on("mouseout", mouseOut);
             .on("click", clicked);
         
         // Add a rectangle to each node
@@ -236,7 +272,7 @@ class Odt {
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
-            .style("stroke-width", nodeRectStrokeWidth)
+            .style("stroke-width", nodeRectStrokeWidth);
 
         
         this.renderPathSummaryView(node);
