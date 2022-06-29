@@ -306,6 +306,14 @@ class Odt {
                             .attr("width", xCoefficient.bandwidth())
                             .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
                             .attr("fill", d => featureColorScale(d.name));
+
+                    // Append x-axis for coefficients
+                    d3.select(this).append("g")
+                        .attr("class", "summary coefficients x-axis")
+                        .attr("transform", `translate(${-0.25*(nodeRectWidth-2*nodeRectRatio)}, ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
+                        .call(d3.axisBottom(xCoefficient))
+                        .selectAll("text")
+                            
                 }
                 // Draw split histogram
                 let xRight = d3.scaleLinear()
