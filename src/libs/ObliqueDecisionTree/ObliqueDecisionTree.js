@@ -192,7 +192,7 @@ class Odt {
                 } else {
                     select(this).select(".node-rect")
                     .transition()
-                    .duration(3000)
+                    .duration(1500)
                         .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
                         .attr("width", detailedViewNodeRectWidth)
