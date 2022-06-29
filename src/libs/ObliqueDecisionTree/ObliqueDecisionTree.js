@@ -249,8 +249,8 @@ class Odt {
      * @param {node} node
      */
     renderSummaryView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale } } = this;
-        
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale } } = this;
+        let _this = this;
         // TODO: draw class distribution, histograms
         // Draw class distribution
         node.each(function(nodeData, index) {
@@ -288,7 +288,35 @@ class Odt {
                 .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
                 .style("fill", (d) => colorScale(d.label));
 
-            if (nodeData.data.type == "decision") {
+            if (nodeData.data.type === "decision") {
+                if (nodeData.data.featureIdx.length === 2) {
+                    // Draw coefficient weights of features in the oblique split
+                    const {featureIdx, split }  = nodeData.data;
+                    const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
+                    const coefficientWeights = normalizeArr(featureIdx.map(idx => split[idx]));
+                    const coefficientsData = coefficientWeights.map((val, idx) => ({
+                        name: coefficientsNames[idx],
+                        weight: val,
+                    }));
+                    const xCoefficient = d3.scaleBand()
+                        .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
+                        .domain(coefficientsNames)
+                        .padding(0.2),
+                    yCoefficient = d3.scaleLinear()
+                        .range([0.3*(nodeRectWidth-2*nodeRectRatio), 0])
+                        .domain([0, 1]);
+                    
+                    d3.select(this).selectAll("rect.coefficients")
+                        .data(coefficientsData)
+                        .join("rect")
+                            .attr("class", "summary coefficients")
+                            .attr("x", d => xCoefficient(d.name)-0.25*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("y", d => yCoefficient(d.weight)+0.2*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("width", xCoefficient.bandwidth())
+                            .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
+                            .attr("fill", "#69b3a2");
+                }
+                // Draw split histogram
                 let xRight = d3.scaleLinear()
                     .domain([0, _.sum(nodeData.data.totalCount)])
                     .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
@@ -724,6 +752,18 @@ const traverseTree = (node) => {
     if (node.children && node.children.length > 0) {
         node.children.map(child => traverseTree(child));
     }
+}
+
+/**
+ * Description
+ * @date 2022-06-29
+ * @param {any} count
+ * @returns {any}
+ */
+const normalizeArr = (count) => {
+    const absCount = count.map(element => Math.abs(element));
+    const n = _.sum(absCount);
+    return absCount.map(element => element / n);
 }
 
 Odt.initClass();
