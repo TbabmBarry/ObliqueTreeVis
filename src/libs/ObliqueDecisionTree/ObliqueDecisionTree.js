@@ -50,6 +50,7 @@ class Odt {
                 nodeTextDx: 10,
                 nodeRectRatio: 20,
                 nodeRectWidth: 240,
+                detailedViewNodeRectWidth: 360,
                 pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
                 nodeRectStrokeWidth: 3,
@@ -168,7 +169,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, colorScale, pathSummaryHeight } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -191,14 +192,24 @@ class Odt {
         function mouseOver(event, node) {
             if (event.shiftKey) {
                 select(this).select(".node-rect")
-                .attr("transform", `scale(${1.7})`);
+                .transition()
+                .duration(3000)
+                    .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
+                    .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
+                    .attr("width", detailedViewNodeRectWidth)
+                    .attr("height", detailedViewNodeRectWidth);
             }
         }
 
         // Mouse out event listener to recover node style
         function mouseOut(event, node) {
             select(this).select(".node-rect")
-                .attr("transform", `scale(${1})`);
+                .transition()
+                .duration(1500)
+                    .attr("x", - 0.5 * nodeRectWidth)
+                    .attr("y", 0)
+                    .attr("width", nodeRectWidth)
+                    .attr("height", nodeRectWidth);
         }
 
         // Create svg group binding decision and leaf nodes
@@ -210,8 +221,8 @@ class Odt {
                 (d.children ? " node--internal" : " node--leaf"); 
             })
             .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
-            // .on("mouseover", mouseOver)
-            // .on("mouseout", mouseOut)
+            .on("mouseover", mouseOver)
+            .on("mouseout", mouseOut)
             .on("click", clicked);
         
         // Add a rectangle to each node
@@ -372,7 +383,7 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, scatterPlotPadding, colorScale, featureArr, texture } } = this;
+        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, texture } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
@@ -449,10 +460,10 @@ class Odt {
                 // Set up y-axis value encodings for histograms
                 const yHistogram1 = d3.scaleLinear()
                         .domain([0, d3.max(bins1, d => d.length)])
-                        .range([0.5*(nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
+                        .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
                     yHistogram2 = d3.scaleLinear()
                         .domain([0, d3.max(bins2, d => d.length)])
-                        .range([0.5*(nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
+                        .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
                 // Draw histograms
 
                 d3.select(this).call(texture);
@@ -462,9 +473,9 @@ class Odt {
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("x", 2)
-                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*nodeRectWidth})`)
+                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
                     .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
-                    .attr("height", d => 0.5*(nodeRectWidth-scatterPlotPadding)-yHistogram1(d.length))
+                    .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
                     .attr("fill", texture.url());
 
                 d3.select(this).selectAll("rect.histogram.y-histogram")
@@ -472,7 +483,7 @@ class Odt {
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("y", 2)
-                    .attr("transform", d => `translate(${0.5*(nodeRectWidth+nodeRectRatio)}, ${x[currFeatureIdx[1]](d.x0)})`)
+                    .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
                     .attr("fill", texture.url());
