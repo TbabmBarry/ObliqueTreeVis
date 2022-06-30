@@ -57,7 +57,6 @@ const state = reactive({
 });
 
 const selectedPointsChanged = (selectedPoints) => {
-    console.log("Home got emit selectedPointsChanged: ", selectedPoints);
     state.selectedPoints = selectedPoints;
 }
 const { selectedPoints } = toRefs(state);
