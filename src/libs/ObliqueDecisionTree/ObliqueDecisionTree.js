@@ -464,48 +464,82 @@ class Odt {
                         .thresholds(y[currFeatureIdx[1]].ticks(20));
 
                 // Get the original data for histograms
-                const values1 = nodeData.data.subTrainingSet.map(idx => ({
+                const values1Left = nodeData.data.leftSubTrainingSet.map(idx => ({
                     value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
                     label: _this.trainY[idx],
                 })),
-                    values2 = nodeData.data.subTrainingSet.map(idx => ({
+                    values1Right = nodeData.data.rightSubTrainingSet.map(idx => ({
+                    value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
+                    label: _this.trainY[idx],
+                })),
+                    values2Left = nodeData.data.leftSubTrainingSet.map(idx => ({
+                        value: _this.trainX[idx][featureArr[currFeatureIdx[1]]],
+                        label: _this.trainY[idx],
+                    })),
+                    values2Right = nodeData.data.rightSubTrainingSet.map(idx => ({
                         value: _this.trainX[idx][featureArr[currFeatureIdx[1]]],
                         label: _this.trainY[idx],
                     }));
                 // Get the histogram data according to predefined histogram functions
-                const bins1 = histogram1(values1),
-                    bins2 = histogram2(values2);
+                const bins1Left = histogram1(values1Left),
+                    bins1Right = histogram1(values1Right),
+                    bins2Left = histogram2(values2Left),
+                    bins2Right = histogram2(values2Right);
 
                 // Set up y-axis value encodings for histograms
                 const yHistogram1 = d3.scaleLinear()
-                        .domain([0, d3.max(bins1, d => d.length)])
+                        .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
                         .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
                     yHistogram2 = d3.scaleLinear()
-                        .domain([0, d3.max(bins2, d => d.length)])
+                        .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
                         .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
                 // Draw histograms
 
                 d3.select(this).call(texture);
 
-                d3.select(this).selectAll("rect.histogram.x-histogram")
-                    .data(bins1)
+                d3.select(this).selectAll("rect.histogram.x-histogram.left")
+                    .data(bins1Left)
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("x", 2)
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
                     .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-                    .attr("fill", "#69b3a2");
+                    .attr("fill", "#ffd700")
+                    .style("opacity", 0.6);
+                
+                d3.select(this).selectAll("rect.histogram.x-histogram.right")
+                    .data(bins1Right)
+                    .join("rect")
+                    .attr("class", "detailed histogram")
+                    .attr("x", 2)
+                    .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
+                    .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
+                    .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
+                    .attr("fill", "#0000ff")
+                    .style("opacity", 0.6);
 
-                d3.select(this).selectAll("rect.histogram.y-histogram")
-                    .data(bins2)
+                d3.select(this).selectAll("rect.histogram.y-histogram.left")
+                    .data(bins2Left)
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("y", 2)
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
-                    .attr("fill", "#69b3a2");
+                    .attr("fill", "#ffd700")
+                    .style("opacity", 0.6);
+
+                d3.select(this).selectAll("rect.histogram.y-histogram.right")
+                    .data(bins2Right)
+                    .join("rect")
+                    .attr("class", "detailed histogram")
+                    .attr("y", 2)
+                    .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
+                    .attr("width", d => yHistogram2(d.length))
+                    .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
+                    .attr("fill", "#0000ff")
+                    .style("opacity", 0.6);
             }
         })
     }
