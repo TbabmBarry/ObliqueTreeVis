@@ -80,7 +80,7 @@ class Odt {
     }
 
     draw() {
-        const { data, opts, computed, parts, height, width, constants: { nodeRectRatio } } = this;
+        const { data, parts, height, width } = this;
         
         // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
@@ -96,7 +96,7 @@ class Odt {
                             .attr('class', 'oblique-tree-group')
 
         parts.treeMap = d3.tree().size([width, height]);
-        let nodes = d3.hierarchy(this.data);
+        let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         // Modify element for each node recursively
         traverseTree(nodes);
@@ -114,7 +114,7 @@ class Odt {
      * @date 2022-06-14
      * @param {any} parm1
      */
-    update({ transitionOrigin = null, initialization = false, showTransition = false } = {}) {
+    update() {
 
     }
 
@@ -127,28 +127,28 @@ class Odt {
      * @param {links} links
      */
     renderLinks(links) {
-        const { parts, height, width, constants: { colorScale } } = this;
+        const { parts, constants: { colorScale } } = this;
         const flowLinks = this.generateFlows(links);
         parts.svgGroup.selectAll(".link")
-                .data(flowLinks)
-                .enter().append("path")
-                .attr("class", "link")
-                .attr("d", (d) => {
-                    return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                        {
-                            x0: d.source.x - 0.5 * d.source.width,
-                            x1: d.source.x + 0.5 * d.source.width,
-                            y: d.source.y,
-                        },
-                        {
-                            x0: d.target.x - 0.5 * d.target.width,
-                            x1: d.target.x + 0.5 * d.target.width,
-                            y: d.target.y,
-                        }
-                    ]);
-                })
-                .style("fill", (d) => colorScale(d.class))
-                .style("stroke", "none");
+            .data(flowLinks)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", (d) => {
+                return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                    {
+                        x0: d.source.x - 0.5 * d.source.width,
+                        x1: d.source.x + 0.5 * d.source.width,
+                        y: d.source.y,
+                    },
+                    {
+                        x0: d.target.x - 0.5 * d.target.width,
+                        x1: d.target.x + 0.5 * d.target.width,
+                        y: d.target.y,
+                    }
+                ]);
+            })
+            .style("fill", (d) => colorScale(d.class))
+            .style("stroke", "none");
 
     }
 
@@ -160,7 +160,8 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
+        const { parts, 
+            constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -224,8 +225,8 @@ class Odt {
         
         this.renderPathSummaryView(node);
         this.renderSummaryView(node);
-        // this.renderDetailedView(node);
 
+        // Add a text tip to help user to switch between summary and detailed views
         node.append("text")
             .filter((d) => d.data.name === "root")
             .attr("x", -2.5*nodeRectWidth)
@@ -240,7 +241,7 @@ class Odt {
      * @param {node} node
      */
     renderSummaryView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale, featureColorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale, featureColorScale } } = this;
         let _this = this;
         // TODO: draw class distribution, histograms
         // Draw class distribution
@@ -402,8 +403,7 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { parts, width, height, 
-            constants: { nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
@@ -549,10 +549,9 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale, pathSummaryHeight } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = this;
         let _this = this;
-        // Add a rectangle under each leaf node
-
+        
         // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
