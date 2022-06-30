@@ -402,7 +402,8 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { parts, width, height, constants: { nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, texture } } = this;
+        const { parts, width, height, 
+            constants: { nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
@@ -503,8 +504,8 @@ class Odt {
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
                     .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-                    .attr("fill", "#ffd700")
-                    .style("opacity", 0.6);
+                    .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+                    .style("opacity", 0.4);
                 
                 d3.select(this).selectAll("rect.histogram.x-histogram.right")
                     .data(bins1Right)
@@ -514,7 +515,7 @@ class Odt {
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
                     .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-                    .attr("fill", "#0000ff")
+                    .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
                     .style("opacity", 0.6);
 
                 d3.select(this).selectAll("rect.histogram.y-histogram.left")
@@ -525,8 +526,8 @@ class Odt {
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
-                    .attr("fill", "#ffd700")
-                    .style("opacity", 0.6);
+                    .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
+                    .style("opacity", 0.4);
 
                 d3.select(this).selectAll("rect.histogram.y-histogram.right")
                     .data(bins2Right)
@@ -536,7 +537,7 @@ class Odt {
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
-                    .attr("fill", "#0000ff")
+                    .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
                     .style("opacity", 0.6);
             }
         })
