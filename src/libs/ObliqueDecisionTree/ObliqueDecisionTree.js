@@ -583,6 +583,17 @@ class Odt {
         });
     }
 
+/**
+ * Update the oblique tree visualization according to selected data points
+ * @date 2020-06-30
+ * @param {any} selectedNodes
+ * @returns {any} 
+ */ 
+    renderSelectionEffect(selectedNodes) {
+        console.log("selected nodes: ", selectedNodes);
+    }
+
+
     /**
      * Zooming is performed by either double clickiing on an empty part
      * of the SVG or by scrolling the mouse-wheel.

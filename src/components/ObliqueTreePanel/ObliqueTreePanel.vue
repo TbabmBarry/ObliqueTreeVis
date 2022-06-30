@@ -4,7 +4,7 @@
     </div>
 </template>
 <script setup>
-import { onMounted, inject, ref, watch } from "vue";
+import { onMounted, inject, reactive, watch } from "vue";
 import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
 import BivariateDecisionTree from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
 import { getDataset } from "@/api/metrics.js";
@@ -18,12 +18,15 @@ const props = defineProps({
     },
 });
 
-const rootNode = ref({});
-const trainingData = ref({});
+const state = reactive({
+    rootNode: {},
+    trainingData: {},
+    obliqueTreeVis: null
+})
 
 onMounted(async () => {
     let opts = null;
-    rootNode.value = await getDataset()
+    state.rootNode = await getDataset()
         .then(function (bundle) {
             const { trainingSet, labelSet } = bundle.data;
             const builder = {
@@ -44,20 +47,20 @@ onMounted(async () => {
         }).catch(function (error) {
             console.log("ERROR: ", error);
         });
-    trainingData.value = await getDataset()
+    state.trainingData = await getDataset()
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
             trainingSet = trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }));
             return { trainingSet, labelSet };
         });
-    let odt = new Odt(["#vis"]);
-    odt.init();
-    odt.setDataAndOpts(opts, rootNode.value, trainingData.value);
-    odt.draw();
+    state.obliqueTreeVis = new Odt(["#vis"]);
+    state.obliqueTreeVis.init();
+    state.obliqueTreeVis.setDataAndOpts(opts, state.rootNode, state.trainingData);
+    state.obliqueTreeVis.draw();
 })
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
-    console.log("oblique tree got selectedPoints:", newValue, oldValue);
+    state.obliqueTreeVis.renderSelectionEffect(newValue);
 });
 </script>
 <style scoped>
