@@ -799,6 +799,14 @@ const normalizeArr = (count) => {
 };
 
 
+/**
+ * KDE estimates the probability distribution of a random variable.
+ * The kernel's bandwidth determines the estimates' smoothness.
+ * @date 2022-06-30
+ * @param {any} kernel
+ * @param {any} X
+ * @returns {any}
+ */
 const kernelDensityEstimator = (kernel, X) => {
     return (V) => {
         return X.map((x) => {
@@ -807,6 +815,12 @@ const kernelDensityEstimator = (kernel, X) => {
     }
 };
 
+/**
+ * An Epanechnikov Kernel is a kernel function that is of quadratic form.
+ * @date 2022-06-30
+ * @param {any} k
+ * @returns {any}
+ */
 const kernelEpanechnikov = (k) => {
     return (v) => {
         return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
