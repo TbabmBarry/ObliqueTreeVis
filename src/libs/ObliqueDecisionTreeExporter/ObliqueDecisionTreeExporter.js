@@ -112,6 +112,8 @@ export default class BivariateDecisionTree {
                 rightCount: node.type === "decision" ? node.rightCount.slice() : [],
                 totalCount: node.totalCount.slice(),
                 subTrainingSet: node.subTrainingSet.slice(),
+                leftSubTrainingSet: node.type === "decision" ? node.leftTrainingSet.slice() : [],
+                rightSubTrainingSet: node.type === "decision" ? node.rightTrainingSet.slice() : [],
                 featureIdx: this.getFeatureIndex(node),
                 featureContribution: node.type === "leaf" ? node.featureContribution.map(arr => arr.slice()) : [],
                 children: traverse(node),
