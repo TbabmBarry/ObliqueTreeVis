@@ -495,7 +495,7 @@ class Odt {
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
                     .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-                    .attr("fill", texture.url());
+                    .attr("fill", "#69b3a2");
 
                 d3.select(this).selectAll("rect.histogram.y-histogram")
                     .data(bins2)
@@ -505,7 +505,7 @@ class Odt {
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
                     .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
-                    .attr("fill", texture.url());
+                    .attr("fill", "#69b3a2");
             }
         })
     }
@@ -763,7 +763,22 @@ const normalizeArr = (count) => {
     const absCount = count.map(element => Math.abs(element));
     const n = _.sum(absCount);
     return absCount.map(element => element / n);
-}
+};
+
+
+const kernelDensityEstimator = (kernel, X) => {
+    return (V) => {
+        return X.map((x) => {
+            return [x, d3.mean(V, (v) => kernel(x - v))];
+        })
+    }
+};
+
+const kernelEpanechnikov = (k) => {
+    return (v) => {
+        return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+    }
+} 
 
 Odt.initClass();
 export default Odt;
