@@ -493,17 +493,15 @@ class Odt {
                     yHistogram2 = d3.scaleLinear()
                         .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
                         .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
+                
                 // Draw histograms
-
-                d3.select(this).call(texture);
-
                 d3.select(this).selectAll("rect.histogram.x-histogram.left")
                     .data(bins1Left)
                     .join("rect")
                     .attr("class", "detailed histogram")
                     .attr("x", 2)
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-                    .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
+                    .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
                     .attr("fill", "#ffd700")
                     .style("opacity", 0.6);
@@ -514,7 +512,7 @@ class Odt {
                     .attr("class", "detailed histogram")
                     .attr("x", 2)
                     .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-                    .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0) - 1)
+                    .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
                     .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
                     .attr("fill", "#0000ff")
                     .style("opacity", 0.6);
@@ -526,7 +524,7 @@ class Odt {
                     .attr("y", 2)
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
-                    .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
+                    .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
                     .attr("fill", "#ffd700")
                     .style("opacity", 0.6);
 
@@ -537,7 +535,7 @@ class Odt {
                     .attr("y", 2)
                     .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
                     .attr("width", d => yHistogram2(d.length))
-                    .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)-1)
+                    .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
                     .attr("fill", "#0000ff")
                     .style("opacity", 0.6);
             }
