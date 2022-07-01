@@ -673,11 +673,11 @@ class Odt {
         const { nodes } = this;
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
-            decisionPath: new Array()
+            path: new Array()
         }));
         const traverse = (res, currNode, selectedPoint, idx) => {
             if (currNode.data.subTrainingSet.includes(selectedPoint.id)) {
-                res[idx].decisionPath.push(currNode.data.name);
+                res[idx].path.push(currNode.data.name);
                 currNode.children?.forEach((child) => {
                     traverse(res, child, selectedPoint, idx);
                 });
@@ -688,7 +688,21 @@ class Odt {
         });
         let decisionPathSet = new Set(decisionPaths.map(JSON.stringify));
         const uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
-        return uniqueDecisionPaths;
+        const exposedFlowLinks = [];
+        let i, j, k;
+        uniqueDecisionPaths.forEach((decisionPath) => {
+            k = decisionPath.path.length;
+            i = 0, j = 1;
+            while (j < k) {
+                exposedFlowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
+                i += 1;
+                j += 1;
+            }
+        })
+        return {
+            exposedFlowLinks,
+            uniqueDecisionPaths
+        };
     }
 
 
