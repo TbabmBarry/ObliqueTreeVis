@@ -245,40 +245,8 @@ class Odt {
         let _this = this;
         // Draw class distribution
         node.each(function(nodeData, index) {
-            // Encode current decision node class distribution into the range of node rect width
-            let xTotal = d3.scaleLinear()
-                .domain([0, _.sum(nodeData.data.totalCount)])
-                .range([0, nodeRectWidth-2*nodeRectRatio]);
-            
-            // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
-            let currStart, currEnd = 0, nextStart = 0;
-            const classData = [];
-            nodeData.data.totalCount.forEach((ele, idx) => {
-                currStart = nextStart;
-                currEnd += ele;
-                nextStart += ele;
-                classData.push({
-                    start: currStart,
-                    end: currEnd,
-                    label: idx,
-                });
-            });
-
-            // Create a svg group to bind each individual class rect
-            let classDistribution = d3.select(this).selectAll("g.class-distribution")
-                .data(classData)
-                .enter()
-                .append("g")
-                .attr("class", "summary class-distribution")
-                .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
-            // Append each class rect into classDistribution svg group
-            classDistribution.append("rect")
-                .attr("class", "summary class-rect")
-                .attr("width", (d) => xTotal(d.end-d.start))
-                .attr("height", nodeRectRatio)
-                .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
-                .style("fill", (d) => colorScale(d.label));
-
+            // Draw class distribution
+            _this.drawClassDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
             if (nodeData.data.type === "decision") {
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw coefficient weights of features in the oblique split
@@ -394,6 +362,42 @@ class Odt {
             }
             
         })
+    }
+
+    drawClassDistribution(target, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+        // Encode current decision node class distribution into the range of node rect width
+        let xTotal = d3.scaleLinear()
+            .domain([0, _.sum(nodeData.data.totalCount)])
+            .range([0, nodeRectWidth-2*nodeRectRatio]);
+        
+        // Generate classData with data structure [{start: , end: , label: },...] to draw horizontal bar
+        let currStart, currEnd = 0, nextStart = 0;
+        const classData = [];
+        nodeData.data.totalCount.forEach((ele, idx) => {
+            currStart = nextStart;
+            currEnd += ele;
+            nextStart += ele;
+            classData.push({
+                start: currStart,
+                end: currEnd,
+                label: idx,
+            });
+        });
+
+        // Create a svg group to bind each individual class rect
+        let classDistribution = target.selectAll("g.class-distribution")
+            .data(classData)
+            .enter()
+            .append("g")
+            .attr("class", "summary class-distribution")
+            .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
+        // Append each class rect into classDistribution svg group
+        classDistribution.append("rect")
+            .attr("class", "summary class-rect")
+            .attr("width", (d) => xTotal(d.end-d.start))
+            .attr("height", nodeRectRatio)
+            .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
+            .style("fill", (d) => colorScale(d.label));
     }
 
     /**
