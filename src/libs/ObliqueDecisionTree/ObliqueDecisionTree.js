@@ -671,10 +671,13 @@ class Odt {
  */ 
     renderSelectionEffect(selectedDataPoints) {
         const { nodes } = this;
-        const decisionPaths = Array(selectedDataPoints.length).fill(null).map(() => new Array());
+        const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
+            label: selectedDataPoint.label,
+            decisionPath: new Array()
+        }));
         const traverse = (res, currNode, selectedPoint, idx) => {
             if (currNode.data.subTrainingSet.includes(selectedPoint.id)) {
-                res[idx].push(currNode.data.name);
+                res[idx].decisionPath.push(currNode.data.name);
                 currNode.children?.forEach((child) => {
                     traverse(res, child, selectedPoint, idx);
                 });
