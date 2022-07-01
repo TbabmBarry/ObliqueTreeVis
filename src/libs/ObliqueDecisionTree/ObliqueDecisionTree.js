@@ -249,39 +249,7 @@ class Odt {
             _this.drawClassDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
             if (nodeData.data.type === "decision") {
                 if (nodeData.data.featureIdx.length === 2) {
-                    // Draw coefficient weights of features in the oblique split
-                    const {featureIdx, split }  = nodeData.data;
-                    const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
-                    const coefficientWeights = normalizeArr(featureIdx.map(idx => split[idx]));
-                    const coefficientsData = coefficientWeights.map((val, idx) => ({
-                        name: coefficientsNames[idx],
-                        weight: val,
-                    }));
-                    const xCoefficient = d3.scaleBand()
-                        .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
-                        .domain(coefficientsNames)
-                        .padding(0.2),
-                    yCoefficient = d3.scaleLinear()
-                        .range([0.3*(nodeRectWidth-2*nodeRectRatio), 0])
-                        .domain([0, 1]);
-                    
-                    d3.select(this).selectAll("rect.coefficients")
-                        .data(coefficientsData)
-                        .join("rect")
-                            .attr("class", "summary coefficients")
-                            .attr("x", d => xCoefficient(d.name)-0.25*(nodeRectWidth-2*nodeRectRatio))
-                            .attr("y", d => yCoefficient(d.weight)+0.2*(nodeRectWidth-2*nodeRectRatio))
-                            .attr("width", xCoefficient.bandwidth())
-                            .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
-                            .attr("fill", d => featureColorScale(d.name));
-
-                    // Append x-axis for coefficients
-                    d3.select(this).append("g")
-                        .attr("class", "summary coefficients x-axis")
-                        .attr("transform", `translate(${-0.25*(nodeRectWidth-2*nodeRectRatio)}, ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
-                        .call(d3.axisBottom(xCoefficient))
-                        .selectAll("text")
-                            
+                    _this.drawCoefficientDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
                 }
                 // Draw split histogram
                 let xRight = d3.scaleLinear()
@@ -364,7 +332,7 @@ class Odt {
         })
     }
 
-    drawClassDistribution(target, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+    drawClassDistribution(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
         // Encode current decision node class distribution into the range of node rect width
         let xTotal = d3.scaleLinear()
             .domain([0, _.sum(nodeData.data.totalCount)])
@@ -385,7 +353,7 @@ class Odt {
         });
 
         // Create a svg group to bind each individual class rect
-        let classDistribution = target.selectAll("g.class-distribution")
+        let classDistribution = targetSelection.selectAll("g.class-distribution")
             .data(classData)
             .enter()
             .append("g")
@@ -398,6 +366,41 @@ class Odt {
             .attr("height", nodeRectRatio)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
             .style("fill", (d) => colorScale(d.label));
+    }
+
+    drawCoefficientDistribution(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale) {
+        // Draw coefficient weights of features in the oblique split
+        const {featureIdx, split }  = nodeData.data;
+        const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
+        const coefficientWeights = normalizeArr(featureIdx.map(idx => split[idx]));
+        const coefficientsData = coefficientWeights.map((val, idx) => ({
+            name: coefficientsNames[idx],
+            weight: val,
+        }));
+        const xCoefficient = d3.scaleBand()
+            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
+            .domain(coefficientsNames)
+            .padding(0.2),
+        yCoefficient = d3.scaleLinear()
+            .range([0.3*(nodeRectWidth-2*nodeRectRatio), 0])
+            .domain([0, 1]);
+        
+        targetSelection.selectAll("rect.coefficients")
+            .data(coefficientsData)
+            .join("rect")
+                .attr("class", "summary coefficients")
+                .attr("x", d => xCoefficient(d.name)-0.25*(nodeRectWidth-2*nodeRectRatio))
+                .attr("y", d => yCoefficient(d.weight)+0.2*(nodeRectWidth-2*nodeRectRatio))
+                .attr("width", xCoefficient.bandwidth())
+                .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
+                .attr("fill", d => featureColorScale(d.name));
+
+        // Append x-axis for coefficients
+        targetSelection.append("g")
+            .attr("class", "summary coefficients x-axis")
+            .attr("transform", `translate(${-0.25*(nodeRectWidth-2*nodeRectRatio)}, ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
+            .call(d3.axisBottom(xCoefficient))
+            .selectAll("text")
     }
 
     /**
