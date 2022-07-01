@@ -427,12 +427,12 @@ class Odt {
                     .attr("transform", `translate(${-0.5*nodeRectWidth}, ${0})`)
                     .call(d3.axisLeft(y[currFeatureIdx[1]]));
                 
-                const randomPoints = getRandomSplitPoint(currFeatureIdx, nodeData, _this);
+                const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, _this);
                 const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
 
                 d3.select(this)
                     .append("path")
-                    .datum(randomPoints)
+                    .datum(endPoints)
                         .attr("class", "detailed split-line")
                         .attr("d", (d) => lineHelper(d))
                         .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
@@ -470,9 +470,9 @@ class Odt {
                     label: _this.trainY[idx],
                 })),
                     values1Right = nodeData.data.rightSubTrainingSet.map(idx => ({
-                    value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
-                    label: _this.trainY[idx],
-                })),
+                        value: _this.trainX[idx][featureArr[currFeatureIdx[0]]],
+                        label: _this.trainY[idx],
+                    })),
                     values2Left = nodeData.data.leftSubTrainingSet.map(idx => ({
                         value: _this.trainX[idx][featureArr[currFeatureIdx[1]]],
                         label: _this.trainY[idx],
@@ -714,33 +714,46 @@ const adjustedClientRect = (node) => {
 };
 
 /**
- * Return random points on current split
+ * Return two end points on current split
  * @date 2022-06-21
  * @param {featureIdxArr} featureIdxArr
  * @param {currNode} currNode
  * @param {that} that
  */
-const getRandomSplitPoint = (featureIdxArr, currNode, that) => {
-    const getRandomFloat = (range, decimals) => {
-        const str = (Math.random() * (range[1] - range[0]) + range[0]).toFixed(decimals);
-        return parseFloat(str);
-    }
+const getEndSplitPoint = (featureIdxArr, currNode, that) => {
     const sv = currNode.data.split;
+    const getSplitY = (x) => (sv[featureIdxArr[0]] * x + sv[sv.length-1]) / (- sv[featureIdxArr[1]]);
+    const getSplitX = (y) => (sv[featureIdxArr[1]] * y + sv[sv.length-1]) / (- sv[featureIdxArr[0]]);
     const rangeX = d3.extent(that.trainX, d => d[that.constants.featureArr[featureIdxArr[0]]]);
     const rangeY = d3.extent(that.trainX, d => d[that.constants.featureArr[featureIdxArr[1]]]);
-    const randomXYPairs = [];
-    let tmpRandomX, tmpRandomY;
-    while (randomXYPairs.length < 10) {
-        tmpRandomX = getRandomFloat(rangeX, 4);
-        tmpRandomY = (sv[featureIdxArr[0]] * tmpRandomX + sv[sv.length-1]) / (- sv[featureIdxArr[1]]);
-        if (tmpRandomY >= rangeY[0] && tmpRandomY <= rangeY[1]) {
-            randomXYPairs.push({
-                x: tmpRandomX,
-                y: tmpRandomY
-            })
-        }
-    };
-    return randomXYPairs;
+    const endPointsPair = [];
+    let tmpMaxX = rangeX[1],
+        tmpMaxY = rangeY[1],
+        tmpMinX = rangeX[0],
+        tmpMinY = rangeY[0];
+    if (getSplitY(tmpMaxX) > tmpMaxY || getSplitY(tmpMaxX) < tmpMinY) {
+        tmpMaxX = Math.max(getSplitX(tmpMaxY), getSplitX(tmpMinY));
+    }
+    if (getSplitY(tmpMinX) < tmpMinY || getSplitY(tmpMinX) > tmpMaxY) {
+        tmpMinX = Math.min(getSplitX(tmpMaxY), getSplitX(tmpMinY));
+    }
+
+    if (getSplitX(tmpMaxY) > tmpMaxX || getSplitX(tmpMaxY) < tmpMinX) {
+        tmpMaxY = Math.max(getSplitY(tmpMaxX), getSplitY(tmpMinX));
+    }
+
+    if (getSplitX(tmpMinY) < tmpMinX || getSplitX(tmpMinY) > tmpMaxX) {
+        tmpMinY = Math.min(getSplitY(tmpMaxX), getSplitY(tmpMinX));
+    }
+    endPointsPair.push({
+        x: tmpMaxX,
+        y: tmpMaxY,
+    });
+    endPointsPair.push({
+        x: tmpMinX,
+        y: tmpMinY,
+    });
+    return endPointsPair;
 }
 
 /**
