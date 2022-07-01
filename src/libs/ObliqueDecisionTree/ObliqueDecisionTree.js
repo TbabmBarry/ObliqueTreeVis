@@ -135,6 +135,7 @@ class Odt {
             .data(flowLinks)
             .enter().append("path")
             .attr("class", "link")
+            .attr("id", (d) => d.id)
             .attr("d", (d) => {
                 return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                     {
@@ -779,6 +780,7 @@ class Odt {
                             width: currLinkWidthArr[idx].value,
                         },
                         class: val.label,
+                        id: `${link.parent.data.name}-${link.data.name}-${val.label}`
                     })
                 }
             })
