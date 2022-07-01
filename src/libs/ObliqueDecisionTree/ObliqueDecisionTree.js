@@ -34,6 +34,7 @@ class Odt {
         _.assign(this, {
             // plotState: new PlotState(),
             data: null,
+            nodes: null,
             trainX: null,
             trainY: null,
             opts: null,
@@ -98,6 +99,7 @@ class Odt {
         parts.treeMap = d3.tree().size([width, height]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
+        this.nodes = nodes;
         // Modify element for each node recursively
         traverseTree(nodes);
         
@@ -665,8 +667,21 @@ class Odt {
  * @param {any} selectedNodes
  * @returns {any} 
  */ 
-    renderSelectionEffect(selectedNodes) {
-        console.log("selected nodes: ", selectedNodes);
+    renderSelectionEffect(selectedDataPoints) {
+        const { nodes } = this;
+        const decisionPaths = Array(selectedDataPoints.length).fill(null).map(() => new Array());
+        const traverse = (res, currNode, selectedPoint, idx) => {
+            if (currNode.data.subTrainingSet.includes(selectedPoint.id)) {
+                res[idx].push(currNode);
+                currNode.children?.forEach((child) => {
+                    traverse(res, child, selectedPoint, idx);
+                });
+            }
+        }
+        selectedDataPoints.forEach((selectedDataPoint, index) => {
+            traverse(decisionPaths, nodes, selectedDataPoint, index);
+        });
+        return decisionPaths;
     }
 
 
