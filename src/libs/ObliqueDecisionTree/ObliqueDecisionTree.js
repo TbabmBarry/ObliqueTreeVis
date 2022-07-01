@@ -243,7 +243,6 @@ class Odt {
     renderSummaryView(node) {
         const { constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale, featureColorScale } } = this;
         let _this = this;
-        // TODO: draw class distribution, histograms
         // Draw class distribution
         node.each(function(nodeData, index) {
             // Encode current decision node class distribution into the range of node rect width
@@ -266,7 +265,7 @@ class Odt {
             });
 
             // Create a svg group to bind each individual class rect
-            let classDistribution = d3.select(this).selectAll("g")
+            let classDistribution = d3.select(this).selectAll("g.class-distribution")
                 .data(classData)
                 .enter()
                 .append("g")
@@ -329,15 +328,15 @@ class Odt {
                     .padding(.1);
 
                 const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
-                d3.select(this).selectAll("g")
+                const splitDistribution = d3.select(this).selectAll("g.split-distribution")
                     .data(splitData)
                     .enter()
                     .append("g")
                     .attr("class", "summary split-distribution")
-                    .attr("transform", `translate(${0.5*nodeRectWidth},${nodeRectRatio})`);
+                    .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
                 
                 // Append left and right split distribution into splitDistribution svg group
-                classDistribution.append("rect")
+                splitDistribution.append("rect")
                     .attr("class", "summary split-rect")
                     .attr("width", (d) => {
                         return xRight(d[1]);
@@ -347,7 +346,7 @@ class Odt {
                     .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
                     .attr("fill", (d, i) => colorScale(i));
 
-                classDistribution.append("rect")
+                splitDistribution.append("rect")
                     .attr("class", "summary split-rect")
                     .attr("width", (d) => {
                         return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
@@ -358,7 +357,7 @@ class Odt {
                     .attr("fill", (d, i) => colorScale(i));
 
                 // Append left and right split distribution text into splitDistribution svg group
-                classDistribution.append("text")
+                splitDistribution.append("text")
                     .attr("class", "summary split-text")
                     .text( (d) => d[1])
                     .attr("text-anchor", "start")
@@ -369,7 +368,7 @@ class Odt {
                             ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
                     })
                 
-                classDistribution.append("text")
+                splitDistribution.append("text")
                     .attr("class", "summary split-text")
                     .text( (d) => d[0])
                     .attr("text-anchor", "end")
@@ -381,13 +380,13 @@ class Odt {
                     })
 
                 // Append centered axis
-                classDistribution.append("g")
+                splitDistribution.append("g")
                     .attr("class", "summary center-axis")
                     .attr("transform", `translate(${-nodeRectRatio},
                         ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
                     .call(d3.axisLeft(yBand).tickFormat(""));
 
-                classDistribution.append("g")
+                splitDistribution.append("g")
                     .attr("class", "summary center-axis")
                     .attr("transform", `translate(${-nodeRectRatio},
                         ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
