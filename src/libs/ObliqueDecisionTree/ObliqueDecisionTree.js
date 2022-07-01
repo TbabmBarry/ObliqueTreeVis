@@ -208,6 +208,7 @@ class Odt {
                 return "node" + 
                 (d.children ? " node--internal" : " node--leaf"); 
             })
+            .attr("id", (d) => d.data.name)
             .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
             .on("click", clicked);
         
