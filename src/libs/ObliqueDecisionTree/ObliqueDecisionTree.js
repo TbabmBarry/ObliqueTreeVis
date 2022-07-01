@@ -672,7 +672,7 @@ class Odt {
         const decisionPaths = Array(selectedDataPoints.length).fill(null).map(() => new Array());
         const traverse = (res, currNode, selectedPoint, idx) => {
             if (currNode.data.subTrainingSet.includes(selectedPoint.id)) {
-                res[idx].push(currNode);
+                res[idx].push(currNode.data.name);
                 currNode.children?.forEach((child) => {
                     traverse(res, child, selectedPoint, idx);
                 });
