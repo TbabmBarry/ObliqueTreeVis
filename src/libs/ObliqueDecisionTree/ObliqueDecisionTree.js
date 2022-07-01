@@ -417,43 +417,9 @@ class Odt {
         node.each(function (nodeData, index) {
             let currFeatureIdx = nodeData.data.featureIdx;
             if (currFeatureIdx.length === 2) {
-                // Allow X and Y axis generators to be called
-                node.append("g")
-                    .attr("class", "detailed x-axis")
-                    .attr("transform", `translate(${-0.5*nodeRectWidth}, ${nodeRectWidth-scatterPlotPadding})`)
-                    .call(d3.axisBottom(x[currFeatureIdx[0]]));
-                node.append("g")
-                    .attr("class", "detailed y-axis")
-                    .attr("transform", `translate(${-0.5*nodeRectWidth}, ${0})`)
-                    .call(d3.axisLeft(y[currFeatureIdx[1]]));
+                // Draw two-feature scatter plot
+                _this.drawScatterPlot(node, nodeData, nodeRectWidth, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
                 
-                const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, _this);
-                const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
-
-                d3.select(this)
-                    .append("path")
-                    .datum(endPoints)
-                        .attr("class", "detailed split-line")
-                        .attr("d", (d) => lineHelper(d))
-                        .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
-                        .style('fill', 'none')
-                        .style('stroke', 'black')
-                        .style('stroke-width', '2px');
-
-                d3.select(this).selectAll("circle")
-                    .data(nodeData.data.subTrainingSet)
-                    .enter()
-                    .append("circle")
-                        .attr("class", "detailed dot")
-                        .attr("cx", (d) => {
-                            return x[currFeatureIdx[0]](_this.trainX[d][featureArr[currFeatureIdx[0]]])-0.5*nodeRectWidth;
-                        })
-                        .attr("cy", (d) => {
-                            return y[currFeatureIdx[1]](_this.trainX[d][featureArr[currFeatureIdx[1]]]);
-                        })
-                        .attr("r", 3.5)
-                        .style("fill", d => colorScale(_this.trainY[d]));
-
                 // Set the parameters for histograms
                 const histogram1 = d3.bin()
                         .value((d) => d.value)
@@ -541,6 +507,44 @@ class Odt {
                     .style("opacity", 0.6);
             }
         })
+    }
+
+    drawScatterPlot(node, nodeData, nodeRectWidth, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
+        // Allow X and Y axis generators to be called
+        node.append("g")
+            .attr("class", "detailed x-axis")
+            .attr("transform", `translate(${-0.5*nodeRectWidth}, ${nodeRectWidth-scatterPlotPadding})`)
+            .call(d3.axisBottom(x[currFeatureIdx[0]]));
+        node.append("g")
+            .attr("class", "detailed y-axis")
+            .attr("transform", `translate(${-0.5*nodeRectWidth}, ${0})`)
+            .call(d3.axisLeft(y[currFeatureIdx[1]]));
+        
+        const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, that);
+        const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
+
+        node.append("path")
+            .datum(endPoints)
+                .attr("class", "detailed split-line")
+                .attr("d", (d) => lineHelper(d))
+                .attr("transform", `translate(${- 0.5 * nodeRectWidth}, ${0})`)
+                .style('fill', 'none')
+                .style('stroke', 'black')
+                .style('stroke-width', '2px');
+
+        node.selectAll("circle")
+            .data(nodeData.data.subTrainingSet)
+            .enter()
+            .append("circle")
+                .attr("class", "detailed dot")
+                .attr("cx", (d) => {
+                    return x[currFeatureIdx[0]](that.trainX[d][featureArr[currFeatureIdx[0]]])-0.5*nodeRectWidth;
+                })
+                .attr("cy", (d) => {
+                    return y[currFeatureIdx[1]](that.trainX[d][featureArr[currFeatureIdx[1]]]);
+                })
+                .attr("r", 3.5)
+                .style("fill", d => colorScale(that.trainY[d]));
     }
 
     /**
