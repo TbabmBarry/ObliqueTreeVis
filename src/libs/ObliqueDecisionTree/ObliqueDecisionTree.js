@@ -259,6 +259,15 @@ class Odt {
         })
     }
 
+    /**
+     * Draw class distribution in the summary view
+     * @date 2022-07-01
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {nodeRectRatio} nodeRectRatio
+     * @param {colorScale} colorScale
+     */
     drawClassDistribution(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
         // Encode current decision node class distribution into the range of node rect width
         let xTotal = d3.scaleLinear()
@@ -295,6 +304,16 @@ class Odt {
             .style("fill", (d) => colorScale(d.label));
     }
 
+    /**
+     * Draw feature coefficients distribution in the summary view
+     * @date 2022-07-01
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {nodeRectRatio} nodeRectRatio
+     * @param {featureArr} featureArr
+     * @param {featureColorScale} featureColorScale
+     */
     drawCoefficientDistribution(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale) {
         // Draw coefficient weights of features in the oblique split
         const {featureIdx, split }  = nodeData.data;
@@ -330,6 +349,15 @@ class Odt {
             .selectAll("text")
     }
 
+    /**
+     * Draw split point distribution in the summary view
+     * @date 2022-07-01
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {nodeRectRatio} nodeRectRatio
+     * @param {colorScale} colorScale
+     */
     drawSplitHistogram(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
         // Draw split histogram
         let xRight = d3.scaleLinear()
@@ -437,13 +465,27 @@ class Odt {
         })
     }
 
-    drawScatterPlot(node, nodeData, nodeRectWidth, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
+    /**
+     * Draw two-feature scatter plot in each decision node
+     * @date 2022-07-01
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {scatterPlotPadding} scatterPlotPadding
+     * @param {featureArr} featureArr
+     * @param {colorScale} colorScale
+     * @param {currFeatureIdx} currFeatureIdx
+     * @param {that} that
+     * @param {x} x
+     * @param {y} y
+     */
+    drawScatterPlot(targetSelection, nodeData, nodeRectWidth, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
         // Allow X and Y axis generators to be called
-        node.append("g")
+        targetSelection.append("g")
             .attr("class", "detailed x-axis")
             .attr("transform", `translate(${-0.5*nodeRectWidth}, ${nodeRectWidth-scatterPlotPadding})`)
             .call(d3.axisBottom(x[currFeatureIdx[0]]));
-        node.append("g")
+        targetSelection.append("g")
             .attr("class", "detailed y-axis")
             .attr("transform", `translate(${-0.5*nodeRectWidth}, ${0})`)
             .call(d3.axisLeft(y[currFeatureIdx[1]]));
@@ -451,7 +493,7 @@ class Odt {
         const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, that);
         const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
 
-        node.append("path")
+        targetSelection.append("path")
             .datum(endPoints)
                 .attr("class", "detailed split-line")
                 .attr("d", (d) => lineHelper(d))
@@ -460,7 +502,7 @@ class Odt {
                 .style('stroke', 'black')
                 .style('stroke-width', '2px');
 
-        node.selectAll("circle")
+        targetSelection.selectAll("circle")
             .data(nodeData.data.subTrainingSet)
             .enter()
             .append("circle")
@@ -475,92 +517,107 @@ class Odt {
                 .style("fill", d => colorScale(that.trainY[d]));
     }
 
-    drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+    /**
+     * Draw feature distribution in detailed view
+     * @date 2022-07-01
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
+     * @param {scatterPlotPadding} scatterPlotPadding
+     * @param {featureArr} featureArr
+     * @param {featureColorScale} featureColorScale
+     * @param {currFeatureIdx} currFeatureIdx
+     * @param {that} that
+     * @param {x} x
+     * @param {y} y
+     */
+    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
             .value((d) => d.value)
             .domain(x[currFeatureIdx[0]].domain())
             .thresholds(x[currFeatureIdx[0]].ticks(20)),
-        histogram2 = d3.bin()
-            .value((d) => d.value)
-            .domain(y[currFeatureIdx[1]].domain())
-            .thresholds(y[currFeatureIdx[1]].ticks(20));
+            histogram2 = d3.bin()
+                .value((d) => d.value)
+                .domain(y[currFeatureIdx[1]].domain())
+                .thresholds(y[currFeatureIdx[1]].ticks(20));
 
-    // Get the original data for histograms
-    const values1Left = nodeData.data.leftSubTrainingSet.map(idx => ({
-        value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
-        label: that.trainY[idx],
-    })),
-        values1Right = nodeData.data.rightSubTrainingSet.map(idx => ({
+        // Get the original data for histograms
+        const values1Left = nodeData.data.leftSubTrainingSet.map(idx => ({
             value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
             label: that.trainY[idx],
         })),
-        values2Left = nodeData.data.leftSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
-            label: that.trainY[idx],
-        })),
-        values2Right = nodeData.data.rightSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
-            label: that.trainY[idx],
-        }));
-    // Get the histogram data according to predefined histogram functions
-    const bins1Left = histogram1(values1Left),
-        bins1Right = histogram1(values1Right),
-        bins2Left = histogram2(values2Left),
-        bins2Right = histogram2(values2Right);
+            values1Right = nodeData.data.rightSubTrainingSet.map(idx => ({
+                value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
+                label: that.trainY[idx],
+            })),
+            values2Left = nodeData.data.leftSubTrainingSet.map(idx => ({
+                value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
+                label: that.trainY[idx],
+            })),
+            values2Right = nodeData.data.rightSubTrainingSet.map(idx => ({
+                value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
+                label: that.trainY[idx],
+            }));
+        // Get the histogram data according to predefined histogram functions
+        const bins1Left = histogram1(values1Left),
+            bins1Right = histogram1(values1Right),
+            bins2Left = histogram2(values2Left),
+            bins2Right = histogram2(values2Right);
 
-    // Set up y-axis value encodings for histograms
-    const yHistogram1 = d3.scaleLinear()
-            .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
-            .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
-        yHistogram2 = d3.scaleLinear()
-            .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
-            .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
+        // Set up y-axis value encodings for histograms
+        const yHistogram1 = d3.scaleLinear()
+                .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
+                .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
+            yHistogram2 = d3.scaleLinear()
+                .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
+                .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
 
-    // Draw histograms
-    node.selectAll("rect.histogram.x-histogram.left")
-        .data(bins1Left)
-        .join("rect")
-        .attr("class", "detailed histogram")
-        .attr("x", 2)
-        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-        .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
-        .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
-        .style("opacity", 0.4);
+        // Draw histograms
+        targetSelection.selectAll("rect.histogram.x-histogram.left")
+            .data(bins1Left)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("x", 2)
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
+            .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
+            .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.4);
 
-    node.selectAll("rect.histogram.x-histogram.right")
-        .data(bins1Right)
-        .join("rect")
-        .attr("class", "detailed histogram")
-        .attr("x", 2)
-        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-        .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
-        .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
-        .style("opacity", 0.6);
+        targetSelection.selectAll("rect.histogram.x-histogram.right")
+            .data(bins1Right)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("x", 2)
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
+            .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
+            .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.6);
 
-    node.selectAll("rect.histogram.y-histogram.left")
-        .data(bins2Left)
-        .join("rect")
-        .attr("class", "detailed histogram")
-        .attr("y", 2)
-        .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
-        .attr("width", d => yHistogram2(d.length))
-        .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
-        .style("opacity", 0.4);
+        targetSelection.selectAll("rect.histogram.y-histogram.left")
+            .data(bins2Left)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("y", 2)
+            .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
+            .attr("width", d => yHistogram2(d.length))
+            .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
+            .style("opacity", 0.4);
 
-    node.selectAll("rect.histogram.y-histogram.right")
-        .data(bins2Right)
-        .join("rect")
-        .attr("class", "detailed histogram")
-        .attr("y", 2)
-        .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
-        .attr("width", d => yHistogram2(d.length))
-        .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
-        .style("opacity", 0.6);
+        targetSelection.selectAll("rect.histogram.y-histogram.right")
+            .data(bins2Right)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("y", 2)
+            .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
+            .attr("width", d => yHistogram2(d.length))
+            .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
+            .style("opacity", 0.6);
     }
 
     /**
@@ -625,9 +682,9 @@ class Odt {
         }
 
         const zoomListener = d3.zoom()
-                                .extent([[0,0], [width, height]])
-                                .scaleExtent([1, 8])
-                                .on('zoom', zoomed);
+            .extent([[0,0], [width, height]])
+            .scaleExtent([1, 8])
+            .on('zoom', zoomed);
         parts.baseSvg.call(zoomListener);
     }
 
