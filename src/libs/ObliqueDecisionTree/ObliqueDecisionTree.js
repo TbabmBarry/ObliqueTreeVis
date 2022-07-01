@@ -682,7 +682,9 @@ class Odt {
         selectedDataPoints.forEach((selectedDataPoint, index) => {
             traverse(decisionPaths, nodes, selectedDataPoint, index);
         });
-        return decisionPaths;
+        let decisionPathSet = new Set(decisionPaths.map(JSON.stringify));
+        const uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
+        return uniqueDecisionPaths;
     }
 
 
