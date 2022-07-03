@@ -728,12 +728,12 @@ class Odt {
         });
     }
 
-/**
- * Update the oblique tree visualization according to selected data points
- * @date 2020-06-30
- * @param {any} selectedNodes
- * @returns {any} 
- */ 
+    /**
+     * Update the oblique tree visualization according to selected data points
+     * @date 2020-06-30
+     * @param {any} selectedNodes
+     * @returns {any} 
+     */ 
     renderSelectionEffect(selectedDataPoints) {
         const { nodes } = this;
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
@@ -747,7 +747,7 @@ class Odt {
                     traverse(res, child, selectedPoint, idx);
                 });
             }
-        }
+        };
         selectedDataPoints.forEach((selectedDataPoint, index) => {
             traverse(decisionPaths, nodes, selectedDataPoint, index);
         });
@@ -763,6 +763,10 @@ class Odt {
                 i += 1;
                 j += 1;
             }
+        });
+        console.log(exposedFlowLinks);
+        exposedFlowLinks.forEach((exposedFlowLink) => {
+            d3.select(`#${exposedFlowLink}`).style("stroke", "red");
         })
         return {
             exposedFlowLinks,
