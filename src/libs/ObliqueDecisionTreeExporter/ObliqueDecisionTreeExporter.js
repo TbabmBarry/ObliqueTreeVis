@@ -64,7 +64,7 @@ export default class BivariateDecisionTree {
      * target data structure.
      * @date 2022-06-20
      */
-    compute() {
+    run() {
         this.build();
         this.classify();
         this.computeFeatureContribution();
@@ -159,7 +159,7 @@ export default class BivariateDecisionTree {
                         currNode = currNode.left;
                     } else {
                         // Count leaf node labels and store points
-                        currNode.left = new TreeNode(new Array(8).fill(0), "llf", "leaf");
+                        currNode.left = new TreeNode(new Array(8).fill(0), currNode.name + "-llf", "leaf");
                         currNode.left.totalCount[this.labelSet[idx]]++;
                         currNode.left.subTrainingSet.push(idx);
                         break;
@@ -175,7 +175,7 @@ export default class BivariateDecisionTree {
                         currNode = currNode.right;
                     } else {
                         // Count leaf node labels and store points
-                        currNode.right = new TreeNode(new Array(8).fill(0), "rlf", "leaf");
+                        currNode.right = new TreeNode(new Array(8).fill(0), currNode.name + "-llf", "leaf");
                         currNode.right.totalCount[this.labelSet[idx]]++;
                         currNode.right.subTrainingSet.push(idx);
                         break;
