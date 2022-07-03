@@ -466,6 +466,45 @@ class Odt {
                 // Draw two-feature histogram
                 _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
             }
+
+            if (currFeatureIdx.length === 1) {
+                const stripData = nodeData.data.subTrainingSet.map((idx) => 
+                    ({
+                        id: idx,
+                        label: _this.trainY[idx],
+                        value: _this.trainX[idx][featureArr[currFeatureIdx[0]]]
+                    })
+                );
+                const splitPoint = nodeData.data.split[nodeData.data.split.length-1];
+                const xStrip = d3.scaleLinear()
+                    .domain(d3.extent(stripData, d => d.value))
+                    .range([scatterPlotPadding, detailedViewNodeRectWidth-scatterPlotPadding]);
+                const yStrip = d3.scalePoint()
+                    .domain([0,1,2])
+                    .rangeRound([detailedViewNodeRectWidth-scatterPlotPadding, scatterPlotPadding])
+                    .padding(1);
+                d3.select(this).append("g")
+                    .attr("class", "detailed strip-chart x-axis")
+                    .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth}, ${nodeRectWidth+2*scatterPlotPadding})`)
+                    .call(d3.axisBottom(xStrip));
+                
+                d3.select(this).append("g")
+                    .attr("class", "detailed strip-chart y-axis")
+                    .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
+                    .call(d3.axisLeft(yStrip));
+
+                d3.select(this).append("g")
+                    .attr("class", "detailed strip-chart-group")
+                    .attr("pointer-events", "all")
+                .selectAll("circle")
+                .data(stripData)
+                .join("circle")
+                    .attr("r", 3.5)
+                    .attr("cx", d => xStrip(d.value)-0.5*detailedViewNodeRectWidth)
+                    .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth))
+                    .attr("fill", d => d.value < splitPoint ? "red" : "blue");
+
+            }
         })
     }
 
@@ -521,6 +560,10 @@ class Odt {
                 .style("fill", d => colorScale(that.trainY[d]));
     }
 
+    drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+        
+    }
+
     /**
      * Draw feature distribution in detailed view
      * @date 2022-07-01
@@ -535,7 +578,7 @@ class Odt {
      * @param {that} that
      * @param {x} x
      * @param {y} y
-     */
+     */    
     drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
