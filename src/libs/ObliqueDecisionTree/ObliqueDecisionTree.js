@@ -526,7 +526,20 @@ class Odt {
                 .style("fill", d => colorScale(that.trainY[d]));
     }
 
+    /**
+     * Draw strip chart for one-feature classifier decision node
+     * @date 2022-07-03
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
+     * @param {scatterPlotPadding} scatterPlotPadding
+     * @param {featureArr} featureArr
+     * @param {currFeatureIdx} currFeatureIdx
+     * @param {that} that
+     */
     drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, currFeatureIdx, that) {
+        // Generate data for strip chart
         const stripData = nodeData.data.subTrainingSet.map((idx) => 
             ({
                 id: idx,
@@ -534,6 +547,7 @@ class Odt {
                 value: that.trainX[idx][featureArr[currFeatureIdx[0]]]
             })
         );
+        // Get split point value
         const splitPoint = nodeData.data.split[nodeData.data.split.length-1];
         const xStrip = d3.scaleLinear()
             .domain(d3.extent(stripData, d => d.value))
