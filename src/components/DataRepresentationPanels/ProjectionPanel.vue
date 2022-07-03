@@ -114,6 +114,7 @@ function brush (cell, circle, x, y) {
     let brushCell;
 
     function brushStarted () {
+        console.log("brushStarted");
         if (brushCell !== this) {
             d3.select(brushCell).call(brush.move, null);
             brushCell = this;
@@ -122,6 +123,7 @@ function brush (cell, circle, x, y) {
 
     function brushed ({selection}) {
         let selected = [];
+        console.log("brushed");
         if (selection) {
             const [[x0, y0], [x1, y1]] = selection; // selection is a list of two lists of two numbers
             // Label unselected points as "unselected" and update their style
@@ -143,6 +145,7 @@ function brush (cell, circle, x, y) {
     }
 
     function brushEnded ({ selection }) {
+        console.log("brushEnded");
         if (selection) return;
         // Reset the selected points
         state.selectedPoints = [];

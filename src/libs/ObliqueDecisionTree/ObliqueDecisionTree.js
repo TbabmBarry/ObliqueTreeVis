@@ -151,7 +151,7 @@ class Odt {
                 ]);
             })
             .style("fill", (d) => colorScale[d.class])
-            .style("opacity", 0.6)
+            // .style("opacity", 0.6)
             .style("stroke", "none");
 
     }
