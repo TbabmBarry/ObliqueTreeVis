@@ -576,7 +576,14 @@ class Odt {
             .attr("cx", d => xStrip(d.value)-0.5*detailedViewNodeRectWidth)
             .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth))
             .attr("fill", d => d.value < splitPoint ? "red" : "blue");
-
+        
+        targetSelection.append("line")
+            .attr("class", "detailed strip-cahrt split-line")
+            .attr("x1", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth)
+            .attr("y1", 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-scatterPlotPadding)
+            .attr("x2", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth)
+            .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding)
+            .style("stroke", "#000");
     }
 
     /**
