@@ -755,7 +755,6 @@ class Odt {
         const uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
         const exposedFlowLinks = [];
         let i, j, k;
-        console.log(uniqueDecisionPaths, exposedFlowLinks);
         uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;
@@ -765,6 +764,9 @@ class Odt {
                 j += 1;
             }
         });
+        exposedFlowLinks.forEach((exposedFlowLink) => {
+            d3.select(`#${exposedFlowLink}`).style("stroke", "red");
+        })
         return {
             exposedFlowLinks,
             uniqueDecisionPaths
