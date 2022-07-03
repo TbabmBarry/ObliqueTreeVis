@@ -217,6 +217,7 @@ class Odt {
         // Add a rectangle to each node
         node.append("rect")
             .attr("class", "node-rect")
+            .attr("id", (d) => d.data.name)
             .attr("width", nodeRectWidth)
             .attr("height", (d) => d.data.type === "leaf" ? nodeRectWidth+2*nodeRectRatio : nodeRectWidth)
             .attr("x",- 0.5 * nodeRectWidth)
@@ -225,6 +226,7 @@ class Odt {
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
+            .style("opacity", 0.6)
             .style("stroke-width", nodeRectStrokeWidth);
 
         

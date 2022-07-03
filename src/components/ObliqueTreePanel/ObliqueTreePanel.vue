@@ -63,9 +63,18 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
     const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
     d3.selectAll("path.link")
             .style("opacity", 0.6);
+    d3.selectAll("rect.node-rect")
+            .style("opacity", 0.6);
     exposedFlowLinks.forEach((exposedFlowLink) => {
         d3.selectAll(`path.link#${exposedFlowLink}`)
             .style("opacity", 1);
+    });
+    uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
+        console.log(uniqueDecisionPath);
+        uniqueDecisionPath?.path.forEach((decisionNode) => {
+            d3.selectAll(`rect.node-rect#${decisionNode}`)
+                .style("opacity", 1);
+        });
     });
 });
 </script>
