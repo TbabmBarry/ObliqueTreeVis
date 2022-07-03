@@ -78,6 +78,9 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
     if (oldValue.length !== 0 && newValue.length === 0) {
         d3.selectAll("path.link")
             .style("opacity", 1);
+
+        d3.selectAll("rect.node-rect")
+            .style("opacity", 1);
     }
 });
 </script>

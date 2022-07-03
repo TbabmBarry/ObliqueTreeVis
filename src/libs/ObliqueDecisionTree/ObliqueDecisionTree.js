@@ -151,7 +151,6 @@ class Odt {
                 ]);
             })
             .style("fill", (d) => colorScale[d.class])
-            // .style("opacity", 0.6)
             .style("stroke", "none");
 
     }
@@ -226,7 +225,6 @@ class Odt {
             .attr("ry", nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
-            .style("opacity", 0.6)
             .style("stroke-width", nodeRectStrokeWidth);
 
         
