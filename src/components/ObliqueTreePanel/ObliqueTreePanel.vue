@@ -60,7 +60,13 @@ onMounted(async () => {
 })
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
-    state.obliqueTreeVis.renderSelectionEffect(newValue);
+    const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
+    d3.selectAll("path.link")
+            .style("opacity", 0.6);
+    exposedFlowLinks.forEach((exposedFlowLink) => {
+        d3.selectAll(`path.link#${exposedFlowLink}`)
+            .style("opacity", 1);
+    });
 });
 </script>
 <style scoped>

@@ -151,6 +151,7 @@ class Odt {
                 ]);
             })
             .style("fill", (d) => colorScale[d.class])
+            .style("opacity", 0.6)
             .style("stroke", "none");
 
     }
@@ -764,9 +765,6 @@ class Odt {
                 j += 1;
             }
         });
-        exposedFlowLinks.forEach((exposedFlowLink) => {
-            d3.select(`#${exposedFlowLink}`).style("stroke", "red");
-        })
         return {
             exposedFlowLinks,
             uniqueDecisionPaths
@@ -872,7 +870,6 @@ class Odt {
         }
         return resFlows;
     }
-
 }
 
 /**
@@ -1002,7 +999,6 @@ const normalizeArr = (count) => {
     const n = _.sum(absCount);
     return absCount.map(element => element / n);
 };
-
 
 /**
  * KDE estimates the probability distribution of a random variable.
