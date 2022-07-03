@@ -51,7 +51,7 @@ class Odt {
                 pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
                 nodeRectStrokeWidth: 3,
-                colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"]),
+                colorScale: ["#e63946", "#a8dadc", "#457b9d"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
                 texture: textures.paths().d("crosses").lighter().thicker(),
@@ -150,7 +150,7 @@ class Odt {
                     }
                 ]);
             })
-            .style("fill", (d) => colorScale(d.class))
+            .style("fill", (d) => colorScale[d.class])
             .style("stroke", "none");
 
     }
@@ -305,7 +305,7 @@ class Odt {
             .attr("width", (d) => xTotal(d.end-d.start))
             .attr("height", nodeRectRatio)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
-            .style("fill", (d) => colorScale(d.label));
+            .style("fill", (d) => colorScale[d.label]);
     }
 
     /**
@@ -392,7 +392,7 @@ class Odt {
             .attr("height", yBand.bandwidth())
             .attr("x", - nodeRectRatio)
             .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-            .attr("fill", (d, i) => colorScale(i));
+            .attr("fill", (d, i) => colorScale[i]);
 
         splitDistribution.append("rect")
             .attr("class", "summary split-rect")
@@ -402,7 +402,7 @@ class Odt {
             .attr("height", yBand.bandwidth())
             .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
             .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-            .attr("fill", (d, i) => colorScale(i));
+            .attr("fill", (d, i) => colorScale[i]);
 
         // Append left and right split distribution text into splitDistribution svg group
         splitDistribution.append("text")
@@ -523,7 +523,7 @@ class Odt {
                     return y[currFeatureIdx[1]](that.trainX[d][featureArr[currFeatureIdx[1]]]);
                 })
                 .attr("r", 3.5)
-                .style("fill", d => colorScale(that.trainY[d]));
+                .style("fill", d => colorScale[that.trainY[d]]);
     }
 
     /**
@@ -722,7 +722,7 @@ class Odt {
                                  +yBand(d.label)+idx*(1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
-                            .attr("fill", (d) => colorScale(d.label));
+                            .attr("fill", (d) => colorScale[d.label]);
                 })
             }
         });
@@ -755,6 +755,7 @@ class Odt {
         const uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
         const exposedFlowLinks = [];
         let i, j, k;
+        console.log(uniqueDecisionPaths, exposedFlowLinks);
         uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;

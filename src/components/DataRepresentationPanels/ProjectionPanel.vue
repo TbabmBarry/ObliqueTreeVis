@@ -19,7 +19,7 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 20,
-    colorScale: d3.scaleOrdinal(["#e63946", "#a8dadc", "#457b9d", "#1d3557"])
+    colorScale: ["#e63946", "#a8dadc", "#457b9d"]
 })
 
 onMounted(async() => {
@@ -89,7 +89,7 @@ function initProjectionView () {
     const circle = circleGroup.selectAll("circle")
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
-        .attr("fill", d => state.colorScale(d.label));
+        .attr("fill", d => state.colorScale[d.label]);
 
     circleGroup.call(brush, circle, x, y);
     baseSvg.property("value", []);
