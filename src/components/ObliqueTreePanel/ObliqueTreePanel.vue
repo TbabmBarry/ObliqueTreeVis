@@ -62,9 +62,9 @@ onMounted(async () => {
 watch(() => props.selectedPoints, (newValue, oldValue) => {
     const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
     d3.selectAll("path.link")
-        .style("opacity", 0.6);
+        .style("opacity", 0.4);
     d3.selectAll("rect.node-rect")
-        .style("opacity", 0.6);
+        .style("opacity", 0.4);
     exposedFlowLinks.forEach((exposedFlowLink) => {
         d3.selectAll(`path.link#${exposedFlowLink}`)
             .style("opacity", 1);
