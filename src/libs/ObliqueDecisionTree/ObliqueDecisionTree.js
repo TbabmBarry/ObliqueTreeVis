@@ -764,10 +764,6 @@ class Odt {
                 j += 1;
             }
         });
-        console.log(exposedFlowLinks);
-        exposedFlowLinks.forEach((exposedFlowLink) => {
-            d3.select(`#${exposedFlowLink}`).style("stroke", "red");
-        })
         return {
             exposedFlowLinks,
             uniqueDecisionPaths

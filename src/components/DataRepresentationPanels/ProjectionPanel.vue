@@ -25,7 +25,6 @@ const state = reactive({
 onMounted(async() => {
     state.projections = await getProjection()
         .then(function (res) {
-            // console.log(projections);
             return res.data;
         }).catch((error) => {
             console.log("ERROR: ", error);
