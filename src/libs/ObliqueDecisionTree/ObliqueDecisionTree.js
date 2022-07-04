@@ -738,7 +738,7 @@ class Odt {
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
                     .style("fill", "#FF5154")
-                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y})`);
+                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y+nodeRectRatio})`);
                 
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
                 // TODO: determine scale for feature contribution
@@ -766,7 +766,7 @@ class Odt {
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
                 const absoluteContentHeight = contentBBox.y + contentBBox.height;
-                const scrollBarHeight = leafNodeBBox.height * leafNodeBBox.height / absoluteContentHeight;
+                const scrollBarHeight = (leafNodeBBox.height-2*nodeRectRatio) * leafNodeBBox.height / absoluteContentHeight;
                 scrollBar.attr("height", scrollBarHeight);
 
                 const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
@@ -782,19 +782,17 @@ class Odt {
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
-                    const scrollBarPosition = scrollDistance / maxScroll * (leafNodeBBox.height - scrollBarHeight); 
+                    const scrollBarPosition = scrollDistance / maxScroll * ((leafNodeBBox.height-2*nodeRectRatio) - scrollBarHeight); 
                     scrollBar.attr("y", scrollBarPosition);
                 }
                 // Set up scroll events
                 d3.select(this).on("wheel", (e,data) => {
-                    // console.log(e);
                     updateScrollPosition(e.deltaY);
                 });
 
                 // Set up scrollbar drag events
                 const dragBehaviour = d3.drag()
                     .on("drag", (e, data) => {
-                        // console.log(e.dy * maxScroll / (leafNodeBBox.height - scrollBarHeight));
                         updateScrollPosition(e.dy * maxScroll / (leafNodeBBox.height - scrollBarHeight))
                     });
                 scrollBar.call(dragBehaviour);
