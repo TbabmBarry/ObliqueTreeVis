@@ -765,6 +765,16 @@ class Odt {
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
                             .attr("fill", (d) => colorScale[d.label]);
+                    // Add line to separeate each feature contribution
+                    d3.select(this).append("line")
+                        .attr("class", "path-summary feature-contribution-line")
+                        .style("stroke", "#005CAB")
+                        .style("stroke-width", 2)
+                        .attr("x1", -0.5*(nodeRectWidth-2*nodeRectRatio))
+                        .attr("y1", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5)
+                        .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
+                        .attr("y2", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
+                    
                 });
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
@@ -781,7 +791,7 @@ class Odt {
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
-                    d3.select(this).selectAll("rect.path-summary")
+                    d3.select(this).selectAll(".path-summary")
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
