@@ -758,6 +758,7 @@ class Odt {
                 
                 // Iterate through the feature contribution arrays and draw them one by one
                 fcArr.forEach((fc, idx) => {
+                    console.log(fc);
                     // Draw feature contribution histogram
                     d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
@@ -781,6 +782,13 @@ class Odt {
                         .attr("y1", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5)
                         .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
                         .attr("y2", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
+                    // Add text to show feature contribution name
+                    d3.select(this).append("text")
+                        .attr("class", "path-summary feature-contribution-text")
+                        .attr("x", -0.5*(nodeRectWidth-2*nodeRectRatio))
+                        .attr("y", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)+yBand.bandwidth()*2)
+                        .text(fc.featureName);
+
                     
                 });
                 // Calculate maximum scrollable amount
