@@ -749,9 +749,9 @@ class Odt {
                     .domain(fcRange)
                     .range([0, nodeRectWidth-4*nodeRectRatio]),
                     yBand = d3.scaleBand()
-                    .range([0, (1/(2))*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
+                    .range([0, (1/2)*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
                     .domain([0,1,2])
-                    .padding(.1);
+                    .padding(.2);
                 fcArr.forEach((fc, idx) => {
                     d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
@@ -759,7 +759,7 @@ class Odt {
                         .append("rect")
                             .attr("class", "path-summary feature-contribution-rect")
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
-                            .attr('rx', 5)
+                            .attr('rx', 2)
                             .attr("y", (d) => 3*nodeRectRatio
                                  +yBand(d.label)+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
