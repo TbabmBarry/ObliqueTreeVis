@@ -698,17 +698,54 @@ class Odt {
     renderPathSummaryView(node) {
         const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = this;
         let _this = this;
-        
+
         // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
+                d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)");
+                // Get node rect bbox
+                const currLeafNode = d3.select(this).select("rect.node-rect");
+                const leafNodeBBox = {
+                    x: currLeafNode.attr("x"),
+                    y: currLeafNode.attr("y"),
+                    width: currLeafNode.attr("width"),
+                    height: currLeafNode.attr("height"),
+                }
+
+                const scrollBarWidth = 4;
+                let scrollDistance = 0;
+                const clipRect = d3.select(this).append("clipPath")
+                    .attr("id", "scrollbox-clip-path")
+                    .append("rect");
+                
+                clipRect
+                    .attr("x", leafNodeBBox.x)
+                    .attr("y", leafNodeBBox.y)
+                    .attr("width", leafNodeBBox.width)
+                    .attr("height", leafNodeBBox.height);
+                
+                // Insert an invisible rect that will be used to capture scroll events
+                d3.select(this).insert("rect", "g")
+                    .attr("x", leafNodeBBox.x)
+                    .attr("y", leafNodeBBox.y)
+                    .attr("width", leafNodeBBox.width)
+                    .attr("height", leafNodeBBox.height)
+                    .attr("opacity", 0.0);
+
+                // Position the scroll indicator
+                const scrollBar = d3.select(this).append("rect")
+                    .attr("width", scrollBarWidth)
+                    .attr("rx", scrollBarWidth/2)
+                    .attr("ry", scrollBarWidth/2)
+                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y})`);
+                
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
                 // TODO: determine scale for feature contribution
                 let x = d3.scaleLinear()
                     .domain(fcRange)
                     .range([0, nodeRectWidth-4*nodeRectRatio]),
                     yBand = d3.scaleBand()
-                    .range([0, (1/(fcArr.length))*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
+                    .range([0, (1/(2))*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
                     .domain([0,1,2])
                     .padding(.1);
                 fcArr.forEach((fc, idx) => {
@@ -720,11 +757,46 @@ class Odt {
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
                             .attr('rx', 5)
                             .attr("y", (d) => 3*nodeRectRatio
-                                 +yBand(d.label)+idx*(1/fcArr.length)*(nodeRectWidth-2*nodeRectRatio))
+                                 +yBand(d.label)+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
                             .attr("fill", (d) => colorScale[d.label]);
-                })
+                });
+                // Calculate maximum scrollable amount
+                const contentBBox = d3.select(this).node().getBBox();
+                const absoluteContentHeight = contentBBox.y + contentBBox.height;
+                const scrollBarHeight = leafNodeBBox.height * leafNodeBBox.height / absoluteContentHeight;
+                scrollBar.attr("height", scrollBarHeight);
+
+                const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
+                const updateScrollPosition = (diff) => {
+                    scrollDistance += diff;
+                    scrollDistance = Math.max(0, scrollDistance);
+                    scrollDistance = Math.min(maxScroll, scrollDistance);
+                    d3.select(this).selectAll("rect.summary")
+                        .attr("transform", 
+                        `translate(${parseFloat(leafNodeBBox.x)+0.5*parseFloat(leafNodeBBox.width)},
+                            ${parseFloat(leafNodeBBox.y)-scrollDistance})`);
+                    d3.select(this).selectAll("rect.path-summary")
+                        .attr("transform", 
+                        `translate(${parseFloat(leafNodeBBox.x)+0.5*parseFloat(leafNodeBBox.width)},
+                            ${parseFloat(leafNodeBBox.y)-scrollDistance})`);
+                    const scrollBarPosition = scrollDistance / maxScroll * (leafNodeBBox.height - scrollBarHeight); 
+                    scrollBar.attr("y", scrollBarPosition);
+                }
+                // Set up scroll events
+                d3.select(this).on("wheel", (e,data) => {
+                    // console.log(e);
+                    updateScrollPosition(e.deltaY);
+                });
+
+                // Set up scrollbar drag events
+                const dragBehaviour = d3.drag()
+                    .on("drag", (e, data) => {
+                        // console.log(e.dy * maxScroll / (leafNodeBBox.height - scrollBarHeight));
+                        updateScrollPosition(e.dy * maxScroll / (leafNodeBBox.height - scrollBarHeight))
+                    });
+                scrollBar.call(dragBehaviour);
             }
         });
     }
