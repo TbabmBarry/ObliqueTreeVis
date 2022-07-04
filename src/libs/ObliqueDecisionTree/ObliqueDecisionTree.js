@@ -741,7 +741,7 @@ class Odt {
                     .attr("width", scrollBarWidth)
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
-                    .style("fill", "#FF5154")
+                    .style("fill", "#515151")
                     .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y+nodeRectRatio})`);
                 
                 // Get valid feature contribution data for this node
@@ -776,6 +776,7 @@ class Odt {
                         .attr("class", "path-summary feature-contribution-line")
                         .style("stroke", "#005CAB")
                         .style("stroke-width", 2)
+                        .style("stroke-dasharray", ("3, 3"))
                         .attr("x1", -0.5*(nodeRectWidth-2*nodeRectRatio))
                         .attr("y1", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5)
                         .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
