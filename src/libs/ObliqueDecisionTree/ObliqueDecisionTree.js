@@ -51,6 +51,7 @@ class Odt {
                 histogramHeight: 60,
                 pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
+                histogramScatterPlotPadding: 10,
                 nodeRectStrokeWidth: 3,
                 colorScale: ["#e63946", "#a8dadc", "#457b9d"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
@@ -449,24 +450,24 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { constants: { nodeRectWidth, histogramHeight, detailedViewNodeRectWidth, scatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
+        const { constants: { nodeRectWidth, histogramHeight, detailedViewNodeRectWidth, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
             .domain(d3.extent(this.trainX, d => d[f]))
-            .range([0, detailedViewNodeRectWidth-histogramHeight-2*scatterPlotPadding]));
+            .range([0, detailedViewNodeRectWidth-histogramHeight-3*scatterPlotPadding-histogramScatterPlotPadding]));
 
         const y = x.map(x => x.copy()
-            .range([detailedViewNodeRectWidth-histogramHeight-2*scatterPlotPadding, 0]));
+            .range([detailedViewNodeRectWidth-histogramHeight-3*scatterPlotPadding-histogramScatterPlotPadding, 0]));
 
         // Add dots in each decision node
         node.each(function (nodeData, index) {
             let currFeatureIdx = nodeData.data.featureIdx;
             if (currFeatureIdx.length === 2) {
                 // Draw two-feature scatter plot
-                _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
+                _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
                 // Draw two-feature histogram
-                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
+                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
             }
 
             if (currFeatureIdx.length === 1) {
@@ -490,17 +491,17 @@ class Odt {
      * @param {x} x
      * @param {y} y
      */
-    drawScatterPlot(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
+    drawScatterPlot(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
         // Allow X and Y axis generators to be called
         targetSelection.append("g")
             .attr("class", "detailed x-axis")
-            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
-                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-scatterPlotPadding})`)
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding})`)
             .call(d3.axisBottom(x[currFeatureIdx[0]]));
         targetSelection.append("g")
             .attr("class", "detailed y-axis")
-            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
-                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
             .call(d3.axisLeft(y[currFeatureIdx[1]]));
         
         const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, that);
@@ -510,8 +511,8 @@ class Odt {
             .datum(endPoints)
                 .attr("class", "detailed split-line")
                 .attr("d", (d) => lineHelper(d))
-                .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
-                    ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+                .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                    ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
                 .style('fill', 'none')
                 .style('stroke', 'black')
                 .style('stroke-width', '2px');
@@ -523,11 +524,11 @@ class Odt {
                 .attr("class", "detailed dot")
                 .attr("cx", (d) => {
                     return x[currFeatureIdx[0]](that.trainX[d][featureArr[currFeatureIdx[0]]])
-                        -0.5*detailedViewNodeRectWidth+scatterPlotPadding;
+                        -0.5*detailedViewNodeRectWidth+2*scatterPlotPadding;
                 })
                 .attr("cy", (d) => {
                     return y[currFeatureIdx[1]](that.trainX[d][featureArr[currFeatureIdx[1]]])
-                        -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding;
+                        -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding;
                 })
                 .attr("r", 3.5)
                 .style("fill", d => colorScale[that.trainY[d]]);
@@ -608,7 +609,7 @@ class Odt {
      * @param {x} x
      * @param {y} y
      */    
-    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
             .value((d) => d.value)
@@ -656,7 +657,7 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("x", 2)
-            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
             .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
             .attr("height", d => histogramHeight-yHistogram1(d.length))
@@ -668,7 +669,7 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("x", 2)
-            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
                 .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
                 .attr("height", d => histogramHeight-yHistogram1(d.length))
