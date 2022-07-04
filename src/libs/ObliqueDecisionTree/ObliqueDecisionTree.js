@@ -706,10 +706,10 @@ class Odt {
                 // Get node rect bbox
                 const currLeafNode = d3.select(this).select("rect.node-rect");
                 const leafNodeBBox = {
-                    x: currLeafNode.attr("x"),
-                    y: currLeafNode.attr("y"),
-                    width: currLeafNode.attr("width"),
-                    height: currLeafNode.attr("height"),
+                    x: parseFloat(currLeafNode.attr("x")),
+                    y: parseFloat(currLeafNode.attr("y")),
+                    width: parseFloat(currLeafNode.attr("width")),
+                    height: parseFloat(currLeafNode.attr("height")),
                 }
 
                 const scrollBarWidth = 6;
@@ -776,12 +776,12 @@ class Odt {
                     scrollDistance = Math.min(maxScroll, scrollDistance);
                     d3.select(this).selectAll("rect.summary")
                         .attr("transform", 
-                        `translate(${parseFloat(leafNodeBBox.x)+0.5*parseFloat(leafNodeBBox.width)},
-                            ${parseFloat(leafNodeBBox.y)-scrollDistance})`);
+                        `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
+                            ${leafNodeBBox.y-scrollDistance})`);
                     d3.select(this).selectAll("rect.path-summary")
                         .attr("transform", 
-                        `translate(${parseFloat(leafNodeBBox.x)+0.5*parseFloat(leafNodeBBox.width)},
-                            ${parseFloat(leafNodeBBox.y)-scrollDistance})`);
+                        `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
+                            ${leafNodeBBox.y-scrollDistance})`);
                     const scrollBarPosition = scrollDistance / maxScroll * (leafNodeBBox.height - scrollBarHeight); 
                     scrollBar.attr("y", scrollBarPosition);
                 }
