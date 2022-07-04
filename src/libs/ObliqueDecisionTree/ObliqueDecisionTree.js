@@ -712,7 +712,7 @@ class Odt {
                     height: currLeafNode.attr("height"),
                 }
 
-                const scrollBarWidth = 4;
+                const scrollBarWidth = 6;
                 let scrollDistance = 0;
                 const clipRect = d3.select(this).append("clipPath")
                     .attr("id", "scrollbox-clip-path")
@@ -737,6 +737,7 @@ class Odt {
                     .attr("width", scrollBarWidth)
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
+                    .style("fill", "#FF5154")
                     .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y})`);
                 
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
