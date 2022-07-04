@@ -710,7 +710,7 @@ class Odt {
                     y: parseFloat(currLeafNode.attr("y")),
                     width: parseFloat(currLeafNode.attr("width")),
                     height: parseFloat(currLeafNode.attr("height")),
-                }
+                };
 
                 const scrollBarWidth = 6;
                 let scrollDistance = 0;
@@ -723,7 +723,7 @@ class Odt {
                     .append("rect");
                 
                 clipRect
-                    .attr("x", leafNodeBBox.x-nodeRectStrokeWidth)
+                    .attr("x", leafNodeBBox.x-nodeRectStrokeWidth) // -nodeRectStrokeWidth to account for stroke
                     .attr("y", leafNodeBBox.y-nodeRectStrokeWidth)
                     .attr("width", leafNodeBBox.width+2*nodeRectStrokeWidth)
                     .attr("height", leafNodeBBox.height+2*nodeRectStrokeWidth);
@@ -744,7 +744,10 @@ class Odt {
                     .style("fill", "#FF5154")
                     .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y+nodeRectRatio})`);
                 
+                // Get valid feature contribution data for this node
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
+                
+                // Create value encoding for x and y axis
                 let x = d3.scaleLinear()
                     .domain(fcRange)
                     .range([0, nodeRectWidth-4*nodeRectRatio]),
@@ -752,6 +755,8 @@ class Odt {
                     .range([0, (1/2)*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio])
                     .domain([0,1,2])
                     .padding(.2);
+                
+                // Iterate through the feature contribution arrays and draw them one by one
                 fcArr.forEach((fc, idx) => {
                     // Draw feature contribution histogram
                     d3.select(this).selectAll("g")
@@ -810,6 +815,7 @@ class Odt {
                     .on("drag", (e, data) => {
                         updateScrollPosition(e.dy * maxScroll / (leafNodeBBox.height - scrollBarHeight))
                     });
+                // Add drag behaviour to scrollbar
                 scrollBar.call(dragBehaviour);
             }
         });
