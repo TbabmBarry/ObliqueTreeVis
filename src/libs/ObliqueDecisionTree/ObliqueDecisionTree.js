@@ -714,6 +714,10 @@ class Odt {
 
                 const scrollBarWidth = 6;
                 let scrollDistance = 0;
+
+                // Add a clip path and a rect within it.
+                // Everything inside the scroll group that does not overlap this 
+                // rectangle will be hidden
                 const clipRect = d3.select(this).append("clipPath")
                     .attr("id", "scrollbox-clip-path")
                     .append("rect");
@@ -741,7 +745,6 @@ class Odt {
                     .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y+nodeRectRatio})`);
                 
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
-                // TODO: determine scale for feature contribution
                 let x = d3.scaleLinear()
                     .domain(fcRange)
                     .range([0, nodeRectWidth-4*nodeRectRatio]),
