@@ -753,6 +753,7 @@ class Odt {
                     .domain([0,1,2])
                     .padding(.2);
                 fcArr.forEach((fc, idx) => {
+                    // Draw feature contribution histogram
                     d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
                         .enter()
@@ -783,6 +784,7 @@ class Odt {
                 scrollBar.attr("height", scrollBarHeight);
 
                 const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
+                // Add scroll event listener
                 const updateScrollPosition = (diff) => {
                     scrollDistance += diff;
                     scrollDistance = Math.max(0, scrollDistance);
