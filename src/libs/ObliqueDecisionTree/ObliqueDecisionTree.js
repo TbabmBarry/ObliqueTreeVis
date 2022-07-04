@@ -696,7 +696,7 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
@@ -719,10 +719,10 @@ class Odt {
                     .append("rect");
                 
                 clipRect
-                    .attr("x", leafNodeBBox.x)
-                    .attr("y", leafNodeBBox.y)
-                    .attr("width", leafNodeBBox.width)
-                    .attr("height", leafNodeBBox.height);
+                    .attr("x", leafNodeBBox.x-nodeRectStrokeWidth)
+                    .attr("y", leafNodeBBox.y-nodeRectStrokeWidth)
+                    .attr("width", leafNodeBBox.width+2*nodeRectStrokeWidth)
+                    .attr("height", leafNodeBBox.height+2*nodeRectStrokeWidth);
                 
                 // Insert an invisible rect that will be used to capture scroll events
                 d3.select(this).insert("rect", "g")
