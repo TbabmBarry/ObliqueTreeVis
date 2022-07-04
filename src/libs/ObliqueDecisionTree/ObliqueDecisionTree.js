@@ -608,7 +608,7 @@ class Odt {
      * @param {x} x
      * @param {y} y
      */    
-    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
             .value((d) => d.value)
@@ -645,10 +645,10 @@ class Odt {
         // Set up y-axis value encodings for histograms
         const yHistogram1 = d3.scaleLinear()
                 .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
-                .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]),
+                .range([histogramHeight, 0]),
             yHistogram2 = d3.scaleLinear()
                 .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
-                .range([0.5*(detailedViewNodeRectWidth-nodeRectWidth-scatterPlotPadding), 0.5*scatterPlotPadding]);
+                .range([histogramHeight, 0]);
 
         // Draw histograms
         targetSelection.selectAll("rect.histogram.x-histogram.left")
@@ -656,9 +656,10 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("x", 2)
-            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-            .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
-            .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
+                ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
+            .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
+            .attr("height", d => histogramHeight-yHistogram1(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
             .style("opacity", 0.4);
 
@@ -667,9 +668,10 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("x", 2)
-            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*nodeRectWidth}, ${yHistogram1(d.length)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
-            .attr("width", d => 0.8*(x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0)))
-            .attr("height", d => 0.5*(detailedViewNodeRectWidth-nodeRectWidth)-yHistogram1(d.length))
+            .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, 
+                ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
+                .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
+                .attr("height", d => histogramHeight-yHistogram1(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
             .style("opacity", 0.6);
 
@@ -678,9 +680,10 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("y", 2)
-            .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
+            .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
+                ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
             .attr("width", d => yHistogram2(d.length))
-            .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
+            .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
             .style("opacity", 0.4);
 
@@ -689,9 +692,10 @@ class Odt {
             .join("rect")
             .attr("class", "detailed histogram")
             .attr("y", 2)
-            .attr("transform", d => `translate(${0.5*(nodeRectWidth)}, ${x[currFeatureIdx[1]](d.x0)})`)
+            .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
+                ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
             .attr("width", d => yHistogram2(d.length))
-            .attr("height", d => 0.8*(x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0)))
+            .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
             .style("opacity", 0.6);
     }
