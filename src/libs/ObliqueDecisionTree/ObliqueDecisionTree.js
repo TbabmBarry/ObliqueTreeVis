@@ -45,7 +45,7 @@ class Odt {
                 nameFontFamily: 'sans-serif',
                 minZoom: 0.1,
                 maxZoom: 50,
-                nodeRectRatio: 25,
+                nodeRectRatio: 20,
                 leafNodeRectRatio: 10,
                 nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
@@ -182,7 +182,7 @@ class Odt {
                     select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
-                        .attr("x", - 0.5 * nodeRectWidth)
+                        .attr("x", -0.5*nodeRectWidth)
                         .attr("y", 0)
                         .attr("width", nodeRectWidth)
                         .attr("height", nodeRectWidth)
@@ -190,8 +190,8 @@ class Odt {
                     select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
-                        .attr("x", - 0.5 * nodeRectWidth - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
-                        .attr("y", - 0.5 * (detailedViewNodeRectWidth - nodeRectWidth))
+                        .attr("x", -0.5*nodeRectWidth-0.5*(detailedViewNodeRectWidth-nodeRectWidth))
+                        .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth))
                         .attr("width", detailedViewNodeRectWidth)
                         .attr("height", detailedViewNodeRectWidth)
                     .on("end", () => {
@@ -226,7 +226,7 @@ class Odt {
             .attr("rx", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
             .attr("ry", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
             .style("fill", "#fff")
-            .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
+            .style("stroke", "#000000")
             .style("stroke-width", nodeRectStrokeWidth);
 
         
@@ -409,7 +409,7 @@ class Odt {
             .attr("rx", 0.25*nodeRectRatio)
             .attr("ry", 0.25*nodeRectRatio)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start))
-            .attr("y", nodeRectRatio)
+            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio)
             .style("fill", (d) => featureColorScale(d.label))
             .style("stroke", "#000")
             .style("stroke-width", "2px");
