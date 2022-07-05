@@ -769,7 +769,6 @@ class Odt {
                 
                 // Iterate through the feature contribution arrays and draw them one by one
                 fcArr.forEach((fc, idx) => {
-                    console.log(fc);
                     // Draw feature contribution histogram
                     d3.select(this).selectAll("g")
                         .data(fc.featureContribution)
@@ -799,8 +798,17 @@ class Odt {
                         .attr("x", -0.5*(nodeRectWidth-2*nodeRectRatio))
                         .attr("y", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)+yBand.bandwidth()*2)
                         .text(fc.featureName);
-
-                    
+                    if (idx === fcArr.length-1) {
+                        d3.select(this).append("line")
+                            .attr("class", "path-summary feature-contribution-line")
+                            .style("stroke", "#005CAB")
+                            .style("stroke-width", 2)
+                            .style("stroke-dasharray", ("3, 3"))
+                            .attr("x1", -0.5*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("y1", 3*nodeRectRatio+(idx+1)*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5)
+                            .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("y2", 3*nodeRectRatio+(idx+1)*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
+                    }
                 });
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
