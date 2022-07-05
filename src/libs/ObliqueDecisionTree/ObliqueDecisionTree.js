@@ -555,8 +555,11 @@ class Odt {
                 value: that.trainX[idx][featureArr[currFeatureIdx[0]]]
             })
         );
+
         // Get split point value
         const splitPoint = nodeData.data.split[nodeData.data.split.length-1];
+
+        // Create value encoding for x and y axis
         const xStrip = d3.scaleLinear()
             .domain(d3.extent(stripData, d => d.value))
             .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
@@ -564,18 +567,20 @@ class Odt {
             .domain([0,1,2])
             .rangeRound([detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight, 0])
             .padding(1);
+
+        // Draw strip chart axes
         targetSelection.append("g")
             .attr("class", "detailed strip-chart x-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding})`)
             .call(d3.axisBottom(xStrip));
-        
         targetSelection.append("g")
             .attr("class", "detailed strip-chart y-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
             .call(d3.axisLeft(yStrip));
-
+        
+        // Draw points for strip chart
         targetSelection.append("g")
             .attr("class", "detailed strip-chart-group")
             .attr("pointer-events", "all")
@@ -587,6 +592,7 @@ class Odt {
             .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding)
             .attr("fill", d => d.value < splitPoint ? "red" : "blue");
         
+        // Append split point line for strip chart
         targetSelection.append("line")
             .attr("class", "detailed strip-cahrt split-line")
             .attr("x1", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
