@@ -846,7 +846,7 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, leafNodeRectStrokeWidth, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectStrokeWidth, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
@@ -862,7 +862,7 @@ class Odt {
                     height: parseFloat(currLeafNode.attr("height")),
                 };
 
-                const scrollBarWidth = 8;
+                const scrollBarWidth = leafNodeRectStrokeWidth;
                 let scrollDistance = 0;
 
                 // Add a clip path and a rect within it.
