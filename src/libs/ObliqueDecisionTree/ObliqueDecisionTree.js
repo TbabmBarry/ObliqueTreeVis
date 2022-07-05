@@ -257,8 +257,10 @@ class Odt {
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
                     // _this.drawCoefficientDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
-                    _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
+                    // _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
                 }
+                // Draw feature coefficients distribution
+                _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
                 // Draw split point distribution
                 _this.drawSplitHistogram(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
             }
@@ -360,6 +362,16 @@ class Odt {
             .selectAll("text")
     }
 
+    /**
+     * Draw feature coefficients distribution in the summary view (horizontal bar)
+     * @date 2022-07-05
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {nodeRectRatio} nodeRectRatio
+     * @param {featureArr} featureArr
+     * @param {featureColorScale} featureColorScale
+     */
     drawCoefficientBar(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale) {
         // Draw coefficient weights of features in the oblique split
         const {featureIdx, split }  = nodeData.data;
