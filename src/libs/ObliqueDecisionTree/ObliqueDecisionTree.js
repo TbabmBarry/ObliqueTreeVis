@@ -472,7 +472,7 @@ class Odt {
 
             if (currFeatureIdx.length === 1) {
                 // Draw strip chart for one-feature classifier
-                _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, currFeatureIdx, _this);
+                _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, currFeatureIdx, _this);
             }
         })
     }
@@ -546,7 +546,7 @@ class Odt {
      * @param {currFeatureIdx} currFeatureIdx
      * @param {that} that
      */
-    drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, scatterPlotPadding, featureArr, currFeatureIdx, that) {
+    drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, currFeatureIdx, that) {
         // Generate data for strip chart
         const stripData = nodeData.data.subTrainingSet.map((idx) => 
             ({
@@ -559,19 +559,21 @@ class Odt {
         const splitPoint = nodeData.data.split[nodeData.data.split.length-1];
         const xStrip = d3.scaleLinear()
             .domain(d3.extent(stripData, d => d.value))
-            .range([scatterPlotPadding, detailedViewNodeRectWidth-scatterPlotPadding]);
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
         const yStrip = d3.scalePoint()
             .domain([0,1,2])
-            .rangeRound([detailedViewNodeRectWidth-scatterPlotPadding, scatterPlotPadding])
+            .rangeRound([detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight, 0])
             .padding(1);
         targetSelection.append("g")
             .attr("class", "detailed strip-chart x-axis")
-            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth}, ${nodeRectWidth+2*scatterPlotPadding})`)
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding})`)
             .call(d3.axisBottom(xStrip));
         
         targetSelection.append("g")
             .attr("class", "detailed strip-chart y-axis")
-            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+scatterPlotPadding}, ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)})`)
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
             .call(d3.axisLeft(yStrip));
 
         targetSelection.append("g")
@@ -581,16 +583,16 @@ class Odt {
         .data(stripData)
         .join("circle")
             .attr("r", 3.5)
-            .attr("cx", d => xStrip(d.value)-0.5*detailedViewNodeRectWidth)
-            .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth))
+            .attr("cx", d => xStrip(d.value)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+            .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding)
             .attr("fill", d => d.value < splitPoint ? "red" : "blue");
         
         targetSelection.append("line")
             .attr("class", "detailed strip-cahrt split-line")
-            .attr("x1", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth)
-            .attr("y1", 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-scatterPlotPadding)
-            .attr("x2", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth)
-            .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding)
+            .attr("x1", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+            .attr("y1", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding)
+            .attr("x2", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+            .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding)
             .style("stroke", "#000");
     }
 
