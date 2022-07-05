@@ -598,7 +598,8 @@ class Odt {
             .attr("y1", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding)
             .attr("x2", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
             .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding)
-            .style("stroke", "#000");
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
         
         // Draw feature histogram for strip chart
         // Set up histogram parameters
