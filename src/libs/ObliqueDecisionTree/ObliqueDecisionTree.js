@@ -467,12 +467,12 @@ class Odt {
                 // Draw two-feature scatter plot
                 _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
                 // Draw two-feature histogram
-                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
+                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
             }
 
             if (currFeatureIdx.length === 1) {
                 // Draw strip chart for one-feature classifier
-                _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, currFeatureIdx, _this);
+                _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this);
             }
         })
     }
@@ -546,7 +546,7 @@ class Odt {
      * @param {currFeatureIdx} currFeatureIdx
      * @param {that} that
      */
-    drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, currFeatureIdx, that) {
+    drawStripChart(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that) {
         // Generate data for strip chart
         const stripData = nodeData.data.subTrainingSet.map((idx) => 
             ({
@@ -565,7 +565,7 @@ class Odt {
             .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
         const yStrip = d3.scalePoint()
             .domain([0,1,2])
-            .rangeRound([detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight, 0])
+            .rangeRound([detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding, 0])
             .padding(1);
 
         // Draw strip chart axes
@@ -577,7 +577,7 @@ class Odt {
         targetSelection.append("g")
             .attr("class", "detailed strip-chart y-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
-                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
             .call(d3.axisLeft(yStrip));
         
         // Draw points for strip chart
@@ -589,7 +589,7 @@ class Odt {
         .join("circle")
             .attr("r", 3.5)
             .attr("cx", d => xStrip(d.value)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
-            .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding)
+            .attr("cy", d => yStrip(d.label)-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding)
             .attr("fill", d => d.value < splitPoint ? "red" : "blue");
         
         // Append split point line for strip chart
@@ -598,8 +598,59 @@ class Odt {
             .attr("x1", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
             .attr("y1", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding)
             .attr("x2", xStrip(splitPoint)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
-            .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding)
+            .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding)
             .style("stroke", "#000");
+        
+        // Draw feature histogram for strip chart
+        // Set up histogram parameters
+        const stripHistogram = d3.bin()
+            .value((d) => d.value)
+            .domain(xStrip.domain())
+            .thresholds(xStrip.ticks(20));
+
+        // Get the original data for histograms
+        const valuesLeft = nodeData.data.leftSubTrainingSet.map(idx => ({
+            value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
+            label: that.trainY[idx],
+        })),
+            valuesRight = nodeData.data.rightSubTrainingSet.map(idx => ({
+                value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
+                label: that.trainY[idx],
+            }));
+
+        // Get the histogram data according to predefined histogram functions
+        const binsLeft = stripHistogram(valuesLeft),
+            binsRight = stripHistogram(valuesRight);
+
+        // Set up y-axis value encodings for histograms
+        const yHistogram = d3.scaleLinear()
+            .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])
+            .range([histogramHeight, 0]);
+        
+        // Draw histograms
+        targetSelection.selectAll("rect.histogram.x-histogram.left")
+            .data(binsLeft)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("x", 2)
+            .attr("transform", d => `translate(${xStrip(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+            .attr("width", d => xStrip(d.x1)-xStrip(d.x0))
+            .attr("height", d => histogramHeight-yHistogram(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.4);
+
+        targetSelection.selectAll("rect.histogram.x-histogram.right")
+            .data(binsRight)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("x", 2)
+            .attr("transform", d => `translate(${xStrip(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+                .attr("width", d => xStrip(d.x1)-xStrip(d.x0))
+                .attr("height", d => histogramHeight-yHistogram(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.6);
     }
 
     /**
@@ -617,7 +668,7 @@ class Odt {
      * @param {x} x
      * @param {y} y
      */    
-    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
             .value((d) => d.value)
