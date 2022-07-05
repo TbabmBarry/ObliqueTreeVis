@@ -772,7 +772,7 @@ class Odt {
         // Draw axis for histogram on the second feature
         targetSelection.append("g")
             .attr("class", "detailed histogram axis-right")
-            .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
+            .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-0.5*histogramScatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
             .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
     }
