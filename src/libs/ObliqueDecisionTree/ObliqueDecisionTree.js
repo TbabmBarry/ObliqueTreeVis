@@ -307,7 +307,9 @@ class Odt {
             .attr("width", (d) => xTotal(d.end-d.start))
             .attr("height", nodeRectRatio)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xTotal(d.start))
-            .style("fill", (d) => colorScale[d.label]);
+            .style("fill", (d) => colorScale[d.label])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
     }
 
     /**
