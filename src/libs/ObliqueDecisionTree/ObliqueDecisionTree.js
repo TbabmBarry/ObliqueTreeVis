@@ -632,7 +632,6 @@ class Odt {
             .data(binsLeft)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("x", 2)
             .attr("transform", d => `translate(${xStrip(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
             .attr("width", d => xStrip(d.x1)-xStrip(d.x0))
@@ -644,7 +643,6 @@ class Odt {
             .data(binsRight)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("x", 2)
             .attr("transform", d => `translate(${xStrip(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
                 .attr("width", d => xStrip(d.x1)-xStrip(d.x0))
@@ -722,7 +720,6 @@ class Odt {
             .data(bins1Left)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("x", 2)
             .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
             .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
@@ -734,7 +731,6 @@ class Odt {
             .data(bins1Right)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("x", 2)
             .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
                 .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
@@ -753,7 +749,7 @@ class Odt {
             .data(bins2Left)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("y", 2)
+            .attr("y", histogramScatterPlotPadding)
             .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
                 ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
             .attr("width", d => yHistogram2(d.length))
@@ -765,7 +761,7 @@ class Odt {
             .data(bins2Right)
             .join("rect")
             .attr("class", "detailed histogram")
-            .attr("y", 2)
+            .attr("y", histogramScatterPlotPadding)
             .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
                 ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
             .attr("width", d => yHistogram2(d.length))
@@ -777,8 +773,8 @@ class Odt {
         targetSelection.append("g")
             .attr("class", "detailed histogram axis-right")
             .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
-                ${scatterPlotPadding})rotate(90)`)
-            .call(d3.axisBottom(x[currFeatureIdx[1]]).tickFormat(""));
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
+            .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
     }
 
     /**
