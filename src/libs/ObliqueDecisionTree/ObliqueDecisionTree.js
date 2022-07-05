@@ -45,11 +45,10 @@ class Odt {
                 nameFontFamily: 'sans-serif',
                 minZoom: 0.1,
                 maxZoom: 50,
-                nodeRectRatio: 20,
-                nodeRectWidth: 240,
+                nodeRectRatio: 25,
+                nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
                 histogramHeight: 60,
-                pathSummaryHeight: 180,
                 scatterPlotPadding: 20,
                 histogramScatterPlotPadding: 10,
                 nodeRectStrokeWidth: 3,
@@ -412,10 +411,10 @@ class Odt {
             .attr("class", "summary split-text")
             .text( (d) => d[1])
             .attr("text-anchor", "start")
-            .attr("font-size", "11px")
+            .attr("font-size", "10px")
             .attr("fill", "black")
             .attr("transform", (d, i) => {
-                return `translate(${-nodeRectRatio+xRight(d[1])+10},
+                return `translate(${-nodeRectRatio+xRight(d[1])+5},
                     ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
             })
         
@@ -423,10 +422,10 @@ class Odt {
             .attr("class", "summary split-text")
             .text( (d) => d[0])
             .attr("text-anchor", "end")
-            .attr("font-size", "11px")
+            .attr("font-size", "10px")
             .attr("fill", "black")
             .attr("transform", (d, i) => {
-                return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-10},
+                return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
                     ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
             })
 
