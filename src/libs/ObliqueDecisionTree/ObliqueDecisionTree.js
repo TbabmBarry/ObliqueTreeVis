@@ -46,6 +46,7 @@ class Odt {
                 minZoom: 0.1,
                 maxZoom: 50,
                 nodeRectRatio: 25,
+                leafNodeRectRatio: 10,
                 nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
                 histogramHeight: 60,
@@ -165,7 +166,7 @@ class Odt {
      */
     renderNodes(nodes) {
         const { parts, 
-            constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
+            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -222,8 +223,8 @@ class Odt {
             .attr("height", (d) => d.data.type === "leaf" ? nodeRectWidth+2*nodeRectRatio : nodeRectWidth)
             .attr("x",- 0.5 * nodeRectWidth)
             .attr("y",0)
-            .attr("rx", nodeRectRatio)
-            .attr("ry", nodeRectRatio)
+            .attr("rx", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
+            .attr("ry", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", (d) => d.data.type === "decision" ? "#005CAB" : "#E31B23")
             .style("stroke-width", nodeRectStrokeWidth);
@@ -846,7 +847,7 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
@@ -862,7 +863,7 @@ class Odt {
                     height: parseFloat(currLeafNode.attr("height")),
                 };
 
-                const scrollBarWidth = 6;
+                const scrollBarWidth = 8;
                 let scrollDistance = 0;
 
                 // Add a clip path and a rect within it.
@@ -891,9 +892,15 @@ class Odt {
                     .attr("width", scrollBarWidth)
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
-                    .style("fill", "#515151")
-                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width}, ${leafNodeBBox.y+nodeRectRatio})`);
-                
+                    .style("fill", "#d6dee1")
+                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width-2}, ${leafNodeBBox.y+leafNodeRectRatio})`)
+                    .on("mouseover", function () {
+                        d3.select(this).style("fill", "#a8bbbf");
+                    })
+                    .on("mouseout", function () {
+                        d3.select(this).style("fill", "#d6dee1");
+                    })
+
                 // Get valid feature contribution data for this node
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
                 
@@ -954,7 +961,7 @@ class Odt {
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
                 const absoluteContentHeight = contentBBox.y + contentBBox.height;
-                const scrollBarHeight = (leafNodeBBox.height-2*nodeRectRatio) * leafNodeBBox.height / absoluteContentHeight;
+                const scrollBarHeight = (leafNodeBBox.height-2*leafNodeRectRatio) * leafNodeBBox.height / absoluteContentHeight;
                 scrollBar.attr("height", scrollBarHeight);
 
                 const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
@@ -971,7 +978,7 @@ class Odt {
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
-                    const scrollBarPosition = scrollDistance / maxScroll * ((leafNodeBBox.height-2*nodeRectRatio) - scrollBarHeight); 
+                    const scrollBarPosition = scrollDistance / maxScroll * ((leafNodeBBox.height-2*leafNodeRectRatio) - scrollBarHeight); 
                     scrollBar.attr("y", scrollBarPosition);
                 }
                 // Set up scroll events
