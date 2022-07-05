@@ -46,13 +46,14 @@ class Odt {
                 minZoom: 0.1,
                 maxZoom: 50,
                 nodeRectRatio: 20,
-                leafNodeRectRatio: 10,
+                leafNodeRectRatio: 0,
                 nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
                 histogramHeight: 60,
-                scatterPlotPadding: 20,
+                scatterPlotPadding: 25,
                 histogramScatterPlotPadding: 10,
                 nodeRectStrokeWidth: 3,
+                leafNodeRectStrokeWidth: 6,
                 colorScale: ["#e63946", "#a8dadc", "#457b9d"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
@@ -166,7 +167,7 @@ class Odt {
      */
     renderNodes(nodes) {
         const { parts, 
-            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
+            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -227,8 +228,7 @@ class Odt {
             .attr("ry", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
             .style("fill", "#fff")
             .style("stroke", "#000000")
-            .style("stroke-width", nodeRectStrokeWidth);
-
+            .style("stroke-width", (d) => d.data.type === "leaf" ? leafNodeRectStrokeWidth : nodeRectStrokeWidth);
         
         this.renderPathSummaryView(node);
         this.renderSummaryView(node);
@@ -393,7 +393,6 @@ class Odt {
         const xBar = d3.scaleLinear()
             .domain([0, 1])
             .range([0, nodeRectWidth-4*nodeRectRatio]);
-        console.log(coefficientsData);
         // Create a svg group to bind each individual coefficient bar
         const coefficientDistribution = targetSelection.selectAll("g.coefficient-distribution")
             .data(coefficientsData)
@@ -847,7 +846,7 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, leafNodeRectStrokeWidth, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
@@ -874,26 +873,28 @@ class Odt {
                     .append("rect");
                 
                 clipRect
-                    .attr("x", leafNodeBBox.x-nodeRectStrokeWidth) // -nodeRectStrokeWidth to account for stroke
-                    .attr("y", leafNodeBBox.y-nodeRectStrokeWidth)
-                    .attr("width", leafNodeBBox.width+2*nodeRectStrokeWidth)
-                    .attr("height", leafNodeBBox.height+2*nodeRectStrokeWidth);
+                    .attr("x", leafNodeBBox.x) // -nodeRectStrokeWidth to account for stroke
+                    .attr("y", leafNodeBBox.y)
+                    .attr("width", leafNodeBBox.width)
+                    .attr("height", leafNodeBBox.height);
                 
                 // Insert an invisible rect that will be used to capture scroll events
                 d3.select(this).insert("rect", "g")
+                    .attr("class", "scroll-capture-rect")
                     .attr("x", leafNodeBBox.x)
                     .attr("y", leafNodeBBox.y)
                     .attr("width", leafNodeBBox.width)
                     .attr("height", leafNodeBBox.height)
-                    .attr("opacity", 0.0);
-
+                    .style("opacity", 0);
+                
                 // Position the scroll indicator
                 const scrollBar = d3.select(this).append("rect")
                     .attr("width", scrollBarWidth)
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
                     .style("fill", "#d6dee1")
-                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width-2}, ${leafNodeBBox.y+leafNodeRectRatio})`)
+                    .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width-0.5*leafNodeRectStrokeWidth}, 
+                        ${leafNodeBBox.y+0.5*leafNodeRectStrokeWidth})`)
                     .on("mouseover", function () {
                         d3.select(this).style("fill", "#a8bbbf");
                     })
@@ -961,7 +962,7 @@ class Odt {
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
                 const absoluteContentHeight = contentBBox.y + contentBBox.height;
-                const scrollBarHeight = (leafNodeBBox.height-2*leafNodeRectRatio) * leafNodeBBox.height / absoluteContentHeight;
+                const scrollBarHeight = (leafNodeBBox.height-leafNodeRectStrokeWidth) * leafNodeBBox.height / absoluteContentHeight;
                 scrollBar.attr("height", scrollBarHeight);
 
                 const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
@@ -978,7 +979,7 @@ class Odt {
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
-                    const scrollBarPosition = scrollDistance / maxScroll * ((leafNodeBBox.height-2*leafNodeRectRatio) - scrollBarHeight); 
+                    const scrollBarPosition = scrollDistance / maxScroll * ((leafNodeBBox.height-leafNodeRectStrokeWidth) - scrollBarHeight); 
                     scrollBar.attr("y", scrollBarPosition);
                 }
                 // Set up scroll events
