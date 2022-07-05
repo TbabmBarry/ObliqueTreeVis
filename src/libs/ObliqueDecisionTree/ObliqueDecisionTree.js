@@ -466,7 +466,7 @@ class Odt {
                 // Draw two-feature scatter plot
                 _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
                 // Draw two-feature histogram
-                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
+                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
             }
 
             if (currFeatureIdx.length === 1) {
@@ -651,6 +651,13 @@ class Odt {
                 .attr("height", d => histogramHeight-yHistogram(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
             .style("opacity", 0.6);
+        
+        // Draw x-axis for histogram
+        targetSelection.append("g")
+            .attr("class", "detailed histogram x-axis")
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+            .call(d3.axisBottom(xStrip).tickFormat(""));
     }
 
     /**
@@ -668,7 +675,7 @@ class Odt {
      * @param {x} x
      * @param {y} y
      */    
-    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+    drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
         // Set the parameters for histograms
         const histogram1 = d3.bin()
             .value((d) => d.value)
@@ -735,6 +742,13 @@ class Odt {
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
             .style("opacity", 0.6);
 
+        // Draw axis for histogram on the first feature
+        targetSelection.append("g")
+            .attr("class", "detailed histogram axis-left")
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+            .call(d3.axisBottom(x[currFeatureIdx[0]]).tickFormat(""));
+
         targetSelection.selectAll("rect.histogram.y-histogram.left")
             .data(bins2Left)
             .join("rect")
@@ -758,6 +772,13 @@ class Odt {
             .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
             .style("opacity", 0.6);
+
+        // Draw axis for histogram on the second feature
+        targetSelection.append("g")
+            .attr("class", "detailed histogram axis-right")
+            .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
+                ${scatterPlotPadding})rotate(90)`)
+            .call(d3.axisBottom(x[currFeatureIdx[1]]).tickFormat(""));
     }
 
     /**
