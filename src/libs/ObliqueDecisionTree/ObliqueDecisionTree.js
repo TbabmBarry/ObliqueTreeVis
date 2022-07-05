@@ -396,7 +396,9 @@ class Odt {
             .attr("height", yBand.bandwidth())
             .attr("x", - nodeRectRatio)
             .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-            .attr("fill", (d, i) => colorScale[i]);
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
 
         splitDistribution.append("rect")
             .attr("class", "summary split-rect")
@@ -406,7 +408,9 @@ class Odt {
             .attr("height", yBand.bandwidth())
             .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
             .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-            .attr("fill", (d, i) => colorScale[i]);
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
 
         // Append left and right split distribution text into splitDistribution svg group
         splitDistribution.append("text")
