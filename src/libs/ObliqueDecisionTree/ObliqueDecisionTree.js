@@ -256,7 +256,8 @@ class Odt {
             if (nodeData.data.type === "decision") {
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
-                    _this.drawCoefficientDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
+                    // _this.drawCoefficientDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
+                    _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
                 }
                 // Draw split point distribution
                 _this.drawSplitHistogram(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
@@ -357,6 +358,48 @@ class Odt {
             .attr("transform", `translate(${-0.25*(nodeRectWidth-2*nodeRectRatio)}, ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
             .call(d3.axisBottom(xCoefficient))
             .selectAll("text")
+    }
+
+    drawCoefficientBar(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale) {
+        // Draw coefficient weights of features in the oblique split
+        const {featureIdx, split }  = nodeData.data;
+        const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
+        const coefficientWeights = normalizeArr(featureIdx.map(idx => split[idx]));
+        let currStart, currEnd = 0, nextStart = 0;
+        const coefficientsData = [];
+        coefficientWeights.forEach((ele, idx) => {
+            currStart = nextStart;
+            currEnd += ele;
+            nextStart += ele;
+            coefficientsData.push({
+                start: currStart,
+                end: currEnd,
+                label: coefficientsNames[idx],
+            });
+        });
+        const xBar = d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, nodeRectWidth-4*nodeRectRatio]);
+        console.log(coefficientsData);
+        // Create a svg group to bind each individual coefficient bar
+        const coefficientDistribution = targetSelection.selectAll("g.coefficient-distribution")
+            .data(coefficientsData)
+            .enter()
+            .append("g")
+            .attr("class", "summary coefficient-distribution")
+            .attr("transform", `translate(${2*nodeRectRatio}, ${2*nodeRectRatio})`);
+        // Append each class rect into coefficientDistribution svg group
+        coefficientDistribution.append("rect")
+            .attr("class", "summary coefficients-bar")
+            .attr("width", (d) => xBar(d.end)-xBar(d.start))
+            .attr("height", 0.5*nodeRectRatio)
+            .attr("rx", 0.25*nodeRectRatio)
+            .attr("ry", 0.25*nodeRectRatio)
+            .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start))
+            .attr("y", nodeRectRatio)
+            .style("fill", (d) => featureColorScale(d.label))
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
     }
 
     /**
