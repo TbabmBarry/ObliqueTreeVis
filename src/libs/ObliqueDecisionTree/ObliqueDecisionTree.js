@@ -863,7 +863,9 @@ class Odt {
                                  +yBand(d.label)+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
-                            .attr("fill", (d) => colorScale[d.label]);
+                            .attr("fill", (d) => colorScale[d.label])
+                            .style("stroke", "#000")
+                            .style("stroke-width", "2px");
                     // Add line to separeate each feature contribution
                     d3.select(this).append("line")
                         .attr("class", "path-summary feature-contribution-line")
