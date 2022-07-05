@@ -347,7 +347,9 @@ class Odt {
                 .attr("y", d => yCoefficient(d.weight)+0.2*(nodeRectWidth-2*nodeRectRatio))
                 .attr("width", xCoefficient.bandwidth())
                 .attr("height", d => 0.3*(nodeRectWidth-2*nodeRectRatio)-yCoefficient(d.weight))
-                .attr("fill", d => featureColorScale(d.name));
+                .attr("fill", d => featureColorScale(d.name))
+                .style("stroke", "#000")
+                .style("stroke-width", "2px");
 
         // Append x-axis for coefficients
         targetSelection.append("g")
