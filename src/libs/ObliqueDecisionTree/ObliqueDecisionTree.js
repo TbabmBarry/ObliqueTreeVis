@@ -56,7 +56,6 @@ class Odt {
                 colorScale: ["#e63946", "#a8dadc", "#457b9d"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
-                texture: textures.paths().d("crosses").lighter().thicker(),
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
                 treeMargins: { top: 5, left: 10, bottom: 5, right: 10 },
@@ -926,7 +925,11 @@ class Odt {
                                  +yBand(d.label)+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
-                            .attr("fill", (d) => colorScale[d.label])
+                            .style("fill", (d) => {
+                                const texture = textures.lines().thicker().stroke(colorScale[d.label]);
+                                d3.select(this).call(texture);
+                                return d.value > 0 ? colorScale[d.label] : texture.url();
+                            })
                             .style("stroke", "#000")
                             .style("stroke-width", "2px");
                     // Add line to separeate each feature contribution
