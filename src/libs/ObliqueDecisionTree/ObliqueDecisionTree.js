@@ -969,6 +969,7 @@ class Odt {
                 const maxScroll = Math.max(absoluteContentHeight - leafNodeBBox.height, 0);
                 // Add scroll event listener
                 const updateScrollPosition = (diff) => {
+                    if (diff === 0) return;
                     scrollDistance += diff;
                     scrollDistance = Math.max(0, scrollDistance);
                     scrollDistance = Math.min(maxScroll, scrollDistance);
