@@ -10,7 +10,7 @@
                     <ProjectionPanel @emit-selected-points-changed="selectedPointsChanged" />
                 </div>
                 <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
-                    <TableDataPanel />
+                    <ControlPanel />
                 </div>
             </div>
         </div>
@@ -47,9 +47,9 @@
 <script setup>
 import { reactive, toRefs } from "vue";
 import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
-// import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
+import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
 import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
-import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
+// import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
 // import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
 
 const state = reactive({
