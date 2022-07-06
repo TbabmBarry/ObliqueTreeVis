@@ -843,7 +843,7 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectStrokeWidth, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
@@ -893,10 +893,26 @@ class Odt {
                     .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width-0.5*leafNodeRectStrokeWidth}, 
                         ${leafNodeBBox.y+0.5*leafNodeRectStrokeWidth})`)
                     .on("mouseover", function () {
-                        d3.select(this).style("fill", "#a8bbbf");
+                        d3.select(this)
+                            .transition()
+                            .duration(transitionDuration/3)
+                            .attr("transform", `translate(${-(scrollBarWidth+2)+0.5*leafNodeBBox.width-0.5*leafNodeRectStrokeWidth}, 
+                                ${leafNodeBBox.y+0.5*leafNodeRectStrokeWidth})`)
+                            .attr("width", scrollBarWidth+2)
+                            .attr("rx", (scrollBarWidth+2)/2)
+                            .attr("ry", (scrollBarWidth+2)/2)
+                            .style("fill", "#a8bbbf");
                     })
                     .on("mouseout", function () {
-                        d3.select(this).style("fill", "#d6dee1");
+                        d3.select(this)
+                            .transition()
+                            .duration(transitionDuration/3)
+                            .attr("transform", `translate(${-scrollBarWidth+0.5*leafNodeBBox.width-0.5*leafNodeRectStrokeWidth}, 
+                                ${leafNodeBBox.y+0.5*leafNodeRectStrokeWidth})`)
+                            .attr("width", scrollBarWidth)
+                            .attr("rx", scrollBarWidth/2)
+                            .attr("ry", scrollBarWidth/2)
+                            .style("fill", "#d6dee1");
                     })
 
                 // Get valid feature contribution data for this node
@@ -932,6 +948,7 @@ class Odt {
                             })
                             .style("stroke", "#000")
                             .style("stroke-width", "2px");
+
                     // Add line to separeate each feature contribution
                     d3.select(this).append("line")
                         .attr("class", "path-summary feature-contribution-line")
@@ -942,6 +959,7 @@ class Odt {
                         .attr("y1", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5)
                         .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
                         .attr("y2", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
+
                     // Add text to show feature contribution name
                     d3.select(this).append("text")
                         .attr("class", "path-summary feature-contribution-text")
