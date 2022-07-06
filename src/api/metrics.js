@@ -8,6 +8,18 @@ export function getDataset(data) {
     })
 };
 
+export function getDatasetChangeSelects(data) {
+    return request({
+        url: "/api/dataset_selected",
+        method: "post",
+        data: data
+    },{
+        message:false,
+        loading:false
+      })
+}
+
+
 export function getAvailDatasetsList(data) {
     return request({
         url: "/api/select",
