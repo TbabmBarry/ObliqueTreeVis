@@ -776,8 +776,7 @@ class Odt {
                 .range([histogramHeight, 0]),
             yHistogram2 = d3.scaleLinear()
                 .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
-                .range([histogramHeight, 0]);
-
+                .range([0, histogramHeight]);
         // Draw histograms
         targetSelection.selectAll("rect.histogram.x-histogram.left")
             .data(bins1Left)
@@ -819,7 +818,7 @@ class Odt {
             .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
             .style("opacity", 0.4);
-            
+
         targetSelection.selectAll("rect.histogram.y-histogram.right")
             .data(bins2Right)
             .join("rect")
