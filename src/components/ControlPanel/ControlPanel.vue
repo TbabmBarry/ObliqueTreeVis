@@ -40,30 +40,26 @@
 </template>
 <script setup>
 import { reactive, ref, toRefs } from "vue";
+
+const emit = defineEmits(["emitSelectedDatasetChanged"]);
+
 const state = reactive({
-    value1: ref('lucy'),
+    value1: ref('iris'),
     options1: ref([{
-        value: 'jack',
-        label: 'Jack',
+        value: 'iris',
+        label: 'Iris Data',
     }, {
-        value: 'lucy',
-        label: 'Lucy',
-    }, {
-        value: 'disabled',
-        label: 'Disabled',
-        disabled: true,
-    }, {
-        value: 'yiminghe',
-        label: 'Yiminghe',
+        value: 'penguins',
+        label: 'Penguins Data',
     }]),
 });
 
 const focus = () => {
-    console.log("focus");
+    // console.log("focus");
 };
 
 const handleChange = (value) => {
-    console.log(`selected${value}`);
+    emit("emitSelectedDatasetChanged", value);
 };
 
 let { options1 } = toRefs(state);

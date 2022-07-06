@@ -10,7 +10,7 @@
                     <ProjectionPanel @emit-selected-points-changed="selectedPointsChanged" />
                 </div>
                 <div class="grid row-span-1 grid-flow-col gap border border-gray-800/100">
-                    <ControlPanel />
+                    <ControlPanel @emit-selected-dataset-changed="selectedDatasetChanged" />
                 </div>
             </div>
         </div>
@@ -54,10 +54,16 @@ import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPa
 
 const state = reactive({
     selectedPoints: [],
+    selectedDataset: "iris"
 });
 
 const selectedPointsChanged = (selectedPoints) => {
     state.selectedPoints = selectedPoints;
+}
+
+const selectedDatasetChanged = (selectedDataset) => {
+    console.log("Home selectedDatasetChanged", selectedDataset);
+    state.selectedDataset = selectedDataset;
 }
 const { selectedPoints } = toRefs(state);
 </script>
