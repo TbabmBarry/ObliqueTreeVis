@@ -32,7 +32,6 @@ class Odt {
         this.updateContainerDimensions();
 
         _.assign(this, {
-            // plotState: new PlotState(),
             data: null,
             nodes: null,
             trainX: null,
@@ -232,14 +231,6 @@ class Odt {
         
         this.renderPathSummaryView(node);
         this.renderSummaryView(node);
-
-        // Add a text tip to help user to switch between summary and detailed views
-        node.append("text")
-            .filter((d) => d.data.name === "root")
-            .attr("x", -2.5*nodeRectWidth)
-            .attr("y", 0.25*nodeRectWidth)
-            .attr("class", "text node-rect")
-            .text("Press Shift and click decision nodes to see their detailed view")
     }
 
     /**
