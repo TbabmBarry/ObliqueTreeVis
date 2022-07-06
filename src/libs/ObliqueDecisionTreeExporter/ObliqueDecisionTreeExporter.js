@@ -26,6 +26,15 @@ import _ from 'lodash';
  *  ],
  * }
  * 
+ * Node coefficients:
+ * [[ 0.          0.          1.          0.        ]
+ * [ 0.          0.00638759  0.         -0.17323776]
+ * [ 0.          0.          1.          0.        ]]
+ * Oblique tree:
+ * Root Hyperplane: Left = [13,0,0], Right = [0,19,13], Oblique Split: 1.000000 x[3] + -2.550000 = 0
+ * r Hyperplane: Left = [0,0,12], Right = [0,19,1], Oblique Split: 0.006388 x[2] + -0.173238 x[4] + 0.291713 = 0
+ * rr Hyperplane: Left = [0,18,0], Right = [0,1,1], Oblique Split: 1.000000 x[3] + -5.000000 = 0
+ * 
  */
 
  class TreeNode {
