@@ -36,3 +36,13 @@ export function getProjection(data) {
     })
 };
 
+export function getProjectionChangeSelects(data) {
+    return request({
+        url: "/api/projection_selected",
+        method: "post",
+        data: data
+    },{
+        message:false,
+        loading:false
+      })
+}
