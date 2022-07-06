@@ -403,6 +403,14 @@ class Odt {
             .style("fill", (d) => featureColorScale(d.label))
             .style("stroke", "#000")
             .style("stroke-width", "2px");
+        
+        // Append text above each bar
+        coefficientDistribution.append("text")
+            .attr("class", "summary coefficients-bar-text")
+            .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
+            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.75*nodeRectRatio)
+            .attr("text-anchor", "middle")
+            .text((d) => d.label);
     }
 
     /**
