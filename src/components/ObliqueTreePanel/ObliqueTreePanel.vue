@@ -16,6 +16,10 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    selectedDataset: {
+        type: String,
+        default: "iris"
+    }
 });
 
 const state = reactive({
@@ -87,6 +91,10 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
         d3.selectAll("g.node--leaf")
             .style("opacity", 1);
     }
+});
+
+watch(() => props.selectedDataset, (val) => {
+    console.log("ObliqueTreePanel: selectedDataset changed to ", val);
 });
 </script>
 <style scoped>

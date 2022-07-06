@@ -12,6 +12,13 @@ let d3 = inject("d3");
 
 const emit = defineEmits(["emitSelectedPointsChanged"]);
 
+const props = defineProps({
+    selectedDataset: {
+        type: String,
+        default: "iris"
+    }
+});
+
 const state = reactive({
     projections: [],
     rootElement: {},
@@ -158,6 +165,12 @@ watch(() => state.selectedPoints,
     { immediate: false }
 );
 
+watch(() => props.selectedDataset,
+    val => {
+        console.log("ProjectionPanel: selected dataset changed to: ", val);
+    },
+    { immediate: false }
+);
 
 
 </script>
