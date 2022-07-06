@@ -815,11 +815,11 @@ class Odt {
             .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
             .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
                 ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
-            .attr("width", d => yHistogram2(d.length))
+            .attr("width", (d) => yHistogram2(d.length))
             .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
             .style("opacity", 0.4);
-
+            
         targetSelection.selectAll("rect.histogram.y-histogram.right")
             .data(bins2Right)
             .join("rect")
@@ -835,7 +835,7 @@ class Odt {
         // Draw axis for histogram on the second feature
         targetSelection.append("g")
             .attr("class", "detailed histogram axis-right")
-            .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-0.5*histogramScatterPlotPadding},
+            .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
             .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
     }
