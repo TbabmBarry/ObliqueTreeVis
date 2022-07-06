@@ -62,7 +62,6 @@ const selectedPointsChanged = (selectedPoints) => {
 }
 
 const selectedDatasetChanged = (selectedDataset) => {
-    console.log("Home selectedDatasetChanged", selectedDataset);
     state.selectedDataset = selectedDataset;
 }
 const { selectedPoints, selectedDataset } = toRefs(state);

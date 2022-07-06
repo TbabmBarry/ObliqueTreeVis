@@ -6,7 +6,7 @@
 <script setup>
 import _ from 'lodash';
 import { onMounted, inject, reactive, watch } from "vue";
-import { getProjection } from "@/api/metrics.js";
+import { getProjection, getProjectionChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
@@ -30,14 +30,8 @@ const state = reactive({
 })
 
 onMounted(async() => {
-    state.projections = await getProjection()
-        .then(function (res) {
-            return res.data;
-        }).catch((error) => {
-            console.log("ERROR: ", error);
-        });
     state.rootElement = document.querySelector("#projection");
-    initProjectionView();
+    initProjectionView("iris");
 })
 
 /**
@@ -45,7 +39,18 @@ onMounted(async() => {
  *
  * @returns {any}
  */
-function initProjectionView () {
+async function initProjectionView (dataset_name) {
+    // remove all existing elements
+    d3.select("#projection").selectAll("*").remove();
+    let req = {
+        dataset_name: dataset_name
+    };
+    state.projections = await getProjectionChangeSelects(req)
+        .then(function (res) {
+            return res.data;
+        }).catch((error) => {
+            console.log("ERROR: ", error);
+        });
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
     state.width = width;
     state.height = height;
@@ -167,7 +172,7 @@ watch(() => state.selectedPoints,
 
 watch(() => props.selectedDataset,
     val => {
-        console.log("ProjectionPanel: selected dataset changed to: ", val);
+        initProjectionView(val);
     },
     { immediate: false }
 );
