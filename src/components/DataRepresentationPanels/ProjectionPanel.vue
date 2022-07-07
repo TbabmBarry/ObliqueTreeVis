@@ -31,7 +31,7 @@ const state = reactive({
 
 onMounted(async() => {
     state.rootElement = document.querySelector("#projection");
-    initProjectionView("iris");
+    initProjectionView("penguins");
 })
 
 /**

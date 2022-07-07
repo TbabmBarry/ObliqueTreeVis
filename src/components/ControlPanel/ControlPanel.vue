@@ -44,7 +44,7 @@ import { reactive, ref, toRefs } from "vue";
 const emit = defineEmits(["emitSelectedDatasetChanged"]);
 
 const state = reactive({
-    value1: ref('iris'),
+    value1: ref('penguins'),
     options1: ref([{
         value: 'iris',
         label: 'Iris Data',
@@ -62,7 +62,7 @@ const handleChange = (value) => {
     emit("emitSelectedDatasetChanged", value);
 };
 
-let { options1 } = toRefs(state);
+let { value1, options1 } = toRefs(state);
 </script>
 <style scoped>
 </style>

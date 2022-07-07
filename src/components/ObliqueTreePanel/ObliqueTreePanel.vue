@@ -18,7 +18,7 @@ const props = defineProps({
     },
     selectedDataset: {
         type: String,
-        default: "iris"
+        default: "penguins"
     }
 });
 
@@ -46,7 +46,7 @@ const state = reactive({
 })
 
 onMounted(async () => {
-    initializeObliqueTree("iris");
+    initializeObliqueTree("penguins");
 })
 
 const initializeObliqueTree = async (dataset_name) => {

@@ -54,7 +54,7 @@ import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPa
 
 const state = reactive({
     selectedPoints: [],
-    selectedDataset: "iris"
+    selectedDataset: "penguins"
 });
 
 const selectedPointsChanged = (selectedPoints) => {
