@@ -37,6 +37,7 @@ class Odt {
             trainX: null,
             trainY: null,
             opts: null,
+            selectionFlag: false,
             registeredStateListeners: [],
             computed: {},
             constants: {
@@ -592,7 +593,14 @@ class Odt {
                         -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding;
                 })
                 .attr("r", 3.5)
-                .style("fill", d => colorScale[that.trainY[d]]);
+                .style("fill", (d) => {
+                    if (that.selectionFlag) {
+                        return "#fff";
+                    } else {
+                        return colorScale[that.trainY[d]];
+                    }
+                })
+                .style("stroke", (d) => colorScale[that.trainY[d]]);
     }
 
     /**
@@ -1027,6 +1035,7 @@ class Odt {
      */ 
     renderSelectionEffect(selectedDataPoints) {
         const { nodes } = this;
+        this.selectionFlag = selectedDataPoints.length > 0;
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
             path: new Array()
@@ -1255,6 +1264,7 @@ const getEffectiveFeatureContribution = (currNode, that) => {
             });
         }
     });
+
     return {
         fcArr: effectiveFeatureArr, 
         fcRange: range
