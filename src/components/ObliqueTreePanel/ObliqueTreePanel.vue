@@ -87,7 +87,7 @@ const initializeObliqueTree = async (dataset_name) => {
 watch(() => props.selectedPoints, (newValue, oldValue) => {
     // Get related links nad nodes from selected points
     const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
-
+    const colorScale = ["#e63946", "#a8dadc", "#457b9d"];
     // Update all the links and nodes' opacity to 0.4 in the vis 
     d3.selectAll("g.node--internal")
         .style("opacity", 0.4);
@@ -95,6 +95,13 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
         .style("opacity", 0.4);
     d3.selectAll("path.link")
         .style("opacity", 0.4);
+    
+    d3.selectAll("circle.detailed.dot")
+        .style("fill", "white");
+    props.selectedPoints.forEach((selectedDataPoint) => {
+        d3.selectAll(`circle#dot-${selectedDataPoint.id}`)
+            .style("fill", colorScale[selectedDataPoint.label]);
+    });
     
     // Update related links and nodes' opacity to 1 in the vis
     exposedFlowLinks.forEach((exposedFlowLink) => {
@@ -118,6 +125,9 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
             .style("opacity", 1);
         d3.selectAll("g.node--leaf")
             .style("opacity", 1);
+
+        // TODO: recover circle fill color in scatter plots
+        
     }
 });
 

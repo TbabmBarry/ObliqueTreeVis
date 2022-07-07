@@ -37,7 +37,7 @@ class Odt {
             trainX: null,
             trainY: null,
             opts: null,
-            selectionFlag: false,
+            selectedPoints: [],
             registeredStateListeners: [],
             computed: {},
             constants: {
@@ -594,7 +594,7 @@ class Odt {
                 })
                 .attr("r", 3.5)
                 .style("fill", (d) => {
-                    if (that.selectionFlag) {
+                    if (that.selectedPoints.length && !that.selectedPoints.includes(d)) {
                         return "#fff";
                     } else {
                         return colorScale[that.trainY[d]];
@@ -1034,8 +1034,8 @@ class Odt {
      * @returns {any} 
      */ 
     renderSelectionEffect(selectedDataPoints) {
-        const { nodes } = this;
-        this.selectionFlag = selectedDataPoints.length > 0;
+        const { nodes, constants: { colorScale } } = this;
+        this.selectedPoints = selectedDataPoints.map(selectedDataPoint => selectedDataPoint.id);
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
             path: new Array()
