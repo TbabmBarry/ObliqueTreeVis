@@ -85,40 +85,13 @@ const initializeObliqueTree = async (dataset_name) => {
 }
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
-    // Get related links nad nodes from selected points
-    const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
-    const colorScale = ["#e63946", "#a8dadc", "#457b9d"];
-    // Update all the links and nodes' opacity to 0.4 in the vis 
-    d3.selectAll("g.node--internal")
-        .style("opacity", 0.4);
-    d3.selectAll("g.node--leaf")
-        .style("opacity", 0.4);
-    d3.selectAll("path.link")
-        .style("opacity", 0.4);
-    
-    d3.selectAll("circle.detailed.dot")
-        .style("fill", "white");
-    props.selectedPoints.forEach((selectedDataPoint) => {
-        d3.selectAll(`circle#dot-${selectedDataPoint.id}`)
-            .style("fill", colorScale[selectedDataPoint.label]);
-    });
-    
-    // Update related links and nodes' opacity to 1 in the vis
-    exposedFlowLinks.forEach((exposedFlowLink) => {
-        d3.selectAll(`path.link#${exposedFlowLink}`)
-            .style("opacity", 1);
-    });
-    uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
-        uniqueDecisionPath?.path.forEach((decisionNode) => {
-            // Select all related svg groups and apply opacity 1
-            d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode)
-                .style("opacity", 1);
-        });
-    });
-
+    // Compute related links nad nodes from selected points
+    state.obliqueTreeVis.renderSelectionEffect(newValue);
+    // Update current oblique tree view
+    state.obliqueTreeVis.update();
     // Select all related svg groups and apply opacity 1 when selection process is over
     if (oldValue.length !== 0 && newValue.length === 0) {
-        state.obliqueTreeVis.update();
+        state.obliqueTreeVis.update("reset");
     }
 });
 

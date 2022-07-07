@@ -38,6 +38,8 @@ class Odt {
             trainY: null,
             opts: null,
             selectedPoints: [],
+            exposedFlowLinks: [],
+            uniqueDecisionPaths: [],
             registeredStateListeners: [],
             computed: {},
             constants: {
@@ -118,20 +120,55 @@ class Odt {
      * @date 2022-06-14
      * @param {any} parm1
      */
-    update() {
-        const { trainY, constants: { colorScale } } = this;
-        // Recover all nodes and links to their original opacity
-        d3.selectAll("path.link")
-            .style("opacity", 1);
-        d3.selectAll("g.node--internal")
-            .style("opacity", 1);
-        d3.selectAll("g.node--leaf")
-            .style("opacity", 1);
+    update(status = "on") {
+        const { trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, constants: { colorScale } } = this;
+        switch (status) {
+            case "on":
+                // Update all the links and nodes' opacity to 0.4 in the vis 
+                d3.selectAll("g.node--internal")
+                    .style("opacity", 0.4);
+                d3.selectAll("g.node--leaf")
+                    .style("opacity", 0.4);
+                d3.selectAll("path.link")
+                    .style("opacity", 0.4);
 
-        // Recover circle fill color in scatter plots
-        d3.selectAll("circle.detailed.dot")
-            .style("fill", d => colorScale[trainY[d]]);
-    }
+                d3.selectAll("circle.detailed.dot")
+                    .style("fill", "white");
+                selectedPoints.forEach((id) => {
+                    d3.selectAll(`circle#dot-${id}`)
+                        .style("fill", colorScale[trainY[id]]);
+                });
+
+                // Update related links and nodes' opacity to 1 in the vis
+                exposedFlowLinks.forEach((exposedFlowLink) => {
+                    d3.selectAll(`path.link#${exposedFlowLink}`)
+                        .style("opacity", 1);
+                });
+                uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
+                    uniqueDecisionPath?.path.forEach((decisionNode) => {
+                        // Select all related svg groups and apply opacity 1
+                        d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode)
+                            .style("opacity", 1);
+                    });
+                });
+                break;
+            case "reset":
+                // Recover all nodes and links to their original opacity
+                d3.selectAll("path.link")
+                    .style("opacity", 1);
+                d3.selectAll("g.node--internal")
+                    .style("opacity", 1);
+                d3.selectAll("g.node--leaf")
+                    .style("opacity", 1);
+
+                // Recover circle fill color in scatter plots
+                d3.selectAll("circle.detailed.dot")
+                    .style("fill", d => colorScale[trainY[d]]);
+                break;
+            default:
+                throw new Error(`Unknown status: ${status}`);
+            }
+        }
 
 
     /**
@@ -1063,22 +1100,17 @@ class Odt {
             traverse(decisionPaths, nodes, selectedDataPoint, index);
         });
         let decisionPathSet = new Set(decisionPaths.map(JSON.stringify));
-        const uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
-        const exposedFlowLinks = [];
+        this.uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
         let i, j, k;
-        uniqueDecisionPaths.forEach((decisionPath) => {
+        this.uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;
             while (j < k) {
-                exposedFlowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
+                this.exposedFlowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
                 i += 1;
                 j += 1;
             }
         });
-        return {
-            exposedFlowLinks,
-            uniqueDecisionPaths
-        };
     }
 
 
