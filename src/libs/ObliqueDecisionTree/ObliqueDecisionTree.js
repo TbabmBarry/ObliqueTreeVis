@@ -582,6 +582,7 @@ class Odt {
             .enter()
             .append("circle")
                 .attr("class", "detailed dot")
+                .attr("id", d => `dot-${d}`)
                 .attr("cx", (d) => {
                     return x[currFeatureIdx[0]](that.trainX[d][featureArr[currFeatureIdx[0]]])
                         -0.5*detailedViewNodeRectWidth+2*scatterPlotPadding;
