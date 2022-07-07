@@ -85,13 +85,18 @@ const initializeObliqueTree = async (dataset_name) => {
 }
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
+    // Get related links nad nodes from selected points
     const { exposedFlowLinks, uniqueDecisionPaths } = state.obliqueTreeVis.renderSelectionEffect(newValue);
+
+    // Update all the links and nodes' opacity to 0.4 in the vis 
     d3.selectAll("g.node--internal")
         .style("opacity", 0.4);
     d3.selectAll("g.node--leaf")
         .style("opacity", 0.4);
     d3.selectAll("path.link")
         .style("opacity", 0.4);
+    
+    // Update related links and nodes' opacity to 1 in the vis
     exposedFlowLinks.forEach((exposedFlowLink) => {
         d3.selectAll(`path.link#${exposedFlowLink}`)
             .style("opacity", 1);
@@ -103,6 +108,8 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
                 .style("opacity", 1);
         });
     });
+
+    // Select all related svg groups and apply opacity 1 when selection process is over
     if (oldValue.length !== 0 && newValue.length === 0) {
         // Recover all nodes and links to their original opacity
         d3.selectAll("path.link")
