@@ -119,7 +119,18 @@ class Odt {
      * @param {any} parm1
      */
     update() {
+        const { trainY, constants: { colorScale } } = this;
+        // Recover all nodes and links to their original opacity
+        d3.selectAll("path.link")
+            .style("opacity", 1);
+        d3.selectAll("g.node--internal")
+            .style("opacity", 1);
+        d3.selectAll("g.node--leaf")
+            .style("opacity", 1);
 
+        // Recover circle fill color in scatter plots
+        d3.selectAll("circle.detailed.dot")
+            .style("fill", d => colorScale[trainY[d]]);
     }
 
 

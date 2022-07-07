@@ -118,16 +118,7 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 
     // Select all related svg groups and apply opacity 1 when selection process is over
     if (oldValue.length !== 0 && newValue.length === 0) {
-        // Recover all nodes and links to their original opacity
-        d3.selectAll("path.link")
-            .style("opacity", 1);
-        d3.selectAll("g.node--internal")
-            .style("opacity", 1);
-        d3.selectAll("g.node--leaf")
-            .style("opacity", 1);
-
-        // TODO: recover circle fill color in scatter plots
-        
+        state.obliqueTreeVis.update();
     }
 });
 
