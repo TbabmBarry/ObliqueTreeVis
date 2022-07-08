@@ -146,7 +146,7 @@ class Odt {
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
                     let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
-                    let currWidth = (exposedFlowLink.idArr.length / currLinkData.count)*currLinkData.source.width;
+                    let currWidth = (exposedFlowLink.count / currLinkData.count)*currLinkData.source.width;
                     // Compute flow data for exposed flow link
                     const flowLinkData = {
                         source: {
@@ -168,7 +168,6 @@ class Odt {
                         .append("path")
                         .attr("class", "exposed-flow-link")
                         .attr("d", (d) => {
-                            console.log(d);
                             return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                                 {
                                     x0: d.source.x - 0.5 * d.source.width,
@@ -1163,21 +1162,21 @@ class Odt {
         // Assign unique decision path to this
         this.uniqueDecisionPaths = res.map(obj => ({...obj}));
         let i, j, k;
-        let flowLinks = [], currNodeSubTrainingSet;
+        let flowLinks = [], currNodeSubTrainingSet, tmpLinkDict = {};
         this.uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;
             while (j < k) {
-                let linkDict = {};
+                tmpLinkDict = {};
                 currNodeSubTrainingSet = d3.select(`rect#${decisionPath.path[i]}`).data()[0].data.subTrainingSet;
-                linkDict.pathId = `${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`;
-                linkDict.idArr = [];
+                tmpLinkDict.pathId = `${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`;
+                tmpLinkDict.count = 0;
                 decisionPath.idArr.forEach((id) => {
                     if (currNodeSubTrainingSet.includes(id)) {
-                        linkDict.idArr.push(id);
+                        tmpLinkDict.count++;
                     }
                 });
-                flowLinks.push(linkDict);
+                flowLinks.push(tmpLinkDict);
                 i += 1;
                 j += 1;
             }
