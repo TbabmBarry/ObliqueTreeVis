@@ -224,94 +224,10 @@ class Odt {
                         });
                         // Select all related svg groups and apply opacity 1
                         const currNodeSvgGroup = d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode);
+                        // Highlight related decision nodes with opacity 1
                         currNodeSvgGroup.style("opacity", 1);
-
-                        // Draw split histogram
-                        let xRight = d3.scaleLinear()
-                            .domain([0, _.sum(currNodeData.totalCount)])
-                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
-                            xLeft = d3.scaleLinear()
-                            .domain([_.sum(currNodeData.totalCount), 0])
-                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
-                            yBand = d3.scaleBand()
-                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
-                            .domain([0,1,2])
-                            .padding(.1);
-
-                        let splitData = decisionNodeData.data.leftCount.map((val, idx) => [val, decisionNodeData.data.rightCount[idx]]);
-                        const splitDistribution = currNodeSvgGroup.selectAll(`g.exposed-split-distribution#${decisionNode}`)
-                            .data(splitData)
-                            .enter()
-                            .append("g")
-                            .attr("class", "summary exposed-split-distribution")
-                            .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
-                        
-                        // Append left and right split distribution into splitDistribution svg group
-                        splitDistribution.append("rect")
-                            .attr("class", "summary exposed-split-rect")
-                            .attr("id", `${decisionNode}`)
-                            .attr("width", (d) => {
-                                return xRight(d[1]);
-                            })
-                            .attr("height", yBand.bandwidth())
-                            .attr("x", - nodeRectRatio)
-                            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-                            .attr("fill", (d, i) => {
-                                const texture = textures.lines()
-                                    .size(8)
-                                    .strokeWidth(2)
-                                    .stroke("#000")
-                                    .background(colorScale[i]);
-                                splitDistribution.call(texture);
-                                return texture.url();
-                            })
-                            .style("stroke", "#000")
-                            .style("stroke-width", "2px");
-
-                        splitDistribution.append("rect")
-                            .attr("class", "summary exposed-split-rect")
-                            .attr("id", `${decisionNode}`)
-                            .attr("width", (d) => {
-                                return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
-                            })
-                            .attr("height", yBand.bandwidth())
-                            .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
-                            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-                            .attr("fill", (d, i) => {
-                                const texture = textures.lines()
-                                    .size(8)
-                                    .strokeWidth(2)
-                                    .stroke("#000")
-                                    .background(colorScale[i]);
-                                splitDistribution.call(texture);
-                                return texture.url();
-                            })
-                            .style("stroke", "#000")
-                            .style("stroke-width", "2px");
-
-                        // Append left and right split distribution text into splitDistribution svg group
-                        // splitDistribution.append("text")
-                        //     .attr("class", "summary exposed-split-text")
-                        //     .text( (d) => d[1])
-                        //     .attr("text-anchor", "start")
-                        //     .attr("font-size", "10px")
-                        //     .attr("fill", "black")
-                        //     .attr("transform", (d, i) => {
-                        //         return `translate(${-nodeRectRatio+xRight(d[1])+5},
-                        //             ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
-                        //     })
-                        
-                        // splitDistribution.append("text")
-                        //     .attr("class", "summary exposed-split-text")
-                        //     .text( (d) => d[0])
-                        //     .attr("text-anchor", "end")
-                        //     .attr("font-size", "10px")
-                        //     .attr("fill", "black")
-                        //     .attr("transform", (d, i) => {
-                        //         return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
-                        //             ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
-                        //     })
-                        
+                        // Draw new split distribution rects to highlight the selected data points
+                        this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, nodeRectWidth, nodeRectRatio, colorScale);
                     });
                 });
                 break;
@@ -718,6 +634,83 @@ class Odt {
             .attr("transform", `translate(${-nodeRectRatio},
                 ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
             .call(d3.axisRight(yBand).tickFormat(""));
+    }
+
+    /**
+     * Draw highlighted split point distribution in the summary view during data points
+     * selection in the projection view
+     * @date 2022-07-08
+     * @param {targetSelection} targetSelection
+     * @param {originalNodeData} originalNodeData
+     * @param {exposedNodeData} exposedNodeData
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {nodeRectRatio} nodeRectRatio
+     * @param {colorScale} colorScale
+     */
+    drawExposedSplitHistogram(targetSelection, originalNodeData, exposedNodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+        // Draw split histogram
+        let xRight = d3.scaleLinear()
+            .domain([0, _.sum(originalNodeData.totalCount)])
+            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
+            xLeft = d3.scaleLinear()
+            .domain([_.sum(originalNodeData.totalCount), 0])
+            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
+            yBand = d3.scaleBand()
+            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
+            .domain([0,1,2])
+            .padding(.1);
+
+        let splitData = exposedNodeData.data.leftCount.map((val, idx) => [val, exposedNodeData.data.rightCount[idx]]);
+        const splitDistribution = targetSelection.selectAll(`g.exposed-split-distribution#${originalNodeData.name}`)
+            .data(splitData)
+            .enter()
+            .append("g")
+            .attr("class", "summary exposed-split-distribution")
+            .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
+        
+        // Append left and right split distribution into splitDistribution svg group
+        splitDistribution.append("rect")
+            .attr("class", "summary exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return xRight(d[1]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", - nodeRectRatio)
+            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d, i) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[i]);
+                splitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
+        splitDistribution.append("rect")
+            .attr("class", "summary exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
+            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d, i) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[i]);
+                splitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
     }
 
     /**
