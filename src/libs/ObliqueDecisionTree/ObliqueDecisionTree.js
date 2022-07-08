@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { select } from 'd3';
+import { color, select } from 'd3';
 import _, { random } from 'lodash';
 import textures from 'textures';
 
@@ -121,7 +121,7 @@ class Odt {
      * @param {any} parm1
      */
     update(status = "on") {
-        const { trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, constants: { colorScale } } = this;
+        const { parts, trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, constants: { nodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
                 // Update all the links and nodes' opacity to 0.4 in the vis 
@@ -141,9 +141,48 @@ class Odt {
 
                 // Update related links and nodes' opacity to 1 in the vis
                 exposedFlowLinks.forEach((exposedFlowLink) => {
-                    // console.log("flow link data: ", d3.selectAll(`path.link#${exposedFlowLink}`).data());
+                    // Hightlight the full width exposed flow link with opacity 0.8
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
-                        .style("opacity", 1);
+                        .style("opacity", 0.8);
+                    let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
+                    let currWidth = (exposedFlowLink.idArr.length / currLinkData.count)*currLinkData.source.width;
+                    // Compute flow data for exposed flow link
+                    const flowLinkData = {
+                        source: {
+                            x: currLinkData.source.x-0.5*(currLinkData.source.width-currWidth),
+                            y: currLinkData.source.y,
+                            width: currWidth,
+                        },
+                        target: {
+                            x: currLinkData.target.x-0.5*(currLinkData.source.width-currWidth),
+                            y: currLinkData.target.y,
+                            width: currWidth,
+                        },
+                        class: currLinkData.class
+                    };
+                    // Draw new flow path line with the new width
+                    parts.svgGroup.selectAll("link.exposed-flow-link")
+                        .data([flowLinkData])
+                        .enter()
+                        .append("path")
+                        .attr("class", "exposed-flow-link")
+                        .attr("d", (d) => {
+                            console.log(d);
+                            return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                                {
+                                    x0: d.source.x - 0.5 * d.source.width,
+                                    x1: d.source.x + 0.5 * d.source.width,
+                                    y: d.source.y+0.5*nodeRectStrokeWidth,
+                                },
+                                {
+                                    x0: d.target.x - 0.5 * d.target.width,
+                                    x1: d.target.x + 0.5 * d.target.width,
+                                    y: d.target.y-0.5*nodeRectStrokeWidth,
+                                }
+                            ]);
+                        })
+                        .style("fill", (d) => colorScale[d.class])
+                        .style("stroke", "#000");
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     uniqueDecisionPath?.path.forEach((decisionNode) => {
@@ -161,6 +200,9 @@ class Odt {
                     .style("opacity", 1);
                 d3.selectAll("g.node--leaf")
                     .style("opacity", 1);
+                
+                // Remove all exposed flow links
+                parts.svgGroup.selectAll("path.exposed-flow-link").remove();
 
                 // Recover circle fill color in scatter plots
                 d3.selectAll("circle.detailed.dot")
@@ -1220,7 +1262,7 @@ class Odt {
                     }
                 }
                 // Store valid flow into resFlows to be rendered
-                if (link.data.totalCount[val.label] === currParentCountArr[idx]) {
+                if (link.data.totalCount[val.label] === currParentCountArr[idx] && currLinkWidthArr[idx].count > 0) {
                     resFlows.push({
                         source: {
                             x: currParentX,
