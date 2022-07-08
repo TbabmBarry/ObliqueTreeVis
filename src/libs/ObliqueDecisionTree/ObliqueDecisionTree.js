@@ -125,6 +125,11 @@ class Odt {
             constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
+                // Remove all exposed flow links
+                // parts.svgGroup.selectAll("path.exposed-flow-link").remove();
+
+                // Remove all exposed split distribution rects 
+
                 // Update all the links and nodes' opacity to 0.4 in the vis 
                 d3.selectAll("g.node--internal")
                     .style("opacity", 0.4);
@@ -237,6 +242,7 @@ class Odt {
                             .data(splitData)
                             .enter()
                             .append("g")
+                            .attr("id", `${decisionNode}`)
                             .attr("class", "summary exposed-split-distribution")
                             .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
                         
@@ -302,6 +308,9 @@ class Odt {
                 
                 // Remove all exposed flow links
                 parts.svgGroup.selectAll("path.exposed-flow-link").remove();
+
+                // Remove all exposed split histograms
+                parts.svgGroup.selectAll("g.exposed-split-distribution").remove();
 
                 // Recover circle fill color in scatter plots
                 d3.selectAll("circle.detailed.dot")
