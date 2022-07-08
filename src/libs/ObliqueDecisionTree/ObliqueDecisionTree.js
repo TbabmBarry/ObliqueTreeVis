@@ -121,7 +121,8 @@ class Odt {
      * @param {any} parm1
      */
     update(status = "on") {
-        const { parts, trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, constants: { nodeRectStrokeWidth, colorScale } } = this;
+        const { parts, trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
+            constants: { nodeRectStrokeWidth, leafNodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
                 // Update all the links and nodes' opacity to 0.4 in the vis 
@@ -177,7 +178,9 @@ class Odt {
                                 {
                                     x0: d.target.x - 0.5 * d.target.width,
                                     x1: d.target.x + 0.5 * d.target.width,
-                                    y: d.target.y-0.5*nodeRectStrokeWidth,
+                                    y: exposedFlowLink.pathId.includes("f") 
+                                        ? d.target.y-0.2*nodeRectStrokeWidth
+                                        : d.target.y-0.5*nodeRectStrokeWidth,
                                 }
                             ]);
                         })
