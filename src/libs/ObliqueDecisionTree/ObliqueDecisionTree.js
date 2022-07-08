@@ -1170,7 +1170,8 @@ class Odt {
             currParentCountArr.forEach((ele, idx) => {
                 currLinkWidthArr.push({
                     label: idx > 2 ? idx - 3 : idx,
-                    value: (ele / currSize) * currWidth
+                    value: (ele / currSize) * currWidth,
+                    count: ele
                 });
             });
             currParentX = link.parent.x;
@@ -1205,7 +1206,8 @@ class Odt {
                             width: currLinkWidthArr[idx].value,
                         },
                         class: val.label,
-                        id: `${link.parent.data.name}-${link.data.name}-${val.label}`
+                        id: `${link.parent.data.name}-${link.data.name}-${val.label}`,
+                        count: currLinkWidthArr[idx].count
                     })
                 }
             })
