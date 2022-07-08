@@ -141,6 +141,7 @@ class Odt {
 
                 // Update related links and nodes' opacity to 1 in the vis
                 exposedFlowLinks.forEach((exposedFlowLink) => {
+                    // console.log("flow link data: ", d3.selectAll(`path.link#${exposedFlowLink}`).data());
                     d3.selectAll(`path.link#${exposedFlowLink}`)
                         .style("opacity", 1);
                 });
@@ -1086,7 +1087,8 @@ class Odt {
         this.selectedPoints = selectedDataPoints.map(selectedDataPoint => selectedDataPoint.id);
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
-            path: new Array()
+            path: new Array(),
+            id: selectedDataPoint.id
         }));
         const traverse = (res, currNode, selectedPoint, idx) => {
             if (currNode.data.subTrainingSet.includes(selectedPoint.id)) {
@@ -1099,18 +1101,35 @@ class Odt {
         selectedDataPoints.forEach((selectedDataPoint, index) => {
             traverse(decisionPaths, nodes, selectedDataPoint, index);
         });
-        let decisionPathSet = new Set(decisionPaths.map(JSON.stringify));
-        this.uniqueDecisionPaths = Array.from(decisionPathSet).map(JSON.parse);
+        let dict = {}, res = [];
+        decisionPaths.forEach((decisionPath) => {
+            let hash = decisionPath.label+JSON.stringify(decisionPath.path);
+            if (!dict[hash]) {
+                dict[hash] = {
+                    label: decisionPath.label,
+                    path: decisionPath.path,
+                    idArr: [decisionPath.id]
+                };
+                res.push(dict[hash]);
+            } else {
+                dict[hash].idArr.push(decisionPath.id);
+            }
+        });
+        // Assign unique decision path to this
+        this.uniqueDecisionPaths = res.map(obj => ({...obj}));
         let i, j, k;
+        let flowLinks = [];
         this.uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;
             while (j < k) {
-                this.exposedFlowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
+                flowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
                 i += 1;
                 j += 1;
             }
         });
+        this.exposedFlowLinks = JSON.parse(JSON.stringify(flowLinks));
+        console.log(this.exposedFlowLinks);
     }
 
 
