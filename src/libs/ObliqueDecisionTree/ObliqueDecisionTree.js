@@ -121,8 +121,8 @@ class Odt {
      * @param {any} parm1
      */
     update(status = "on") {
-        const { parts, trainY, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
-            constants: { nodeRectStrokeWidth, leafNodeRectStrokeWidth, colorScale } } = this;
+        const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
+            constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
                 // Update all the links and nodes' opacity to 0.4 in the vis 
@@ -187,10 +187,107 @@ class Odt {
                         .style("stroke", "#000");
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
+                    let idArr = uniqueDecisionPath.idArr.slice();
                     uniqueDecisionPath?.path.forEach((decisionNode) => {
+                        let currNodeData = d3.selectAll(`g.node#${decisionNode}`).data()[0].data;
+                        const decisionNodeData = {
+                            data: {
+                                totalCount: new Array(3).fill(0),
+                                leftCount: new Array(3).fill(0),
+                                rightCount: new Array(3).fill(0),
+                                subTrainingSet: []
+                            }
+                        };
+                        idArr.forEach((id) => {
+                            if (currNodeData.subTrainingSet.includes(id)) {
+                                decisionNodeData.data.subTrainingSet.push(id);
+                                decisionNodeData.data.totalCount[uniqueDecisionPath.label]++;
+                            }
+                        });
+                        decisionNodeData.data.subTrainingSet.forEach((id) => {
+                            if (currNodeData.type === "decision") {
+                                let X = Object.values(trainX[id]);
+                                let sum = currNodeData.split[currNodeData.split.length-1];
+                                sum += X.map((val, i) => val*currNodeData.split[i]).reduce((a, b) => a+b);
+                                if (sum < 0) {
+                                    decisionNodeData.data.leftCount[uniqueDecisionPath.label]++;
+                                } else {
+                                    decisionNodeData.data.rightCount[uniqueDecisionPath.label]++;
+                                }
+                            }
+                        });
                         // Select all related svg groups and apply opacity 1
-                        d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode)
-                            .style("opacity", 1);
+                        const currNodeSvgGroup = d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode);
+                        currNodeSvgGroup.style("opacity", 0.6);
+
+                        // Draw split histogram
+                        let xRight = d3.scaleLinear()
+                            .domain([0, _.sum(currNodeData.totalCount)])
+                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
+                            xLeft = d3.scaleLinear()
+                            .domain([_.sum(currNodeData.totalCount), 0])
+                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)]),
+                            yBand = d3.scaleBand()
+                            .range([0, 0.5*(nodeRectWidth-2*nodeRectRatio)])
+                            .domain([0,1,2])
+                            .padding(.1);
+
+                        const splitData = decisionNodeData.data.leftCount.map((val, idx) => [val, decisionNodeData.data.rightCount[idx]]);
+                        const splitDistribution = currNodeSvgGroup.selectAll("g.exposed-split-distribution")
+                            .data(splitData)
+                            .enter()
+                            .append("g")
+                            .attr("class", "summary exposed-split-distribution")
+                            .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
+                        
+                        // Append left and right split distribution into splitDistribution svg group
+                        splitDistribution.append("rect")
+                            .attr("class", "summary exposed-split-rect")
+                            .attr("width", (d) => {
+                                return xRight(d[1]);
+                            })
+                            .attr("height", yBand.bandwidth())
+                            .attr("x", - nodeRectRatio)
+                            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("fill", (d, i) => colorScale[i])
+                            .style("stroke", "#000")
+                            .style("stroke-width", "2px");
+
+                        splitDistribution.append("rect")
+                            .attr("class", "summary exposed-split-rect")
+                            .attr("width", (d) => {
+                                return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
+                            })
+                            .attr("height", yBand.bandwidth())
+                            .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
+                            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+                            .attr("fill", (d, i) => colorScale[i])
+                            .style("stroke", "#000")
+                            .style("stroke-width", "2px");
+
+                        // Append left and right split distribution text into splitDistribution svg group
+                        splitDistribution.append("text")
+                            .attr("class", "summary exposed-split-text")
+                            .text( (d) => d[1])
+                            .attr("text-anchor", "start")
+                            .attr("font-size", "10px")
+                            .attr("fill", "black")
+                            .attr("transform", (d, i) => {
+                                return `translate(${-nodeRectRatio+xRight(d[1])+5},
+                                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                            })
+                        
+                        splitDistribution.append("text")
+                            .attr("class", "summary exposed-split-text")
+                            .text( (d) => d[0])
+                            .attr("text-anchor", "end")
+                            .attr("font-size", "10px")
+                            .attr("fill", "black")
+                            .attr("transform", (d, i) => {
+                                return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
+                                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                            })
+                        
                     });
                 });
                 break;
@@ -341,8 +438,6 @@ class Odt {
             if (nodeData.data.type === "decision") {
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
-                    // _this.drawCoefficientDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
-                    // _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
                 }
                 // Draw feature coefficients distribution
                 _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
@@ -1161,6 +1256,8 @@ class Odt {
         });
         // Assign unique decision path to this
         this.uniqueDecisionPaths = res.map(obj => ({...obj}));
+        
+        // Store exposed flow links in this
         let i, j, k;
         let flowLinks = [], currNodeSubTrainingSet, tmpLinkDict = {};
         this.uniqueDecisionPaths.forEach((decisionPath) => {
