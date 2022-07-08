@@ -142,7 +142,7 @@ class Odt {
                 // Update related links and nodes' opacity to 1 in the vis
                 exposedFlowLinks.forEach((exposedFlowLink) => {
                     // console.log("flow link data: ", d3.selectAll(`path.link#${exposedFlowLink}`).data());
-                    d3.selectAll(`path.link#${exposedFlowLink}`)
+                    d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 1);
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
@@ -1118,18 +1118,26 @@ class Odt {
         // Assign unique decision path to this
         this.uniqueDecisionPaths = res.map(obj => ({...obj}));
         let i, j, k;
-        let flowLinks = [];
+        let flowLinks = [], currNodeSubTrainingSet;
         this.uniqueDecisionPaths.forEach((decisionPath) => {
             k = decisionPath.path.length;
             i = 0, j = 1;
             while (j < k) {
-                flowLinks.push(`${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`);
+                let linkDict = {};
+                currNodeSubTrainingSet = d3.select(`rect#${decisionPath.path[i]}`).data()[0].data.subTrainingSet;
+                linkDict.pathId = `${decisionPath.path[i]}-${decisionPath.path[j]}-${decisionPath.label}`;
+                linkDict.idArr = [];
+                decisionPath.idArr.forEach((id) => {
+                    if (currNodeSubTrainingSet.includes(id)) {
+                        linkDict.idArr.push(id);
+                    }
+                });
+                flowLinks.push(linkDict);
                 i += 1;
                 j += 1;
             }
         });
-        this.exposedFlowLinks = JSON.parse(JSON.stringify(flowLinks));
-        console.log(this.exposedFlowLinks);
+        this.exposedFlowLinks = flowLinks.map(link => ({...link}));
     }
 
 
