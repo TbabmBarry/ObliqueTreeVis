@@ -313,8 +313,8 @@ class Odt {
                         y: (exposedFlowLink.pathId.includes("f") 
                             ? d.target.y-0.2*nodeRectStrokeWidth
                             : d.target.y-0.5*nodeRectStrokeWidth)
-                            + (this.pathsIdInDetailView.upper.includes(d.id.substring(0, d.id.length-1)
-                                ? -0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0)),
+                            + (this.pathsIdInDetailView.upper.includes(d.id.substring(0, d.id.length-1))
+                                ? -0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0),
                     }
                 ]);
             })
