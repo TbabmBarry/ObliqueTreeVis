@@ -338,10 +338,10 @@ class Odt {
         function clicked(event, node) {
             if (event.shiftKey && node.data.type === "decision") {
                 let currNodeGroup = select(this);
-                let currNodeName = currNodeGroup.data()[0].data.name;
+                let currNodeName = currNodeGroup.data()[0].data.name, parentNodeName = "";
                 _this.pathsIdInDetailView.lower.push(currNodeName);
                 if (currNodeName !== "root") {
-                    let parentNodeName = currNodeGroup.data()[0].parent.data.name;
+                    parentNodeName = currNodeGroup.data()[0].parent.data.name;
                     _this.pathsIdInDetailView.upper.push(`${parentNodeName}-${currNodeName}-`);
                 }
                 if (currNodeGroup.node().querySelector(".detailed") !== null || 
@@ -400,8 +400,9 @@ class Odt {
                         .attr("height", nodeRectWidth)
                     .on("end", () => {
                         // Clear the pathsIdInDetailView
-                        _this.pathsIdInDetailView.upper = new Array();
-                        _this.pathsIdInDetailView.lower = new Array();
+                        _this.pathsIdInDetailView.lower = _.without(_this.pathsIdInDetailView.lower, currNodeName);
+                        _this.pathsIdInDetailView.upper = _.without(_this.pathsIdInDetailView.upper, `${parentNodeName}-${currNodeName}-`);
+                        
                         // Re-render the exposed split histogram and flow links
                         if (_this.uniqueDecisionPaths.length !== 0) {
                             _this.update();
