@@ -282,14 +282,19 @@ class Odt {
                 y: currLinkData.target.y,
                 width: currWidth,
             },
-            class: currLinkData.class
+            class: currLinkData.class,
+            id: exposedFlowLink.pathId,
         };
         // Draw new flow path line with the new width
         targetSelection.selectAll("link.exposed-flow-link")
             .data([flowLinkData])
             .enter()
             .append("path")
-            .attr("class", "exposed-flow-link")
+            .attr("class", (d) => {
+                let currNodeName = d.id.split("-")[0];
+                return `exposed-flow-link ${currNodeName}`;
+            })
+            .attr("id", (d) => d.id)
             .attr("d", (d) => {
                 return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
                     {
@@ -335,7 +340,7 @@ class Odt {
                     _this.renderSummaryView(currNodeGroup);
 
                     // Update the flow link position
-                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
+                    parts.svgGroup.selectAll(`path.${currNodeName}`)
                     .transition()
                     .duration(transitionDuration)
                     .attr("d", (d) => {
@@ -354,7 +359,7 @@ class Odt {
                     });
                     if (currNodeName !== "root") {
                         let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path.link").filter(function() {
+                        parts.svgGroup.selectAll("path").filter(function() {
                             return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
                         })
                             .transition()
@@ -392,7 +397,7 @@ class Odt {
                     })
                 } else {
                     // Update the flow link position
-                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
+                    parts.svgGroup.selectAll(`path.${currNodeName}`)
                     .transition()
                     .duration(transitionDuration)
                     .attr("d", (d) => {
@@ -411,7 +416,7 @@ class Odt {
                     });
                     if (currNodeName !== "root") {
                         let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path.link").filter(function() {
+                        parts.svgGroup.selectAll("path").filter(function() {
                             return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
                         })
                             .transition()
