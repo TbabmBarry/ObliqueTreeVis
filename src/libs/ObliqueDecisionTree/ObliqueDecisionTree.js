@@ -226,8 +226,10 @@ class Odt {
                         const currNodeSvgGroup = d3.select(d3.selectAll(`rect.node-rect#${decisionNode}`).node().parentNode);
                         // Highlight related decision nodes with opacity 1
                         currNodeSvgGroup.style("opacity", 1);
-                        // Draw new split distribution rects to highlight the selected data points
-                        this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, nodeRectWidth, nodeRectRatio, colorScale);
+                        if (currNodeSvgGroup.node().querySelector(".detailed") === null) {
+                            // Draw new split distribution rects to highlight the selected data points
+                            this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, nodeRectWidth, nodeRectRatio, colorScale);
+                        }
                     });
                 });
                 break;
@@ -309,17 +311,23 @@ class Odt {
                 if (parentNodeGroup.node().querySelector(".detailed") !== null || 
                     (parentNodeGroup.node().querySelector(".detailed") === null &&
                         parentNodeGroup.node().querySelector(".summary") === null)) {
-                    // Fisrtly, remove the detailed view and render the summary view
+                    // Remove the detailed view and render the summary view
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
+
+                    // Re-render the exposed split histogram and flow links
+                    _this.update();
+
+                    // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
                         .attr("x", -0.5*nodeRectWidth)
                         .attr("y", 0)
                         .attr("width", nodeRectWidth)
-                        .attr("height", nodeRectWidth)
+                        .attr("height", nodeRectWidth);
                 } else {
+                    // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
