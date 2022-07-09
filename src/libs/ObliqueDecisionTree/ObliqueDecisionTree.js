@@ -322,6 +322,40 @@ class Odt {
             .style("stroke", "#000");
     }
 
+    /**
+     * Re-render sankey-like nodes according to pathsIdInDetailView
+     * @date 2022-07-10
+     * @param {targetSelection} targetSelection
+     * @param {transitionDuration} transitionDuration
+     * @param {pathsIdInDetailView} pathsIdInDetailView
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
+     * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
+     */
+    updateFlowLinks(targetSelection, transitionDuration, pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth) {
+        targetSelection.selectAll("path.link")
+            .transition()
+            .duration(transitionDuration)
+                .attr("d", (d) => {
+                    return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                        {
+                            x0: d.source.x - 0.5 * d.source.width,
+                            x1: d.source.x + 0.5 * d.source.width,
+                            y: d.source.y+0.5*nodeRectStrokeWidth
+                                + (pathsIdInDetailView.lower.includes(d.id.split("-")[0])
+                                    ? 0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0),
+                        },
+                        {
+                            x0: d.target.x - 0.5 * d.target.width,
+                            x1: d.target.x + 0.5 * d.target.width,
+                            y: d.target.y-0.5*nodeRectStrokeWidth
+                                + (pathsIdInDetailView.upper.includes(d.id.substring(0, d.id.length-1))
+                                    ? -0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0),
+                        }
+                    ]);
+                });
+    }
+
 
     /**
      * Render decision and leaf nodes according to the param nodes 
@@ -350,46 +384,14 @@ class Odt {
                     // Remove the detailed view and render the summary view
                     currNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(currNodeGroup);
-                    // Update the flow link position
-                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
-                    .transition()
-                    .duration(transitionDuration)
-                    .attr("d", (d) => {
-                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                            {
-                                x0: d.source.x - 0.5 * d.source.width,
-                                x1: d.source.x + 0.5 * d.source.width,
-                                y: d.source.y + 0.5*nodeRectStrokeWidth,
-                            },
-                            {
-                                x0: d.target.x - 0.5 * d.target.width,
-                                x1: d.target.x + 0.5 * d.target.width,
-                                y: d.target.y,
-                            }
-                        ]);
-                    });
-                    if (currNodeName !== "root") {
-                        let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path.link").filter(function() {
-                            return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
-                        })
-                            .transition()
-                            .duration(transitionDuration)
-                                .attr("d", (d) => {
-                                    return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                                        {
-                                            x0: d.source.x - 0.5 * d.source.width,
-                                            x1: d.source.x + 0.5 * d.source.width,
-                                            y: d.source.y + 0.5*nodeRectStrokeWidth,
-                                        },
-                                        {
-                                            x0: d.target.x - 0.5 * d.target.width,
-                                            x1: d.target.x + 0.5 * d.target.width,
-                                            y: d.target.y,
-                                        }
-                                    ]);
-                                });
-                    }
+
+                    // Update the pathsIdInDetailView
+                    _this.pathsIdInDetailView.lower = _.without(_this.pathsIdInDetailView.lower, currNodeName);
+                    _this.pathsIdInDetailView.upper = _.without(_this.pathsIdInDetailView.upper, `${parentNodeName}-${currNodeName}-`);
+                    
+                    // Update all the affected flow paths
+                    _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
+
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
@@ -399,10 +401,6 @@ class Odt {
                         .attr("width", nodeRectWidth)
                         .attr("height", nodeRectWidth)
                     .on("end", () => {
-                        // Clear the pathsIdInDetailView
-                        _this.pathsIdInDetailView.lower = _.without(_this.pathsIdInDetailView.lower, currNodeName);
-                        _this.pathsIdInDetailView.upper = _.without(_this.pathsIdInDetailView.upper, `${parentNodeName}-${currNodeName}-`);
-                        
                         // Re-render the exposed split histogram and flow links
                         if (_this.uniqueDecisionPaths.length !== 0) {
                             _this.update();
@@ -411,46 +409,9 @@ class Odt {
                         };
                     })
                 } else {
-                    // Update all the flow link position
-                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
-                    .transition()
-                    .duration(transitionDuration)
-                    .attr("d", (d) => {
-                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                            {
-                                x0: d.source.x - 0.5 * d.source.width,
-                                x1: d.source.x + 0.5 * d.source.width,
-                                y: d.source.y + 0.5*(detailedViewNodeRectWidth-nodeRectWidth) + 0.5*nodeRectStrokeWidth,
-                            },
-                            {
-                                x0: d.target.x - 0.5 * d.target.width,
-                                x1: d.target.x + 0.5 * d.target.width,
-                                y: d.target.y,
-                            }
-                        ]);
-                    });
-                    if (currNodeName !== "root") {
-                        let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path.link").filter(function() {
-                            return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
-                        })
-                            .transition()
-                            .duration(transitionDuration)
-                                .attr("d", (d) => {
-                                    return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                                        {
-                                            x0: d.source.x - 0.5 * d.source.width,
-                                            x1: d.source.x + 0.5 * d.source.width,
-                                            y: d.source.y + 0.5*nodeRectStrokeWidth,
-                                        },
-                                        {
-                                            x0: d.target.x - 0.5 * d.target.width,
-                                            x1: d.target.x + 0.5 * d.target.width,
-                                            y: d.target.y - 0.5*(detailedViewNodeRectWidth-nodeRectWidth),
-                                        }
-                                    ]);
-                                });
-                    }
+                    // Update all the affected flow paths
+                    _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
+
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
