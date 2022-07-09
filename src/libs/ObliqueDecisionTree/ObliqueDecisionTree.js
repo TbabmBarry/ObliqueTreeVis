@@ -292,7 +292,7 @@ class Odt {
             .append("path")
             .attr("class", (d) => {
                 let currNodeName = d.id.split("-")[0];
-                return `exposed-flow-link ${currNodeName}`;
+                return `link exposed-flow-link ${currNodeName}`;
             })
             .attr("id", (d) => d.id)
             .attr("d", (d) => {
@@ -340,7 +340,7 @@ class Odt {
                     _this.renderSummaryView(currNodeGroup);
 
                     // Update the flow link position
-                    parts.svgGroup.selectAll(`path.${currNodeName}`)
+                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
                     .transition()
                     .duration(transitionDuration)
                     .attr("d", (d) => {
@@ -359,7 +359,7 @@ class Odt {
                     });
                     if (currNodeName !== "root") {
                         let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path").filter(function() {
+                        parts.svgGroup.selectAll("path.link").filter(function() {
                             return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
                         })
                             .transition()
@@ -397,7 +397,7 @@ class Odt {
                     })
                 } else {
                     // Update the flow link position
-                    parts.svgGroup.selectAll(`path.${currNodeName}`)
+                    parts.svgGroup.selectAll(`path.link.${currNodeName}`)
                     .transition()
                     .duration(transitionDuration)
                     .attr("d", (d) => {
@@ -416,7 +416,7 @@ class Odt {
                     });
                     if (currNodeName !== "root") {
                         let parentNodeName = currNodeGroup.data()[0].parent.data.name;
-                        parts.svgGroup.selectAll("path").filter(function() {
+                        parts.svgGroup.selectAll("path.link").filter(function() {
                             return d3.select(this).attr("id").includes(`${parentNodeName}-${currNodeName}-`);
                         })
                             .transition()
