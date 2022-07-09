@@ -41,6 +41,10 @@ class Odt {
             exposedFlowLinks: [],
             uniqueDecisionPaths: [],
             registeredStateListeners: [],
+            pathsIdInDetailView: {
+                upper: [],
+                lower: []
+            },
             computed: {},
             constants: {
                 nameFontSize: 10,
@@ -122,7 +126,7 @@ class Odt {
      */
     update(status = "on") {
         const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
-            constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
+            constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
                 // Remove all exposed flow links
@@ -152,7 +156,7 @@ class Odt {
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
                     // Highlight the exposed flow link by drawing a new link over the old one
-                    this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectStrokeWidth, colorScale);
+                    this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale);
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     let idArr = uniqueDecisionPath.idArr.slice();
@@ -265,7 +269,7 @@ class Odt {
      * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
      * @param {colorScale} colorScale
      */
-    renderExposedLinks(targetSelection, exposedFlowLink, nodeRectStrokeWidth, colorScale) {
+    renderExposedLinks(targetSelection, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale) {
         let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
         let currWidth = (exposedFlowLink.count/currLinkData.count)*currLinkData.source.width;
         // Compute flow data for exposed flow link
@@ -283,6 +287,7 @@ class Odt {
             class: currLinkData.class,
             id: exposedFlowLink.pathId,
         };
+
         // Draw new flow path line with the new width
         targetSelection.selectAll("link.exposed-flow-link")
             .data([flowLinkData])
@@ -298,14 +303,18 @@ class Odt {
                     {
                         x0: d.source.x - 0.5 * d.source.width,
                         x1: d.source.x + 0.5 * d.source.width,
-                        y: d.source.y+0.5*nodeRectStrokeWidth,
+                        y: d.source.y+0.5*nodeRectStrokeWidth
+                            + (this.pathsIdInDetailView.lower.includes(d.id.split("-")[0])
+                                ? 0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0),
                     },
                     {
                         x0: d.target.x - 0.5 * d.target.width,
                         x1: d.target.x + 0.5 * d.target.width,
-                        y: exposedFlowLink.pathId.includes("f") 
+                        y: (exposedFlowLink.pathId.includes("f") 
                             ? d.target.y-0.2*nodeRectStrokeWidth
-                            : d.target.y-0.5*nodeRectStrokeWidth,
+                            : d.target.y-0.5*nodeRectStrokeWidth)
+                            + (this.pathsIdInDetailView.upper.includes(d.id.substring(0, d.id.length-1)
+                                ? -0.5*(detailedViewNodeRectWidth-nodeRectWidth) : 0)),
                     }
                 ]);
             })
@@ -330,6 +339,11 @@ class Odt {
             if (event.shiftKey && node.data.type === "decision") {
                 let currNodeGroup = select(this);
                 let currNodeName = currNodeGroup.data()[0].data.name;
+                _this.pathsIdInDetailView.lower.push(currNodeName);
+                if (currNodeName !== "root") {
+                    let parentNodeName = currNodeGroup.data()[0].parent.data.name;
+                    _this.pathsIdInDetailView.upper.push(`${parentNodeName}-${currNodeName}-`);
+                }
                 if (currNodeGroup.node().querySelector(".detailed") !== null || 
                     (currNodeGroup.node().querySelector(".detailed") === null &&
                         currNodeGroup.node().querySelector(".summary") === null)) {
@@ -385,6 +399,9 @@ class Odt {
                         .attr("width", nodeRectWidth)
                         .attr("height", nodeRectWidth)
                     .on("end", () => {
+                        // Clear the pathsIdInDetailView
+                        _this.pathsIdInDetailView.upper = new Array();
+                        _this.pathsIdInDetailView.lower = new Array();
                         // Re-render the exposed split histogram and flow links
                         if (_this.uniqueDecisionPaths.length !== 0) {
                             _this.update();
@@ -393,12 +410,6 @@ class Odt {
                         };
                     })
                 } else {
-                    // Re-render the exposed split histogram and flow links
-                    if (_this.uniqueDecisionPaths.length !== 0) {
-                        _this.update();
-                    } else {
-                        _this.update("reset");
-                    }
                     // Update all the flow link position
                     parts.svgGroup.selectAll(`path.link.${currNodeName}`)
                     .transition()
