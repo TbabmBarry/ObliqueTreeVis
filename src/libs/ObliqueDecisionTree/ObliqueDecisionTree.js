@@ -151,46 +151,8 @@ class Odt {
                     // Hightlight the full width exposed flow link with opacity 0.8
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
-                    let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
-                    let currWidth = (exposedFlowLink.count / currLinkData.count)*currLinkData.source.width;
-                    // Compute flow data for exposed flow link
-                    const flowLinkData = {
-                        source: {
-                            x: currLinkData.source.x-0.5*(currLinkData.source.width-currWidth),
-                            y: currLinkData.source.y,
-                            width: currWidth,
-                        },
-                        target: {
-                            x: currLinkData.target.x-0.5*(currLinkData.source.width-currWidth),
-                            y: currLinkData.target.y,
-                            width: currWidth,
-                        },
-                        class: currLinkData.class
-                    };
-                    // Draw new flow path line with the new width
-                    parts.svgGroup.selectAll("link.exposed-flow-link")
-                        .data([flowLinkData])
-                        .enter()
-                        .append("path")
-                        .attr("class", "exposed-flow-link")
-                        .attr("d", (d) => {
-                            return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
-                                {
-                                    x0: d.source.x - 0.5 * d.source.width,
-                                    x1: d.source.x + 0.5 * d.source.width,
-                                    y: d.source.y+0.5*nodeRectStrokeWidth,
-                                },
-                                {
-                                    x0: d.target.x - 0.5 * d.target.width,
-                                    x1: d.target.x + 0.5 * d.target.width,
-                                    y: exposedFlowLink.pathId.includes("f") 
-                                        ? d.target.y-0.2*nodeRectStrokeWidth
-                                        : d.target.y-0.5*nodeRectStrokeWidth,
-                                }
-                            ]);
-                        })
-                        .style("fill", (d) => colorScale[d.class])
-                        .style("stroke", "#000");
+                    // Highlight the exposed flow link by drawing a new link over the old one
+                    this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectStrokeWidth, colorScale);
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     let idArr = uniqueDecisionPath.idArr.slice();
@@ -290,6 +252,49 @@ class Odt {
             .style("fill", (d) => colorScale[d.class])
             .style("stroke", "none");
 
+    }
+
+    renderExposedLinks(targetSelection, exposedFlowLink, nodeRectStrokeWidth, colorScale) {
+        let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
+        let currWidth = (exposedFlowLink.count/currLinkData.count)*currLinkData.source.width;
+        // Compute flow data for exposed flow link
+        const flowLinkData = {
+            source: {
+                x: currLinkData.source.x-0.5*(currLinkData.source.width-currWidth),
+                y: currLinkData.source.y,
+                width: currWidth,
+            },
+            target: {
+                x: currLinkData.target.x-0.5*(currLinkData.source.width-currWidth),
+                y: currLinkData.target.y,
+                width: currWidth,
+            },
+            class: currLinkData.class
+        };
+        // Draw new flow path line with the new width
+        targetSelection.selectAll("link.exposed-flow-link")
+            .data([flowLinkData])
+            .enter()
+            .append("path")
+            .attr("class", "exposed-flow-link")
+            .attr("d", (d) => {
+                return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                    {
+                        x0: d.source.x - 0.5 * d.source.width,
+                        x1: d.source.x + 0.5 * d.source.width,
+                        y: d.source.y+0.5*nodeRectStrokeWidth,
+                    },
+                    {
+                        x0: d.target.x - 0.5 * d.target.width,
+                        x1: d.target.x + 0.5 * d.target.width,
+                        y: exposedFlowLink.pathId.includes("f") 
+                            ? d.target.y-0.2*nodeRectStrokeWidth
+                            : d.target.y-0.5*nodeRectStrokeWidth,
+                    }
+                ]);
+            })
+            .style("fill", (d) => colorScale[d.class])
+            .style("stroke", "#000");
     }
 
 
