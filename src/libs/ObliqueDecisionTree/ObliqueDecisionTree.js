@@ -235,7 +235,10 @@ class Odt {
         parts.svgGroup.selectAll(".link")
             .data(flowLinks)
             .enter().append("path")
-            .attr("class", "link")
+            .attr("class", (d) => {
+                let parentNodeName = d.id.split("-")[0];
+                return `link ${parentNodeName}`;
+            })
             .attr("id", (d) => d.id)
             .attr("d", (d) => {
                 return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
@@ -323,6 +326,7 @@ class Odt {
         function clicked(event, node) {
             if (event.shiftKey && node.data.type === "decision") {
                 let parentNodeGroup = select(this);
+                let parentNodeName = parentNodeGroup.data()[0].data.name;
                 if (parentNodeGroup.node().querySelector(".detailed") !== null || 
                     (parentNodeGroup.node().querySelector(".detailed") === null &&
                         parentNodeGroup.node().querySelector(".summary") === null)) {
@@ -330,6 +334,24 @@ class Odt {
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
 
+                    // Update the flow link position
+                    parts.svgGroup.selectAll(`path.link.${parentNodeName}`)
+                    .transition()
+                    .duration(transitionDuration)
+                    .attr("d", (d) => {
+                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                            {
+                                x0: d.source.x - 0.5 * d.source.width,
+                                x1: d.source.x + 0.5 * d.source.width,
+                                y: d.source.y + 0.5*nodeRectStrokeWidth,
+                            },
+                            {
+                                x0: d.target.x - 0.5 * d.target.width,
+                                x1: d.target.x + 0.5 * d.target.width,
+                                y: d.target.y,
+                            }
+                        ]);
+                    });
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
@@ -347,6 +369,24 @@ class Odt {
                         }
                     })
                 } else {
+                    // Update the flow link position
+                    parts.svgGroup.selectAll(`path.link.${parentNodeName}`)
+                    .transition()
+                    .duration(transitionDuration)
+                    .attr("d", (d) => {
+                        return d3.area().curve(d3.curveBumpY).x0(dd => dd.x0).x1(dd => dd.x1).y(dd => dd.y)([
+                            {
+                                x0: d.source.x - 0.5 * d.source.width,
+                                x1: d.source.x + 0.5 * d.source.width,
+                                y: d.source.y + 0.5*(detailedViewNodeRectWidth-nodeRectWidth) + 0.5*nodeRectStrokeWidth,
+                            },
+                            {
+                                x0: d.target.x - 0.5 * d.target.width,
+                                x1: d.target.x + 0.5 * d.target.width,
+                                y: d.target.y,
+                            }
+                        ]);
+                    });
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
