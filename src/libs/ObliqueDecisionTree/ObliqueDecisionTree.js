@@ -152,7 +152,9 @@ class Odt {
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
                     // Highlight the exposed flow link by drawing a new link over the old one
-                    this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectStrokeWidth, colorScale);
+                    if (parts.svgGroup.node().querySelector(".detailed") === null) {
+                        this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectStrokeWidth, colorScale);
+                    }
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     let idArr = uniqueDecisionPath.idArr.slice();
@@ -254,6 +256,14 @@ class Odt {
 
     }
 
+    /**
+     * Render exposed sankey-like nodes according to param nodes
+     * @date 2022-07-09
+     * @param {targetSelection} targetSelection
+     * @param {exposedFlowLink} exposedFlowLink
+     * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
+     * @param {colorScale} colorScale
+     */
     renderExposedLinks(targetSelection, exposedFlowLink, nodeRectStrokeWidth, colorScale) {
         let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
         let currWidth = (exposedFlowLink.count/currLinkData.count)*currLinkData.source.width;
@@ -320,9 +330,6 @@ class Odt {
                     parentNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(parentNodeGroup);
 
-                    // Re-render the exposed split histogram and flow links
-                    _this.update();
-
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
@@ -330,7 +337,15 @@ class Odt {
                         .attr("x", -0.5*nodeRectWidth)
                         .attr("y", 0)
                         .attr("width", nodeRectWidth)
-                        .attr("height", nodeRectWidth);
+                        .attr("height", nodeRectWidth)
+                    .on("end", () => {
+                        // Re-render the exposed split histogram and flow links
+                        if (_this.uniqueDecisionPaths.length !== 0) {
+                            _this.update();
+                        } else {
+                            _this.update("reset");
+                        }
+                    })
                 } else {
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
@@ -344,6 +359,12 @@ class Odt {
                         // Remove the summary view and render the detailed view after the transition
                         parentNodeGroup.selectAll(".summary").remove();
                         _this.renderDetailedView(parentNodeGroup);
+                        // Re-render the exposed split histogram and flow links
+                        if (_this.uniqueDecisionPaths.length !== 0) {
+                            _this.update();
+                        } else {
+                            _this.update("reset");
+                        }
                     });
                 }
             }
