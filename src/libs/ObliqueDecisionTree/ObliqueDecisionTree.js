@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { color, select } from 'd3';
-import _, { random } from 'lodash';
+import _, { pad, random } from 'lodash';
 import textures from 'textures';
 
 class Odt {
@@ -834,7 +834,8 @@ class Odt {
 
             if (currFeatureIdx.length === 1) {
                 // Draw strip chart for one-feature classifier
-                _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this);
+                // _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this);
+                _this.drawBeeswarm(node, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale);
             }
         })
     }
@@ -1027,6 +1028,125 @@ class Odt {
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
             .call(d3.axisBottom(xStrip).tickFormat(""));
+    }
+
+    drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale) {
+        const X = nodeData.data.subTrainingSet.map(idx => this.trainX[idx][featureArr[currFeatureIdx[0]]]);
+        const xScale = d3.scaleLinear()
+            .domain(d3.extent(X))
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
+
+        function dodge(X, radius) {
+            const Y = new Float64Array(X.length);
+            const radius2 = radius ** 2;
+            const epsilon = 1e-3;
+            let head = null, tail = null;
+
+            // Returns true if circle (x, y) intersects with any circle in the queue.
+            function intersects(x, y) {
+                let a = head;
+                while (a) {
+                    const ai = a.index;
+                    if (radius2 - epsilon > (X[ai] - x) ** 2 + (Y[ai] - y) ** 2) return true;
+                    a = a.next;
+                }
+                return false;
+            }
+
+            // Place each circle sequentially in the queue.
+            for (const bi of d3.range(X.length).sort((i, j) => X[i] - X[j])) {
+                // Remove circles from the queue that can't intersect the new circle b.
+                while (head && X[head.index] < X[bi] - radius2) head = head.next;
+
+                // Choose the minimum non-intersecting tangent.
+                if (intersects(X[bi], Y[bi] = 0)) {
+                    let a = head;
+                    Y[bi] = Infinity;
+                    do {
+                        const ai = a.index;
+                        let y = Y[ai] + Math.sqrt(radius2 - (X[ai] - X[bi]) ** 2);
+                        if (y < Y[bi] && !intersects(X[bi], y)) Y[bi] = y;
+                        a = a.next;
+                    } while (a);
+                }
+
+                // Add circle b to the queue.
+                const b = { index: bi, next: null };
+                if (head == null) head = tail = b;
+                else tail = tail.next = b;
+            }
+            return Y;
+        }
+        const radius = 3, padding = 1.5;
+        const marginTop = scatterPlotPadding + histogramHeight + histogramScatterPlotPadding;
+        const marginBottom = 0.5*detailedViewNodeRectWidth + 2*scatterPlotPadding;
+        const Y = dodge(X.map(x => xScale(x)), radius * 2 + padding);
+        const beeswarmHeight = d3.max(Y) + (radius + padding) * 2 + marginTop + marginBottom;
+        // Draw points for strip chart
+        targetSelection.append("g")
+            .attr("class", "detailed beeswarm-chart-group")
+        .selectAll("circle")
+        .data(X)
+        .join("circle")
+            .attr("r", radius)
+            .attr("cx", d => xScale(d)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+            .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y[i]);
+
+        // Draw feature histogram for beeswarm plot
+        // Set up histogram parameters
+        const beeswarmHistogram = d3.bin()
+            .value((d) => d.value)
+            .domain(xScale.domain())
+            .thresholds(xScale.ticks(20));
+
+        // Get the original data for histograms
+        const valuesLeft = nodeData.data.leftSubTrainingSet.map(idx => ({
+            value: this.trainX[idx][featureArr[currFeatureIdx[0]]],
+            label: this.trainY[idx],
+        })),
+            valuesRight = nodeData.data.rightSubTrainingSet.map(idx => ({
+                value: this.trainX[idx][featureArr[currFeatureIdx[0]]],
+                label: this.trainY[idx],
+            }));
+
+        // Get the histogram data according to predefined histogram functions
+        const binsLeft = beeswarmHistogram(valuesLeft),
+            binsRight = beeswarmHistogram(valuesRight);
+
+        // Set up y-axis value encodings for histograms
+        const yHistogram = d3.scaleLinear()
+            .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])
+            .range([histogramHeight, 0]);
+        
+        // Draw histograms
+        targetSelection.selectAll("rect.histogram.x-histogram.left")
+            .data(binsLeft)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("transform", d => `translate(${xScale(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+            .attr("width", d => xScale(d.x1)-xScale(d.x0))
+            .attr("height", d => histogramHeight-yHistogram(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.4);
+
+        targetSelection.selectAll("rect.histogram.x-histogram.right")
+            .data(binsRight)
+            .join("rect")
+            .attr("class", "detailed histogram")
+            .attr("transform", d => `translate(${xScale(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+                .attr("width", d => xScale(d.x1)-xScale(d.x0))
+                .attr("height", d => histogramHeight-yHistogram(d.length))
+            .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .style("opacity", 0.6);
+        
+        // Draw x-axis for histogram
+        targetSelection.append("g")
+            .attr("class", "detailed histogram x-axis")
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+            .call(d3.axisBottom(xScale).tickFormat(""));
     }
 
     /**
