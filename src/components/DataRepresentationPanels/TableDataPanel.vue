@@ -6,9 +6,10 @@
                 bordered
                 :dataSource="dataSource"
                 :columns="columns"
-                :scroll="{ y: tableHeight, x: tableWidth}"
+                :scroll="{ y: tableHeight, x: tableWidth }"
                 size="small"
                 :pagination="pagination"
+                :rowClassName="selectedRowsClassed"
             >
             </a-table>
         </div>
@@ -19,9 +20,13 @@ import { reactive, toRefs, onMounted, watch } from "vue";
 import { getDatasetChangeSelects } from "@/api/metrics.js";
 
 const props = defineProps({
+    selectedPoints: {
+        type: Array,
+        default: () => []
+    },
     selectedDataset: {
         type: String,
-        default: "iris"
+        default: "penguins"
     }
 });
 
@@ -31,6 +36,7 @@ const state = reactive({
     tableWidth: 800,
     dataSource: [],
     columns: [],
+    selectedDataIndexArray: []
 });
 
 onMounted(async () => {
@@ -70,10 +76,27 @@ watch(() => props.selectedDataset,
     { immediate: false }
 );
 
+watch(() => props.selectedPoints, (newValue, oldValue) => {
+    // Update selected data index array
+    state.selectedDataIndexArray = newValue.map(point => point.id);
+});
+
+const selectedRowsClassed = (record, index) => {
+    if (state.selectedDataIndexArray.includes(index)) {
+        return 'selected-row';
+    }
+    return '';
+}
+
 let { pagination, tableHeight, tableWidth, dataSource, columns } = toRefs(state);
 </script>
 <style scoped>
 .table {
     height: fit-content;
+}
+
+tr.selected-row {
+    border: 1px solid lime;
+    color: blueviolet;
 }
 </style>

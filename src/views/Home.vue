@@ -43,7 +43,7 @@
         </div>
     </div> -->
     <div class="border border-gray-800/100 my-2 min-w-full max-w-screen-2xl">      
-        <TableDataPanel :selectedDataset="selectedDataset" />
+        <TableDataPanel :selectedPoints="selectedPoints" :selectedDataset="selectedDataset" />
     </div>
 </div>
 </template>
