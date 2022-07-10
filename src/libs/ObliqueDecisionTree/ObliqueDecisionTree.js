@@ -1050,7 +1050,7 @@ class Odt {
         const xScale = d3.scaleLinear()
             .domain(d3.extent(X))
             .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
-
+        const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
         function dodge(X, radius) {
             const Y = new Float64Array(X.length);
             const radius2 = radius ** 2;
@@ -1097,7 +1097,22 @@ class Odt {
         const marginBottom = 0.5*detailedViewNodeRectWidth + 2*scatterPlotPadding;
         const Y = dodge(X.map(x => xScale(x)), radius * 2 + padding);
         const beeswarmHeight = d3.max(Y) + (radius + padding) * 2 + marginTop + marginBottom;
-        // Draw points for strip chart
+
+        // Draw X-axis for beeswarm plot
+        targetSelection.append("g")
+            .attr("class", "detailed beeswarm x-axis")
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}
+                ,${beeswarmHeight-marginBottom})`)
+            .call(xAxis)
+            .call(g => g.append("text")
+                .attr("x", detailedViewNodeRectWidth-3*scatterPlotPadding)
+                .attr("y", -0.5*detailedViewNodeRectWidth + marginBottom-4)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "end")
+                .text("xLabel")
+            );
+
+        // Draw points for beeswarm plot
         targetSelection.append("g")
             .attr("class", "detailed beeswarm-chart-group")
         .selectAll("circle")
