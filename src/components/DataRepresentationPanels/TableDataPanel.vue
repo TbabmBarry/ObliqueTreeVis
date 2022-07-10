@@ -9,7 +9,6 @@
                 :scroll="{ y: tableHeight, x: tableWidth }"
                 size="small"
                 :pagination="pagination"
-                :rowClassName="selectedRowsClassed"
             >
             </a-table>
         </div>
@@ -71,6 +70,7 @@ const initializeDataTable = async (dataset_name) => {
     state.dataSource = state.trainingSet.map(obj => ({...obj}));
 }
 
+
 watch(() => props.selectedDataset,
     val => {
         initializeDataTable(val);
@@ -88,22 +88,10 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 }, { immediate: false });
 
 
-const selectedRowsClassed = (record, index) => {
-    if (state.selectedDataIndexArray.includes(index)) {
-        return 'selected-row';
-    }
-    return '';
-}
-
 let { pagination, tableHeight, tableWidth, dataSource, columns } = toRefs(state);
 </script>
-<style>
+<style scoped>
 .table {
     height: fit-content;
-}
-
-tr.selected-row {
-    /* border: 2px solid lime; */
-    background-color: blueviolet;
 }
 </style>
