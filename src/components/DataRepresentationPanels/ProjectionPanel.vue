@@ -75,18 +75,18 @@ async function initProjectionView (dataset_name) {
     // Create x and y value encodings for the circle group
     const x = d3.scaleLinear()
             .domain(d3.extent(state.projections, (d) => d.position[0]))
-            .range([state.padding / 2, state.width - state.padding / 2]),
+            .range([state.padding, state.width-state.padding]),
         y = d3.scaleLinear()
             .domain(d3.extent(state.projections, (d) => d.position[1]))
-            .range([state.height - state.padding / 2, state.padding / 2]);
+            .range([state.height-state.padding, state.padding]);
     
     circleGroup.append("rect")
         .attr("fill", "none")
         .attr("stroke", "none")
-        .attr("x", state.padding / 2 + 0.5)
-        .attr("y", state.padding / 2 + 0.5)
-        .attr("width", state.width - state.padding)
-        .attr("height", state.height - state.padding);
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", state.width)
+        .attr("height", state.height);
 
     circleGroup.selectAll("circle")
         .data(state.projections)
@@ -117,7 +117,7 @@ async function initProjectionView (dataset_name) {
  */
 function brush (cell, circle, x, y) {
     const brush = d3.brush()
-        .extent([[state.padding / 2, state.padding / 2], [state.width - state.padding / 2, state.height - state.padding / 2]])
+        .extent([[0,0], [state.width, state.height]])
         .on("start", brushStarted)
         .on("brush", brushed)
         .on("end", brushEnded);
