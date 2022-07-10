@@ -216,7 +216,7 @@ class Odt {
 
                 // Recover circle fill color in scatter plots
                 d3.selectAll("circle.detailed.dot")
-                    .style("fill", d => colorScale[trainY[d]]);
+                    .style("fill", d => (typeof d === 'object' && d !== null) ? colorScale[d.label] : colorScale[trainY[d]]);
                 break;
             default:
                 throw new Error(`Unknown status: ${status}`);
@@ -1046,9 +1046,13 @@ class Odt {
      * @param {featureColorScale} featureColorScale
      */
     drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale) {
-        const X = nodeData.data.subTrainingSet.map(idx => this.trainX[idx][featureArr[currFeatureIdx[0]]]);
+        const X = nodeData.data.subTrainingSet.map(idx => ({
+            value: this.trainX[idx][featureArr[currFeatureIdx[0]]],
+            index: idx,
+            label: this.trainY[idx],
+        }));
         const xScale = d3.scaleLinear()
-            .domain(d3.extent(X))
+            .domain(d3.extent(X, d => d.value))
             .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
         const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
         function dodge(X, radius) {
@@ -1095,7 +1099,7 @@ class Odt {
         const radius = 3, padding = 1.5;
         const marginTop = scatterPlotPadding + histogramHeight + histogramScatterPlotPadding;
         const marginBottom = 0.5*detailedViewNodeRectWidth + 2*scatterPlotPadding;
-        const Y = dodge(X.map(x => xScale(x)), radius * 2 + padding);
+        const Y = dodge(X.map(x => xScale(x.value)), radius * 2 + padding);
         const beeswarmHeight = d3.max(Y) + (radius + padding) * 2 + marginTop + marginBottom;
 
         // Draw X-axis for beeswarm plot
@@ -1118,10 +1122,19 @@ class Odt {
         .selectAll("circle")
         .data(X)
         .join("circle")
+        .attr("class", "detailed dot")
+        .attr("id", d => `dot-${d.index}`)
             .attr("r", radius)
-            .attr("cx", d => xScale(d)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+            .attr("cx", d => xScale(d.value)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
             .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y[i])
-            .attr("fill", (d, i) => colorScale[this.trainY[i]]);
+            .style("fill", (d) => {
+                if (this.selectedPoints.length && !this.selectedPoints.includes(d.index)) {
+                    return "#fff";
+                } else {
+                    return colorScale[d.label];
+                }
+            })
+            .style("stroke", (d) => colorScale[d.label]);
 
         // Draw feature histogram for beeswarm plot
         // Set up histogram parameters
