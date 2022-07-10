@@ -1030,6 +1030,21 @@ class Odt {
             .call(d3.axisBottom(xStrip).tickFormat(""));
     }
 
+    /**
+     * Draw beeswarm plot for one-feature decision node in detailed view.
+     * @date 2022-07-10
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {featureArr} featureArr
+     * @param {currFeatureIdx} currFeatureIdx
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
+     * @param {histogramHeight} histogramHeight
+     * @param {scatterPlotPadding} scatterPlotPadding
+     * @param {histogramScatterPlotPadding} histogramScatterPlotPadding
+     * @param {colorScale} colorScale
+     * @param {featureColorScale} featureColorScale
+     */
     drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale) {
         const X = nodeData.data.subTrainingSet.map(idx => this.trainX[idx][featureArr[currFeatureIdx[0]]]);
         const xScale = d3.scaleLinear()
@@ -1090,7 +1105,8 @@ class Odt {
         .join("circle")
             .attr("r", radius)
             .attr("cx", d => xScale(d)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
-            .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y[i]);
+            .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y[i])
+            .attr("fill", (d, i) => colorScale[this.trainY[i]]);
 
         // Draw feature histogram for beeswarm plot
         // Set up histogram parameters
