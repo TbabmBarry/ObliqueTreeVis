@@ -82,8 +82,8 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
     // Update selected data index array
     state.selectedDataIndexArray = newValue.map(point => point.id);
     state.dataSource = state.trainingSet.filter((obj, index) => state.selectedDataIndexArray.includes(index));
-    if (oldValue.length !== 0 && newValue.length === 0) {
-        state.dataSource = state.trainingSet.map(obj => ({...obj}));
+    if (newValue.length === 0) {
+        state.dataSource = state.trainingSet;
     }
 }, { immediate: false });
 
