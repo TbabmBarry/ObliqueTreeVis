@@ -519,7 +519,7 @@ class Odt {
      * @param {node} node
      */
     renderDetailedView(node) {
-        const { constants: { nodeRectWidth, histogramHeight, detailedViewNodeRectWidth, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureArr, featureColorScale } } = this;
+        const { constants: { histogramHeight, detailedViewNodeRectWidth, scatterPlotPadding, histogramScatterPlotPadding, featureArr } } = this;
         let _this = this;
         // Map two feature variables into visual representations
         const x = featureArr.map(f => d3.scaleLinear()
@@ -534,16 +534,15 @@ class Odt {
             let currFeatureIdx = nodeData.data.featureIdx;
             if (currFeatureIdx.length === 2) {
                 // Draw two-feature scatter plot
-                _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
+                _this.drawScatterPlot(node, nodeData, currFeatureIdx, x, y, _this);
                 // Draw two-feature histogram
-                _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
-                _this.drawSplitHistogramInDetailedView(node, nodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale);
+                _this.drawFeatureHistogram(node, nodeData, currFeatureIdx, x, y, _this);
+                _this.drawSplitHistogramInDetailedView(node, nodeData, _this);
             }
 
             if (currFeatureIdx.length === 1) {
                 // Draw strip chart for one-feature classifier
-                // _this.drawStripChart(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this);
-                _this.drawBeeswarm(node, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale, _this);
+                _this.drawBeeswarm(node, nodeData, currFeatureIdx, _this);
             }
         })
     }

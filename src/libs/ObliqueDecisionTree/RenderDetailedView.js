@@ -16,7 +16,9 @@ import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
  * @param {x} x
  * @param {y} y
  */
-export function drawScatterPlot(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, that, x, y) {
+export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y, that) {
+    const { trainX, trainY, constants : { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale }} = that;
+    
     // Allow X and Y axis generators to be called
     targetSelection.append("g")
         .attr("class", "detailed x-axis")
@@ -63,11 +65,11 @@ export function drawScatterPlot(targetSelection, nodeData, nodeRectWidth, detail
             .attr("class", "detailed dot")
             .attr("id", d => `dot-${d}`)
             .attr("cx", (d) => {
-                return x[currFeatureIdx[0]](that.trainX[d][featureArr[currFeatureIdx[0]]])
+                return x[currFeatureIdx[0]](trainX[d][featureArr[currFeatureIdx[0]]])
                     -0.5*detailedViewNodeRectWidth+2*scatterPlotPadding;
             })
             .attr("cy", (d) => {
-                return y[currFeatureIdx[1]](that.trainX[d][featureArr[currFeatureIdx[1]]])
+                return y[currFeatureIdx[1]](trainX[d][featureArr[currFeatureIdx[1]]])
                     -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding;
             })
             .attr("r", 3.5)
@@ -75,10 +77,10 @@ export function drawScatterPlot(targetSelection, nodeData, nodeRectWidth, detail
                 if (that.selectedPoints.length && !that.selectedPoints.includes(d)) {
                     return "#fff";
                 } else {
-                    return colorScale[that.trainY[d]];
+                    return colorScale[trainY[d]];
                 }
             })
-            .style("stroke", (d) => colorScale[that.trainY[d]]);
+            .style("stroke", (d) => colorScale[trainY[d]]);
 }
 
 /**
@@ -221,11 +223,13 @@ export function drawStripChart(targetSelection, nodeData, nodeRectWidth, detaile
  * @param {colorScale} colorScale
  * @param {featureColorScale} featureColorScale
  */
-export function drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureIdx, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale, that) {
+export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
+    const { trainX, trainY, 
+        constants: { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale } } = that;
     const X = nodeData.data.subTrainingSet.map(idx => ({
-        value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
+        value: trainX[idx][featureArr[currFeatureIdx[0]]],
         index: idx,
-        label: that.trainY[idx],
+        label: trainY[idx],
     }));
     const xScale = d3.scaleLinear()
         .domain(d3.extent(X, d => d.value))
@@ -321,12 +325,12 @@ export function drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureI
 
     // Get the original data for histograms
     const valuesLeft = nodeData.data.leftSubTrainingSet.map(idx => ({
-        value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
-        label: that.trainY[idx],
+        value: trainX[idx][featureArr[currFeatureIdx[0]]],
+        label: trainY[idx],
     })),
         valuesRight = nodeData.data.rightSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
-            label: that.trainY[idx],
+            value: trainX[idx][featureArr[currFeatureIdx[0]]],
+            label: trainY[idx],
         }));
 
     // Get the histogram data according to predefined histogram functions
@@ -386,7 +390,8 @@ export function drawBeeswarm(targetSelection, nodeData, featureArr, currFeatureI
  * @param {x} x
  * @param {y} y
  */    
-export function drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, that, x, y) {
+export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, x, y, that) {
+    const { trainX, trainY, constants : { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureColorScale }} = that;
     // Set the parameters for histograms
     const histogram1 = d3.bin()
         .value((d) => d.value)
@@ -399,20 +404,20 @@ export function drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, d
 
     // Get the original data for histograms
     const values1Left = nodeData.data.leftSubTrainingSet.map(idx => ({
-        value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
-        label: that.trainY[idx],
+        value: trainX[idx][featureArr[currFeatureIdx[0]]],
+        label: trainY[idx],
     })),
         values1Right = nodeData.data.rightSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[0]]],
-            label: that.trainY[idx],
+            value: trainX[idx][featureArr[currFeatureIdx[0]]],
+            label: trainY[idx],
         })),
         values2Left = nodeData.data.leftSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
-            label: that.trainY[idx],
+            value: trainX[idx][featureArr[currFeatureIdx[1]]],
+            label: trainY[idx],
         })),
         values2Right = nodeData.data.rightSubTrainingSet.map(idx => ({
-            value: that.trainX[idx][featureArr[currFeatureIdx[1]]],
-            label: that.trainY[idx],
+            value: trainX[idx][featureArr[currFeatureIdx[1]]],
+            label: trainY[idx],
         }));
     // Get the histogram data according to predefined histogram functions
     const bins1Left = histogram1(values1Left),
@@ -502,7 +507,8 @@ export function drawFeatureHistogram(targetSelection, nodeData, nodeRectWidth, d
  * @param {scatterPlotPadding} scatterPlotPadding
  * @param {colorScale} colorScale
  */
-export function drawSplitHistogramInDetailedView(targetSelection, nodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale) {
+export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that) {
+    const { constants : { detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale } } = that;
     // Draw detailed split histogram
     let xRight = d3.scaleLinear()
         .domain([0, _.sum(nodeData.data.totalCount)])
