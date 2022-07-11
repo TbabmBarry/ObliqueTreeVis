@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
-import { normalizeArr } from '../Utils';
+import { normalizeArr } from '@/libs/Utils';
 
 /**
  * Draw class distribution in the summary view

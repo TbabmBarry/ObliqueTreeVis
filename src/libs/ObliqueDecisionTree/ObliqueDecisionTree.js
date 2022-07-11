@@ -3,11 +3,11 @@ import { color, select } from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { adjustedClientRect, getEffectiveFeatureContribution,
-    traverseTree } from '../Utils.js';
+    traverseTree } from '@/libs/Utils';
 import { drawClassDistribution, drawCoefficientBar, drawSplitHistogram,
-    drawExposedSplitHistogram } from './RenderSummaryView.js';
+    drawExposedSplitHistogram } from '@/libs/ObliqueDecisionTree/RenderSummaryView';
 import { drawScatterPlot, drawBeeswarm, drawFeatureHistogram,
-    drawSplitHistogramInDetailedView, drawExposedSplitHistogramInDetailedView } from './RenderDetailedView.js';
+    drawSplitHistogramInDetailedView, drawExposedSplitHistogramInDetailedView } from '@/libs/ObliqueDecisionTree/RenderDetailedView';
 
 class Odt {
     static initClass() {
