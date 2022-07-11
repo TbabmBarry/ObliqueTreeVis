@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import { color, select } from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { adjustedClientRect, getEffectiveFeatureContribution,
@@ -397,7 +396,7 @@ class Odt {
         // Click event listener to switch between summary and detailed views
         function clicked(event, node) {
             if (event.shiftKey && node.data.type === "decision") {
-                let currNodeGroup = select(this);
+                let currNodeGroup = d3.select(this);
                 let currNodeName = currNodeGroup.data()[0].data.name, parentNodeName = "";
                 _this.pathsIdInDetailView.lower.push(currNodeName);
                 if (currNodeName !== "root") {
@@ -419,7 +418,7 @@ class Odt {
                     _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
 
                     // Update the node rect width and stroke width
-                    select(this).select(".node-rect")
+                    d3.select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
                         .attr("x", -0.5*nodeRectWidth)
@@ -438,7 +437,7 @@ class Odt {
                     // Update all the affected flow paths
                     _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
                     // Update the node rect width and stroke width
-                    select(this).select(".node-rect")
+                    d3.select(this).select(".node-rect")
                     .transition()
                     .duration(transitionDuration)
                         .attr("x", -0.5*nodeRectWidth-0.5*(detailedViewNodeRectWidth-nodeRectWidth))

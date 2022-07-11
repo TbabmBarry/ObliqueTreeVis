@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
+import textures from 'textures';
 import { normalizeArr } from '@/libs/ObliqueDecisionTree/Utils';
 
 /**
