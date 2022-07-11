@@ -860,12 +860,26 @@ class Odt {
             .attr("class", "detailed x-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding})`)
-            .call(d3.axisBottom(x[currFeatureIdx[0]]));
+            .call(d3.axisBottom(x[currFeatureIdx[0]]))
+            .call(g => g.append("text")
+                .attr("x", detailedViewNodeRectWidth-2*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding)
+                .attr("y", 1.5*scatterPlotPadding)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "end")
+                .text(`${featureArr[currFeatureIdx[0]]} →`)
+            );
         targetSelection.append("g")
             .attr("class", "detailed y-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
-            .call(d3.axisLeft(y[currFeatureIdx[1]]));
+            .call(d3.axisLeft(y[currFeatureIdx[1]]))
+            .call(g => g.append("text")
+                .attr("x", -0.5*scatterPlotPadding)
+                .attr("y", -histogramScatterPlotPadding)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "end")
+                .text(`↑ ${featureArr[currFeatureIdx[1]]}`)
+            );
         
         const endPoints = getEndSplitPoint(currFeatureIdx, nodeData, that);
         const lineHelper = d3.line().x(d => x[currFeatureIdx[0]](d.x)).y(d => y[currFeatureIdx[1]](d.y));
