@@ -55,7 +55,7 @@ class Odt {
                 leafNodeRectRatio: 0,
                 nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
-                histogramHeight: 60,
+                histogramHeight: 100,
                 scatterPlotPadding: 20,
                 histogramScatterPlotPadding: 10,
                 nodeRectStrokeWidth: 3,
@@ -1111,10 +1111,10 @@ class Odt {
             return Y;
         }
         const radius = 3, padding = 1.5;
-        const marginTop = scatterPlotPadding + histogramHeight + histogramScatterPlotPadding;
-        const marginBottom = 0.5*detailedViewNodeRectWidth + 2*scatterPlotPadding;
-        const Y = dodge(X.map(x => xScale(x.value)), radius * 2 + padding);
-        const beeswarmHeight = d3.max(Y) + (radius + padding) * 2 + marginTop + marginBottom;
+        const marginTop = scatterPlotPadding+histogramHeight+histogramScatterPlotPadding;
+        const marginBottom = 0.5*detailedViewNodeRectWidth+2*scatterPlotPadding;
+        const Y = dodge(X.map(x => xScale(x.value)), radius*2+padding);
+        const beeswarmHeight = d3.max(Y)+(radius+padding)*2+marginTop+marginBottom;
 
         // Draw X-axis for beeswarm plot
         targetSelection.append("g")
@@ -1124,7 +1124,7 @@ class Odt {
             .call(xAxis)
             .call(g => g.append("text")
                 .attr("x", detailedViewNodeRectWidth-3*scatterPlotPadding)
-                .attr("y", -0.5*detailedViewNodeRectWidth + marginBottom-4)
+                .attr("y", -0.5*detailedViewNodeRectWidth+marginBottom-4)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "end")
                 .text(`${featureArr[currFeatureIdx[0]]} →`)
@@ -1181,8 +1181,9 @@ class Odt {
             .data(binsLeft)
             .join("rect")
             .attr("class", "detailed histogram")
+            .attr("y", d => yHistogram(d.length))
             .attr("transform", d => `translate(${xScale(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
             .attr("width", d => xScale(d.x1)-xScale(d.x0))
             .attr("height", d => histogramHeight-yHistogram(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
@@ -1192,8 +1193,9 @@ class Odt {
             .data(binsRight)
             .join("rect")
             .attr("class", "detailed histogram")
+            .attr("y", d => yHistogram(d.length))
             .attr("transform", d => `translate(${xScale(d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-                ${yHistogram(d.length)-histogramHeight+scatterPlotPadding})`)
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
                 .attr("width", d => xScale(d.x1)-xScale(d.x0))
                 .attr("height", d => histogramHeight-yHistogram(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
@@ -1268,8 +1270,9 @@ class Odt {
             .data(bins1Left)
             .join("rect")
             .attr("class", "detailed histogram")
+            .attr("y", d => yHistogram1(d.length))
             .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-                ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
             .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
             .attr("height", d => histogramHeight-yHistogram1(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
@@ -1279,8 +1282,9 @@ class Odt {
             .data(bins1Right)
             .join("rect")
             .attr("class", "detailed histogram")
+            .attr("y", d => yHistogram1(d.length))
             .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-                ${yHistogram1(d.length)-histogramHeight+scatterPlotPadding})`)
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
                 .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
                 .attr("height", d => histogramHeight-yHistogram1(d.length))
             .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
