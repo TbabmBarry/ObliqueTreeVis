@@ -7,7 +7,7 @@
 import { onMounted, inject, reactive, watch } from "vue";
 import Odt from '@/libs/ObliqueDecisionTree/ObliqueDecisionTree';
 import BivariateDecisionTree from '@/libs/ObliqueDecisionTreeExporter/ObliqueDecisionTreeExporter';
-import { getDataset, getDatasetChangeSelects } from "@/api/metrics.js";
+import { getDatasetChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
