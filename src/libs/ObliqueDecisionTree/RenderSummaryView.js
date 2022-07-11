@@ -12,7 +12,8 @@ import { normalizeArr } from '@/libs/ObliqueDecisionTree/Utils';
  * @param {nodeRectRatio} nodeRectRatio
  * @param {colorScale} colorScale
  */
-export function drawClassDistribution(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+export function drawClassDistribution(targetSelection, nodeData, that) {
+    const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
     // Encode current decision node class distribution into the range of node rect width
     let xTotal = d3.scaleLinear()
         .domain([0, _.sum(nodeData.data.totalCount)])
@@ -107,7 +108,8 @@ export function drawCoefficientDistribution(targetSelection, nodeData, nodeRectW
  * @param {featureArr} featureArr
  * @param {featureColorScale} featureColorScale
  */
-export function drawCoefficientBar(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale) {
+export function drawCoefficientBar(targetSelection, nodeData, that) {
+    const { constants: { nodeRectWidth, nodeRectRatio, featureArr, featureColorScale } } = that;
     // Draw coefficient weights of features in the oblique split
     const {featureIdx, split }  = nodeData.data;
     const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
@@ -165,7 +167,8 @@ export function drawCoefficientBar(targetSelection, nodeData, nodeRectWidth, nod
  * @param {nodeRectRatio} nodeRectRatio
  * @param {colorScale} colorScale
  */
-export function drawSplitHistogram(targetSelection, nodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+export function drawSplitHistogram(targetSelection, nodeData, that) {
+    const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
     // Draw split histogram
     let xRight = d3.scaleLinear()
         .domain([0, _.sum(nodeData.data.totalCount)])
@@ -259,7 +262,8 @@ export function drawSplitHistogram(targetSelection, nodeData, nodeRectWidth, nod
  * @param {nodeRectRatio} nodeRectRatio
  * @param {colorScale} colorScale
  */
-export function drawExposedSplitHistogram(targetSelection, originalNodeData, exposedNodeData, nodeRectWidth, nodeRectRatio, colorScale) {
+export function drawExposedSplitHistogram(targetSelection, originalNodeData, exposedNodeData, that) {
+    const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
     // Draw split histogram
     let xRight = d3.scaleLinear()
         .domain([0, _.sum(originalNodeData.totalCount)])

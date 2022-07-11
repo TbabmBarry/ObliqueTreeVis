@@ -141,7 +141,8 @@ class Odt {
      */
     update(status = "on") {
         const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
-            constants: { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
+            constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale } } = this;
+        let _this = this;
         switch (status) {
             case "on":
                 // Remove all exposed flow links
@@ -174,7 +175,7 @@ class Odt {
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
                     // Highlight the exposed flow link by drawing a new link over the old one
-                    this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale);
+                    _this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale);
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     let idArr = uniqueDecisionPath.idArr.slice();
@@ -212,11 +213,11 @@ class Odt {
                         currNodeSvgGroup.style("opacity", 1);
                         if (currNodeSvgGroup.node().querySelector(".detailed") === null) {
                             // Draw new split distribution rects to highlight the selected data points
-                            this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, nodeRectWidth, nodeRectRatio, colorScale);
+                            _this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, _this);
                         }
                         if (currNodeSvgGroup.node().querySelector(".detailed") !== null) {
                             // Draw new split distribution rects to highlight the selected data points
-                            this.drawExposedSplitHistogramInDetailedView(currNodeSvgGroup, currNodeData, decisionNodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale);
+                            _this.drawExposedSplitHistogramInDetailedView(currNodeSvgGroup, currNodeData, decisionNodeData, _this);
                         }
                     });
                 });
@@ -494,20 +495,19 @@ class Odt {
      * @param {node} node
      */
     renderSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, featureArr, colorScale, featureColorScale } } = this;
         let _this = this;
         // Draw class distribution
         node.each(function(nodeData, index) {
             // Draw class distribution
-            _this.drawClassDistribution(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
+            _this.drawClassDistribution(d3.select(this), nodeData, _this);
             if (nodeData.data.type === "decision") {
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
                 }
                 // Draw feature coefficients distribution
-                _this.drawCoefficientBar(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, featureArr, featureColorScale);
+                _this.drawCoefficientBar(d3.select(this), nodeData, _this);
                 // Draw split point distribution
-                _this.drawSplitHistogram(d3.select(this), nodeData, nodeRectWidth, nodeRectRatio, colorScale);
+                _this.drawSplitHistogram(d3.select(this), nodeData, _this);
             }
             
         })

@@ -593,7 +593,8 @@ export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that
         .call(d3.axisRight(yBand).tickFormat(""));
 }
 
-export function drawExposedSplitHistogramInDetailedView(targetSelection, originalNodeData, exposedNodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale) {
+export function drawExposedSplitHistogramInDetailedView(targetSelection, originalNodeData, exposedNodeData, that) {
+    const { constants: { detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale } } = that;
     // Draw detailed split histogram
     let xRight = d3.scaleLinear()
         .domain([0, _.sum(originalNodeData.totalCount)])
