@@ -141,7 +141,7 @@ class Odt {
      */
     update(status = "on") {
         const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
-            constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale } } = this;
+            constants: { colorScale } } = this;
         let _this = this;
         switch (status) {
             case "on":
@@ -175,7 +175,7 @@ class Odt {
                     d3.selectAll(`path.link#${exposedFlowLink.pathId}`)
                         .style("opacity", 0.8);
                     // Highlight the exposed flow link by drawing a new link over the old one
-                    _this.renderExposedLinks(parts.svgGroup, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale);
+                    _this.renderExposedLinks(parts.svgGroup, exposedFlowLink);
                 });
                 uniqueDecisionPaths?.forEach((uniqueDecisionPath) => {
                     let idArr = uniqueDecisionPath.idArr.slice();
@@ -295,7 +295,8 @@ class Odt {
      * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
      * @param {colorScale} colorScale
      */
-    renderExposedLinks(targetSelection, exposedFlowLink, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale) {
+    renderExposedLinks(targetSelection, exposedFlowLink) {
+        const { constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale }} = this;
         let currLinkData = d3.selectAll(`path.link#${exposedFlowLink.pathId}`).data()[0];
         let currWidth = (exposedFlowLink.count/currLinkData.count)*currLinkData.source.width;
         // Compute flow data for exposed flow link
@@ -358,8 +359,9 @@ class Odt {
      * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
      * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
      */
-    updateFlowLinks(targetSelection, transitionDuration, pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth) {
-        targetSelection.selectAll("path.link")
+    updateFlowLinks() {
+        const { parts, pathsIdInDetailView, constants: { transitionDuration, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth } } = this;
+        parts.svgGroup.selectAll("path.link")
             .transition()
             .duration(transitionDuration)
                 .attr("d", (d) => {
@@ -416,7 +418,7 @@ class Odt {
                     _this.pathsIdInDetailView.upper = _.without(_this.pathsIdInDetailView.upper, `${parentNodeName}-${currNodeName}-`);
                     
                     // Update all the affected flow paths
-                    _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
+                    _this.updateFlowLinks();
 
                     // Update the node rect width and stroke width
                     d3.select(this).select(".node-rect")
@@ -436,7 +438,7 @@ class Odt {
                     })
                 } else {
                     // Update all the affected flow paths
-                    _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
+                    _this.updateFlowLinks();
                     // Update the node rect width and stroke width
                     d3.select(this).select(".node-rect")
                     .transition()
@@ -735,7 +737,7 @@ class Odt {
      * @returns {any} 
      */ 
     renderSelectionEffect(selectedDataPoints) {
-        const { nodes, constants: { colorScale } } = this;
+        const { nodes } = this;
         this.selectedPoints = selectedDataPoints.map(selectedDataPoint => selectedDataPoint.id);
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
