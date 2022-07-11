@@ -2,19 +2,16 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
+
 /**
  * Draw two-feature scatter plot in each decision node
- * @date 2022-07-01
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {scatterPlotPadding} scatterPlotPadding
- * @param {featureArr} featureArr
- * @param {colorScale} colorScale
  * @param {currFeatureIdx} currFeatureIdx
- * @param {that} that
  * @param {x} x
  * @param {y} y
+ * @param {that} that
  */
 export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y, that) {
     const { trainX, trainY, constants : { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale }} = that;
@@ -210,18 +207,11 @@ export function drawStripChart(targetSelection, nodeData, nodeRectWidth, detaile
 
 /**
  * Draw beeswarm plot for one-feature decision node in detailed view.
- * @date 2022-07-10
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {featureArr} featureArr
  * @param {currFeatureIdx} currFeatureIdx
- * @param {nodeRectWidth} nodeRectWidth
- * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
- * @param {histogramHeight} histogramHeight
- * @param {scatterPlotPadding} scatterPlotPadding
- * @param {histogramScatterPlotPadding} histogramScatterPlotPadding
- * @param {colorScale} colorScale
- * @param {featureColorScale} featureColorScale
+ * @param {that} that
  */
 export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
     const { trainX, trainY, 
@@ -374,22 +364,17 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
         .call(d3.axisBottom(xScale).tickFormat(""));
 }
-
+ 
 /**
- * Draw feature distribution in detailed view
- * @date 2022-07-01
+ * Draw feature distribution in detailed view.
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
- * @param {scatterPlotPadding} scatterPlotPadding
- * @param {featureArr} featureArr
- * @param {featureColorScale} featureColorScale
  * @param {currFeatureIdx} currFeatureIdx
- * @param {that} that
  * @param {x} x
  * @param {y} y
- */    
+ * @param {that} that
+ */
 export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, x, y, that) {
     const { trainX, trainY, constants : { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureColorScale }} = that;
     // Set the parameters for histograms
@@ -497,15 +482,11 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
 }
 
 /**
- * Draw split histogram for detailed view
+ * Draw split histogram for detailed view.
  * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
- * @param {nodeRectWidth} nodeRectWidth
- * @param {histogramHeight} histogramHeight
- * @param {scatterPlotPadding} scatterPlotPadding
- * @param {colorScale} colorScale
+ * @param {that} that
  */
 export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that) {
     const { constants : { detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale } } = that;

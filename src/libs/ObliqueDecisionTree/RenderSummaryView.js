@@ -4,13 +4,11 @@ import textures from 'textures';
 import { normalizeArr } from '@/libs/ObliqueDecisionTree/Utils';
 
 /**
- * Draw class distribution in the summary view
- * @date 2022-07-01
+ * Draw class distribution in the summary view.
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {nodeRectRatio} nodeRectRatio
- * @param {colorScale} colorScale
+ * @param {that} that
  */
 export function drawClassDistribution(targetSelection, nodeData, that) {
     const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
@@ -99,14 +97,11 @@ export function drawCoefficientDistribution(targetSelection, nodeData, nodeRectW
 }
 
 /**
- * Draw feature coefficients distribution in the summary view (horizontal bar)
- * @date 2022-07-05
+ * Draw feature coefficients distribution in the summary view (horizontal bar).
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {nodeRectRatio} nodeRectRatio
- * @param {featureArr} featureArr
- * @param {featureColorScale} featureColorScale
+ * @param {that} that
  */
 export function drawCoefficientBar(targetSelection, nodeData, that) {
     const { constants: { nodeRectWidth, nodeRectRatio, featureArr, featureColorScale } } = that;
@@ -159,13 +154,11 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
 }
 
 /**
- * Draw split point distribution in the summary view
- * @date 2022-07-01
+ * Draw split point distribution in the summary view.
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {nodeData} nodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {nodeRectRatio} nodeRectRatio
- * @param {colorScale} colorScale
+ * @param {that} that
  */
 export function drawSplitHistogram(targetSelection, nodeData, that) {
     const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
@@ -254,13 +247,11 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
 /**
  * Draw highlighted split point distribution in the summary view during data points
  * selection in the projection view
- * @date 2022-07-08
+ * @date 2022-07-11
  * @param {targetSelection} targetSelection
  * @param {originalNodeData} originalNodeData
  * @param {exposedNodeData} exposedNodeData
- * @param {nodeRectWidth} nodeRectWidth
- * @param {nodeRectRatio} nodeRectRatio
- * @param {colorScale} colorScale
+ * @param {that} that
  */
 export function drawExposedSplitHistogram(targetSelection, originalNodeData, exposedNodeData, that) {
     const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;

@@ -13,10 +13,12 @@ class Odt {
         this.diagramIndex = 0;
         this.diagramName = "odt";
         // Add functions to this class by assigning to its prototype
+        // Assign functions for rendering summary view
         Odt.prototype.drawClassDistribution = drawClassDistribution;
         Odt.prototype.drawCoefficientBar = drawCoefficientBar;
         Odt.prototype.drawSplitHistogram = drawSplitHistogram;
         Odt.prototype.drawExposedSplitHistogram = drawExposedSplitHistogram;
+        // Assign functions for rendering detailed view
         Odt.prototype.drawScatterPlot = drawScatterPlot;
         Odt.prototype.drawBeeswarm = drawBeeswarm;
         Odt.prototype.drawFeatureHistogram = drawFeatureHistogram;
@@ -136,8 +138,8 @@ class Odt {
 
     /**
      * Update Oblique Tree View accordingly.
-     * @date 2022-06-14
-     * @param {any} parm1
+     * @date 2022-07-11
+     * @param {status = "on"} parm1
      */
     update(status = "on") {
         const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
@@ -289,11 +291,9 @@ class Odt {
 
     /**
      * Render exposed sankey-like nodes according to param nodes
-     * @date 2022-07-09
+     * @date 2022-07-11
      * @param {targetSelection} targetSelection
      * @param {exposedFlowLink} exposedFlowLink
-     * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
-     * @param {colorScale} colorScale
      */
     renderExposedLinks(targetSelection, exposedFlowLink) {
         const { constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth, colorScale }} = this;
@@ -352,12 +352,6 @@ class Odt {
     /**
      * Re-render sankey-like nodes according to pathsIdInDetailView
      * @date 2022-07-10
-     * @param {targetSelection} targetSelection
-     * @param {transitionDuration} transitionDuration
-     * @param {pathsIdInDetailView} pathsIdInDetailView
-     * @param {nodeRectWidth} nodeRectWidth
-     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
-     * @param {nodeRectStrokeWidth} nodeRectStrokeWidth
      */
     updateFlowLinks() {
         const { parts, pathsIdInDetailView, constants: { transitionDuration, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth } } = this;
