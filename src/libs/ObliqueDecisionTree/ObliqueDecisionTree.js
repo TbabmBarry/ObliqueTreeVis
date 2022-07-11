@@ -126,14 +126,17 @@ class Odt {
      */
     update(status = "on") {
         const { parts, trainY, trainX, selectedPoints, exposedFlowLinks, uniqueDecisionPaths, 
-            constants: { nodeRectWidth, detailedViewNodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
+            constants: { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, nodeRectRatio, nodeRectStrokeWidth, colorScale } } = this;
         switch (status) {
             case "on":
                 // Remove all exposed flow links
                 parts.svgGroup.selectAll("path.exposed-flow-link").remove();
 
-                // Remove all exposed split distribution rects 
+                // Remove all exposed split histograms
                 parts.svgGroup.selectAll("g.exposed-split-distribution").remove();
+
+                // Remove all detailed exposed split histograms
+                parts.svgGroup.selectAll("g.detail-exposed-split-distribution").remove();
                 
                 // Update all the links and nodes' opacity to 0.4 in the vis 
                 d3.selectAll("g.node--internal")
@@ -196,6 +199,10 @@ class Odt {
                             // Draw new split distribution rects to highlight the selected data points
                             this.drawExposedSplitHistogram(currNodeSvgGroup, currNodeData, decisionNodeData, nodeRectWidth, nodeRectRatio, colorScale);
                         }
+                        if (currNodeSvgGroup.node().querySelector(".detailed") !== null) {
+                            // Draw new split distribution rects to highlight the selected data points
+                            this.drawExposedSplitHistogramInDetailedView(currNodeSvgGroup, currNodeData, decisionNodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale);
+                        }
                     });
                 });
                 break;
@@ -213,6 +220,9 @@ class Odt {
 
                 // Remove all exposed split histograms
                 parts.svgGroup.selectAll("g.exposed-split-distribution").remove();
+
+                // Remove all detailed exposed split histograms
+                parts.svgGroup.selectAll("g.detail-exposed-split-distribution").remove();
 
                 // Recover circle fill color in scatter plots
                 d3.selectAll("circle.detailed.dot")
@@ -411,7 +421,6 @@ class Odt {
                 } else {
                     // Update all the affected flow paths
                     _this.updateFlowLinks(parts.svgGroup, transitionDuration, _this.pathsIdInDetailView, nodeRectWidth, detailedViewNodeRectWidth, nodeRectStrokeWidth);
-
                     // Update the node rect width and stroke width
                     select(this).select(".node-rect")
                     .transition()
@@ -424,6 +433,11 @@ class Odt {
                         // Remove the summary view and render the detailed view after the transition
                         currNodeGroup.selectAll(".summary").remove();
                         _this.renderDetailedView(currNodeGroup);
+                        if (_this.uniqueDecisionPaths.length !== 0) {
+                            _this.update();
+                        } else {
+                            _this.update("reset");
+                        };
                     });
                 }
             }
@@ -1424,6 +1438,74 @@ class Odt {
             .attr("transform", `translate(${-scatterPlotPadding},
                 ${0})`)
             .call(d3.axisRight(yBand).tickFormat(""));
+    }
+
+    drawExposedSplitHistogramInDetailedView(targetSelection, originalNodeData, exposedNodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale) {
+        // Draw detailed split histogram
+        let xRight = d3.scaleLinear()
+            .domain([0, _.sum(originalNodeData.totalCount)])
+            .range([0, 0.5*histogramHeight]),
+            xLeft = d3.scaleLinear()
+            .domain([_.sum(originalNodeData.totalCount), 0])
+            .range([0, 0.5*histogramHeight]),
+            yBand = d3.scaleBand()
+            .range([0, histogramHeight-scatterPlotPadding])
+            .domain([0,1,2])
+            .padding(.1);
+
+        const splitData = exposedNodeData.data.leftCount.map((val, idx) => [val, exposedNodeData.data.rightCount[idx]]);
+        const detailedExposedSplitDistribution = targetSelection.selectAll(`g.detail-exposed-split-distribution#${originalNodeData.name}`)
+            .data(splitData)
+            .enter()
+            .append("g")
+            .attr("class", "detailed detail-exposed-split-distribution")
+            .attr("transform", 
+                `translate(${0.5*detailedViewNodeRectWidth-0.5*histogramHeight-0.25*scatterPlotPadding},
+                    ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`);
+        
+        // Append left and right split distribution into splitDistribution svg group
+        detailedExposedSplitDistribution.append("rect")
+            .attr("class", "detailed detail-exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return xRight(d[1]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", -scatterPlotPadding)
+            .attr("y", (d, i) => yBand(i))
+            .attr("fill", (d, i) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[i]);
+                detailedExposedSplitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
+        detailedExposedSplitDistribution.append("rect")
+            .attr("class", "detailed detail-exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return 0.5*histogramHeight-xLeft(d[0]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d[0]))
+            .attr("y", (d, i) => yBand(i))
+            .attr("fill", (d, i) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[i]);
+                detailedExposedSplitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
     }
 
     /**
