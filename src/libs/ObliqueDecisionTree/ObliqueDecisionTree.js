@@ -830,6 +830,7 @@ class Odt {
                 _this.drawScatterPlot(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale, currFeatureIdx, _this, x, y);
                 // Draw two-feature histogram
                 _this.drawFeatureHistogram(node, nodeData, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, featureColorScale, currFeatureIdx, _this, x, y);
+                _this.drawSplitHistogramInDetailedView(node, nodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale);
             }
 
             if (currFeatureIdx.length === 1) {
@@ -1327,6 +1328,102 @@ class Odt {
             .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
             .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
+    }
+
+    /**
+     * Draw split histogram for detailed view
+     * @date 2022-07-11
+     * @param {targetSelection} targetSelection
+     * @param {nodeData} nodeData
+     * @param {detailedViewNodeRectWidth} detailedViewNodeRectWidth
+     * @param {nodeRectWidth} nodeRectWidth
+     * @param {histogramHeight} histogramHeight
+     * @param {scatterPlotPadding} scatterPlotPadding
+     * @param {colorScale} colorScale
+     */
+    drawSplitHistogramInDetailedView(targetSelection, nodeData, detailedViewNodeRectWidth, nodeRectWidth, histogramHeight, scatterPlotPadding, colorScale) {
+        // Draw detailed split histogram
+        let xRight = d3.scaleLinear()
+            .domain([0, _.sum(nodeData.data.totalCount)])
+            .range([0, 0.5*histogramHeight]),
+            xLeft = d3.scaleLinear()
+            .domain([_.sum(nodeData.data.totalCount), 0])
+            .range([0, 0.5*histogramHeight]),
+            yBand = d3.scaleBand()
+            .range([0, histogramHeight-scatterPlotPadding])
+            .domain([0,1,2])
+            .padding(.1);
+
+        const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
+        const detailedSplitDistribution = targetSelection.selectAll("g.detail-split-distribution")
+            .data(splitData)
+            .enter()
+            .append("g")
+            .attr("class", "detailed detail-split-distribution")
+            .attr("transform", 
+                `translate(${0.5*detailedViewNodeRectWidth-0.5*histogramHeight-0.25*scatterPlotPadding},
+                    ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`);
+        
+        // Append left and right split distribution into splitDistribution svg group
+        detailedSplitDistribution.append("rect")
+            .attr("class", "detailed detail-split-rect")
+            .attr("width", (d) => {
+                return xRight(d[1]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", -scatterPlotPadding)
+            .attr("y", (d, i) => yBand(i))
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
+        detailedSplitDistribution.append("rect")
+            .attr("class", "detailed detail-split-rect")
+            .attr("width", (d) => {
+                return 0.5*histogramHeight-xLeft(d[0]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d[0]))
+            .attr("y", (d, i) => yBand(i))
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
+        // Append left and right split distribution text into splitDistribution svg group
+        detailedSplitDistribution.append("text")
+            .attr("class", "detailed detail-split-text")
+            .text( (d) => d[1])
+            .attr("text-anchor", "start")
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .attr("transform", (d, i) => {
+                return `translate(${-scatterPlotPadding+xRight(d[1])+5},
+                    ${5+0.5*yBand.bandwidth()+yBand(i)})`;
+            })
+        
+        detailedSplitDistribution.append("text")
+            .attr("class", "detailed detail-split-text")
+            .text( (d) => d[0])
+            .attr("text-anchor", "end")
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .attr("transform", (d, i) => {
+                return `translate(${-0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d[0])-5},
+                    ${5+0.5*yBand.bandwidth()+yBand(i)})`;
+            })
+
+        // Append centered axis
+        detailedSplitDistribution.append("g")
+            .attr("class", "detailed detail-center-axis")
+            .attr("transform", `translate(${-scatterPlotPadding},
+                ${0})`)
+            .call(d3.axisLeft(yBand).tickFormat(""));
+
+        detailedSplitDistribution.append("g")
+            .attr("class", "detailed detail-center-axis")
+            .attr("transform", `translate(${-scatterPlotPadding},
+                ${0})`)
+            .call(d3.axisRight(yBand).tickFormat(""));
     }
 
     /**
