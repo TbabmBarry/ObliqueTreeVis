@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
-import { getEndSplitPoint } from '@/libs/Utils';
+import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
 /**
  * Draw two-feature scatter plot in each decision node
  * @date 2022-07-01

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
-import { normalizeArr } from '@/libs/Utils';
+import { normalizeArr } from '@/libs/ObliqueDecisionTree/Utils';
 
 /**
  * Draw class distribution in the summary view

@@ -3,7 +3,7 @@ import { color, select } from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { adjustedClientRect, getEffectiveFeatureContribution,
-    traverseTree } from '@/libs/Utils';
+    traverseTree } from '@/libs/ObliqueDecisionTree/Utils';
 import { drawClassDistribution, drawCoefficientBar, drawSplitHistogram,
     drawExposedSplitHistogram } from '@/libs/ObliqueDecisionTree/RenderSummaryView';
 import { drawScatterPlot, drawBeeswarm, drawFeatureHistogram,
