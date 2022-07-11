@@ -1127,7 +1127,7 @@ class Odt {
                 .attr("y", -0.5*detailedViewNodeRectWidth + marginBottom-4)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "end")
-                .text("xLabel")
+                .text(`${featureArr[currFeatureIdx[0]]} →`)
             );
 
         // Draw points for beeswarm plot
