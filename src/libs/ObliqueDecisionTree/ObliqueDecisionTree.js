@@ -219,7 +219,9 @@ class Odt {
                         }
                         if (currNodeSvgGroup.node().querySelector(".detailed") !== null) {
                             // Draw new split distribution rects to highlight the selected data points
-                            _this.drawExposedSplitHistogramInDetailedView(currNodeSvgGroup, currNodeData, decisionNodeData, _this);
+                            if (currNodeData.featureIdx.length !== 1) {
+                                _this.drawExposedSplitHistogramInDetailedView(currNodeSvgGroup, currNodeData, decisionNodeData, _this);
+                            }
                         }
                     });
                 });
