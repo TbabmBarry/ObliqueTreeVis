@@ -406,6 +406,10 @@ class Odt {
                         currNodeGroup.node().querySelector(".summary") === null)) {
                     // Remove the detailed view and render the summary view
                     currNodeGroup.selectAll(".detailed").remove();
+                    // Remove selection of the detailed view
+                    currNodeGroup.selectAll(".overlay").remove();
+                    currNodeGroup.selectAll(".selection").remove();
+                    currNodeGroup.selectAll(".handle").remove();
                     _this.renderSummaryView(currNodeGroup);
 
                     // Update the pathsIdInDetailView
