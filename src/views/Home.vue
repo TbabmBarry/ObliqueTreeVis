@@ -42,9 +42,9 @@
             </div>
         </div>
     </div> -->
-    <!-- <div class="border border-gray-800/100 my-2 min-w-full max-w-screen-2xl">      
+    <div class="border border-gray-800/100 my-2 min-w-full max-w-screen-2xl">      
         <TableDataPanel :selectedPoints="selectedPoints" :selectedDataset="selectedDataset" />
-    </div> -->
+    </div>
 </div>
 </template>
 <script setup>
@@ -52,7 +52,7 @@ import { reactive, toRefs } from "vue";
 import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
 import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
 import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
-// import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
+import TableDataPanel from "../components/DataRepresentationPanels/TableDataPanel.vue";
 // import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
 
 const state = reactive({
