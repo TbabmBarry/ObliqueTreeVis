@@ -801,7 +801,9 @@ class Odt {
     enableZooming() {
         const { parts, width, height } = this;
         const zoomed = ({ transform }) => {
-            parts.svgGroup.attr('transform', transform);
+            if (parts.svgGroup.node().querySelector(".detailed") === null) {
+                parts.svgGroup.attr('transform', transform);
+            }
         }
 
         const zoomListener = d3.zoom()

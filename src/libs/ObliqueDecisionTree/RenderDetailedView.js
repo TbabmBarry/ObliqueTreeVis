@@ -55,7 +55,18 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .style('stroke', 'black')
             .style('stroke-width', '2px');
 
-    targetSelection.selectAll("circle")
+    targetSelection.append("rect")
+        .attr("class", "detailed brushable-rect")
+        .attr("id", d => `detailed-brushable-rect-${d.data.name}`)
+        .attr("fill", "none")
+        .attr("stroke", "none")
+        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
+        .attr("width", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding)
+        .attr("height", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding);
+
+    
+    const circle = targetSelection.selectAll("circle")
         .data(nodeData.data.subTrainingSet)
         .enter()
         .append("circle")
@@ -78,6 +89,52 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                 }
             })
             .style("stroke", (d) => colorScale[trainY[d]]);
+
+        targetSelection.call(brush, circle, x[currFeatureIdx[0]], y[currFeatureIdx[1]]);
+    
+    function brush (cell, circle, x, y) {
+        const brush = d3.brush()
+            .extent([[-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding, -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding], 
+                [0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-histogramScatterPlotPadding, 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding]])
+            .on("start", brushStarted)
+            .on("brush", brushed)
+            .on("end", brushEnded);
+        
+        cell.call(brush);
+        let brushCell;
+        function brushStarted() {
+            if (brushCell !== this) {
+                d3.select(brushCell).call(brush.move, null);
+                brushCell = this;
+            }
+        }
+        
+        function brushed ({ selection }) {
+            let selected = [];
+            if (selection) {
+                const [[x0, y0], [x1, y1]] = selection;
+                circle.classed("unselected", (d) => 
+                    (x0+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) > x(trainX[d][featureArr[currFeatureIdx[0]]]) 
+                    || (x1+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) < x(trainX[d][featureArr[currFeatureIdx[0]]]) 
+                    || (y0+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) > y(trainX[d][featureArr[currFeatureIdx[1]]]) 
+                    || (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) < y(trainX[d][featureArr[currFeatureIdx[1]]]));
+
+                selected = nodeData.data.subTrainingSet.filter((d) =>
+                    d => (x0+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) <= x(trainX[d][featureArr[currFeatureIdx[0]]]) 
+                    && (x1+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) >= x(trainX[d][featureArr[currFeatureIdx[0]]]) 
+                    && (y0+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) <= y(trainX[d][featureArr[currFeatureIdx[1]]]) 
+                    && (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) >= y(trainX[d][featureArr[currFeatureIdx[1]]]));
+            }
+            // Update the selected  points
+            console.log(selected);
+        }
+
+        function brushEnded ({ selection }) {
+            if (selection) return;
+            // Reset the unselected points to their original style
+            circle.classed("unselected", false);
+        }
+    }
 }
 
 /**
