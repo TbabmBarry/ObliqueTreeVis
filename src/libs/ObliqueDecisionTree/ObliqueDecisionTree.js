@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { adjustedClientRect, getEffectiveFeatureContribution,
-    traverseTree } from '@/libs/ObliqueDecisionTree/Utils';
+    traverseTree, maxDepth, maxWidth } from '@/libs/ObliqueDecisionTree/Utils';
 import { drawClassDistribution, drawCoefficientBar, drawSplitHistogram,
     drawExposedSplitHistogram } from '@/libs/ObliqueDecisionTree/RenderSummaryView';
 import { drawScatterPlot, drawBeeswarm, drawFeatureHistogram,
@@ -131,7 +131,6 @@ class Odt {
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
-
         // Enable zooming
         this.enableZooming();
     }

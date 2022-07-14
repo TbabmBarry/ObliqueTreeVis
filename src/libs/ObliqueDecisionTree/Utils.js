@@ -119,6 +119,37 @@ export const traverseTree = (node) => {
 }
 
 /**
+ * Return the maximum depth of the tree
+ * @date 2022-07-14
+ * @param {node} node
+ */
+export const maxDepth = (node) => {
+    if (!node) return 0;
+    if (!node.children || node.children.length === 0) return 1;
+    return 1 + d3.max(node.children, child => maxDepth(child));
+}
+
+export const maxWidth = (node) => {
+    if (!node) return 0;
+    let maxWidth = 1n, que = [[0n, node]];
+    while (que.length) {
+        const width = que[que.length-1][0] + 1n;
+        if (width > maxWidth) maxWidth = width;
+        let tmp = [];
+        que.forEach(([idx, q]) => {
+            if (q.children && q.children.length > 0) {
+                q.children.forEach((child, i) => {
+                    console.log(i);
+                    tmp.push([idx*2n + BigInt(i)*1n, child]);
+                })
+            }
+        });
+        que = tmp;
+    }
+    return Number(maxWidth);
+}
+
+/**
  * Return normalized array of values
  * @date 2022-06-29
  * @param {any} count
