@@ -640,7 +640,10 @@ class Odt {
                 // Iterate through the feature contribution arrays and draw them one by one
                 fcArr.forEach((fc, idx) => {
                     // Draw feature contribution histogram
-                    d3.select(this).selectAll("g")
+                    let featureContributionDistribution = d3.select(this).append("g")
+                        .attr("class", "path-summary feature-contribution-histogram");
+
+                    featureContributionDistribution.selectAll("rect")
                         .data(fc.featureContribution)
                         .enter()
                         .append("rect")
@@ -660,7 +663,7 @@ class Odt {
                             .style("stroke-width", "2px");
 
                     // Add line to separeate each feature contribution
-                    d3.select(this).append("line")
+                    featureContributionDistribution.append("line")
                         .attr("class", "path-summary feature-contribution-line")
                         .style("stroke", "#005CAB")
                         .style("stroke-width", 2)
@@ -671,13 +674,13 @@ class Odt {
                         .attr("y2", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
 
                     // Add text to show feature contribution name
-                    d3.select(this).append("text")
+                    featureContributionDistribution.append("text")
                         .attr("class", "path-summary feature-contribution-text")
                         .attr("x", -0.5*(nodeRectWidth-2*nodeRectRatio))
                         .attr("y", 3*nodeRectRatio+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio)+yBand.bandwidth()*2)
                         .text(fc.featureName);
                     if (idx === fcArr.length-1) {
-                        d3.select(this).append("line")
+                        featureContributionDistribution.append("line")
                             .attr("class", "path-summary feature-contribution-line")
                             .style("stroke", "#005CAB")
                             .style("stroke-width", 2)
@@ -705,7 +708,7 @@ class Odt {
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
-                    d3.select(this).selectAll(".path-summary")
+                    d3.select(this).selectAll("g.path-summary")
                         .attr("transform", 
                         `translate(${leafNodeBBox.x+0.5*leafNodeBBox.width},
                             ${leafNodeBBox.y-scrollDistance})`);
