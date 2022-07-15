@@ -98,8 +98,8 @@ class Odt {
      */
     updateContainerDimensions() {
         try {
-            const { width, height, scale } = adjustedClientRect(this.rootElement);
-            _.assign(this, { width, height, scale });
+            const { width, height, screenHeight, screenWidth, scale } = adjustedClientRect(this.rootElement);
+            _.assign(this, { width, height, screenHeight, screenWidth, scale });
         } catch (err) {
             err.message = `Fail to reset the container: ${err.message}`;
             throw err;
@@ -114,7 +114,7 @@ class Odt {
 
         const zoomListener = d3.zoom()
             .on('zoom', zoomed);
-        
+        this.registeredStateListeners.push(zoomListener);
         // Reset zoom listener
         function reset () {
             parts.baseSvg.transition()
@@ -409,7 +409,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, 
+        const { parts, screenHeight, screenWidth,
             constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
@@ -471,6 +471,11 @@ class Odt {
                     .on("end", () => {
                         // Remove the summary view and render the detailed view after the transition
                         currNodeGroup.selectAll(".summary").remove();
+                        parts.svgGroup.transition()
+                            .duration(750)
+                            .call(_this.registeredStateListeners[0].transform,
+                                d3.zoomIdentity.translate(screenHeight/2, screenWidth/2).scale(1).translate(-node.x, -node.y),
+                                d3.pointer(event));
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
                             _this.update();
