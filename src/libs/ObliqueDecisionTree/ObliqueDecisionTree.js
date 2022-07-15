@@ -72,6 +72,7 @@ class Odt {
                 leafNodeRectRatio: 0,
                 nodeRectWidth: 250,
                 detailedViewNodeRectWidth: 360,
+                leafNodeRectHight: 300,
                 histogramHeight: 100,
                 scatterPlotPadding: 20,
                 histogramScatterPlotPadding: 10,
@@ -106,7 +107,7 @@ class Odt {
     }
 
     draw() {
-        const { data, parts, height, width, scale } = this;
+        const { data, parts, height, width, scale, constants: { treeMargins, leafNodeRectHight } } = this;
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
         }
@@ -131,12 +132,13 @@ class Odt {
                             .attr("transform",`translate(${0},${0})`)
                             .attr("transform", `scale(${scale})`);
 
-        parts.treeMap = d3.tree().size([width, height]);
+        parts.treeMap = d3.tree().size([width, 
+            height-leafNodeRectHight-treeMargins.top-treeMargins.bottom]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         this.nodes = nodes;
         // Modify element for each node recursively
-        traverseTree(nodes);
+        // traverseTree(nodes);
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -397,7 +399,7 @@ class Odt {
      */
     renderNodes(nodes) {
         const { parts, 
-            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
+            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -486,7 +488,7 @@ class Odt {
             .attr("class", "node-rect")
             .attr("id", (d) => d.data.name)
             .attr("width", nodeRectWidth)
-            .attr("height", (d) => d.data.type === "leaf" ? nodeRectWidth+2*nodeRectRatio : nodeRectWidth)
+            .attr("height", (d) => d.data.type === "leaf" ? leafNodeRectHight : nodeRectWidth)
             .attr("x",- 0.5 * nodeRectWidth)
             .attr("y",0)
             .attr("rx", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
