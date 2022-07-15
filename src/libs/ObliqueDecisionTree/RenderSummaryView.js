@@ -35,6 +35,7 @@ export function drawClassDistribution(targetSelection, nodeData, that) {
     let classDistribution = targetSelection.append("g")
         .attr("class", "summary class-distribution")
         .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
+
     classDistribution.selectAll("rect")
         .data(classData)
         .enter()
@@ -124,32 +125,35 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
         .domain([0, 1])
         .range([0, nodeRectWidth-4*nodeRectRatio]);
     // Create a svg group to bind each individual coefficient bar
-    const coefficientDistribution = targetSelection.selectAll("g.coefficient-distribution")
-        .data(coefficientsData)
-        .enter()
-        .append("g")
+    let coefficientDistribution = targetSelection.append("g")
         .attr("class", "summary coefficient-distribution")
         .attr("transform", `translate(${2*nodeRectRatio}, ${2*nodeRectRatio})`);
     // Append each class rect into coefficientDistribution svg group
-    coefficientDistribution.append("rect")
-        .attr("class", "summary coefficients-bar")
-        .attr("width", (d) => xBar(d.end)-xBar(d.start))
-        .attr("height", 0.5*nodeRectRatio)
-        .attr("rx", 0.25*nodeRectRatio)
-        .attr("ry", 0.25*nodeRectRatio)
-        .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start))
-        .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio)
-        .style("fill", (d) => featureColorScale(d.label))
-        .style("stroke", "#000")
-        .style("stroke-width", "2px");
+    coefficientDistribution.selectAll("rect")
+        .data(coefficientsData)
+        .enter()
+        .append("rect")
+            .attr("class", "summary coefficients-bar")
+            .attr("width", (d) => xBar(d.end)-xBar(d.start))
+            .attr("height", 0.5*nodeRectRatio)
+            .attr("rx", 0.25*nodeRectRatio)
+            .attr("ry", 0.25*nodeRectRatio)
+            .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start))
+            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio)
+            .style("fill", (d) => featureColorScale(d.label))
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
 
     // Append text above each bar
-    coefficientDistribution.append("text")
-        .attr("class", "summary coefficients-bar-text")
-        .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
-        .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.75*nodeRectRatio)
-        .attr("text-anchor", "middle")
-        .text((d) => d.label);
+    coefficientDistribution.selectAll("text")
+        .data(coefficientsData)
+        .enter()
+        .append("text")
+            .attr("class", "summary coefficients-bar-text")
+            .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
+            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.75*nodeRectRatio)
+            .attr("text-anchor", "middle")
+            .text((d) => d.label);
 }
 
 /**

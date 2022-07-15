@@ -127,7 +127,6 @@ class Odt {
         this.nodes = nodes;
         // Modify element for each node recursively
         traverseTree(nodes);
-        console.log(nodes.descendants());
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -487,7 +486,6 @@ class Odt {
             .style("stroke-width", (d) => d.data.type === "leaf" ? leafNodeRectStrokeWidth : nodeRectStrokeWidth);
         
         this.renderPathSummaryView(node);
-        console.log(node);
         this.renderSummaryView(node);
     }
 
@@ -500,7 +498,6 @@ class Odt {
         let _this = this;
         // Draw class distribution
         node.each(function(nodeData, index) {
-            console.log(d3.select(this));
             // Draw class distribution
             _this.drawClassDistribution(d3.select(this), nodeData, _this);
             if (nodeData.data.type === "decision") {
