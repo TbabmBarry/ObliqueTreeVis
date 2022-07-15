@@ -114,6 +114,14 @@ class Odt {
 
         const zoomListener = d3.zoom()
             .on('zoom', zoomed);
+        
+        // Reset zoom listener
+        function reset () {
+            parts.baseSvg.transition()
+                .duration(750)
+                .call(zoomListener.transform,
+                    d3.zoomIdentity.scale(scale));
+        }
         // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
@@ -121,16 +129,19 @@ class Odt {
             .attr('class', 'oblique-tree-view')
             .attr('width', width)
             .attr('height', height)
-            .call(zoomListener)
-            .call(d3.zoom().transform, 
-                d3.zoomIdentity.translate(0,0).scale(scale));
+            .on('click', reset);
 
         // Create a container to group other tree diagram related svg elements
         parts.svgGroup = parts.baseSvg
-                            .append('g')
-                            .attr('class', 'oblique-tree-group')
-                            .attr("transform",`translate(${0},${0})`)
-                            .attr("transform", `scale(${scale})`);
+            .append('g')
+            .attr('class', 'oblique-tree-group')
+            .attr("transform",`translate(${0},${0})`)
+            .attr("transform", `scale(${scale})`);
+
+        // Register zoom listener to set up the initial zoom level
+        parts.baseSvg.call(zoomListener)
+            .call(zoomListener.transform, 
+                d3.zoomIdentity.scale(scale));
 
         parts.treeMap = d3.tree().size([width, 
             height-leafNodeRectHight-treeMargins.top-treeMargins.bottom]);
