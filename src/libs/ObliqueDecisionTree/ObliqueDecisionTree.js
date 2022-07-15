@@ -82,7 +82,7 @@ class Odt {
                 featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
-                treeMargins: { top: 5, left: 10, bottom: 5, right: 10 },
+                treeMargins: { top: 20, left: 20, bottom: 20, right: 20 },
             },
             parts: {},
         })
@@ -107,7 +107,6 @@ class Odt {
 
     draw() {
         const { data, parts, height, width } = this;
-        
         // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')

@@ -139,7 +139,6 @@ export const maxWidth = (node) => {
         que.forEach(([idx, q]) => {
             if (q.children && q.children.length > 0) {
                 q.children.forEach((child, i) => {
-                    console.log(i);
                     tmp.push([idx*2n + BigInt(i)*1n, child]);
                 })
             }
