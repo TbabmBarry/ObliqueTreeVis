@@ -32,14 +32,13 @@ export function drawClassDistribution(targetSelection, nodeData, that) {
     });
 
     // Create a svg group to bind each individual class rect
-    let classDistribution = targetSelection.selectAll("g.class-distribution")
-        .data(classData)
-        .enter()
-        .append("g")
+    let classDistribution = targetSelection.append("g")
         .attr("class", "summary class-distribution")
         .attr("transform", `translate(${nodeRectRatio}, ${nodeRectRatio})`);
-    // Append each class rect into classDistribution svg group
-    classDistribution.append("rect")
+    classDistribution.selectAll("rect")
+        .data(classData)
+        .enter()
+        .append("rect")
         .attr("class", "summary class-rect")
         .attr("width", (d) => xTotal(d.end-d.start))
         .attr("height", nodeRectRatio)
