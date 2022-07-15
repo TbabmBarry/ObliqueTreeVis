@@ -178,60 +178,69 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
         .padding(.1);
 
     const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
-    const splitDistribution = targetSelection.selectAll("g.split-distribution")
-        .data(splitData)
-        .enter()
-        .append("g")
-        .attr("class", "summary split-distribution")
-        .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
+    const splitDistribution = targetSelection.append("g")
+            .attr("class", "summary split-distribution")
+            .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
 
     // Append left and right split distribution into splitDistribution svg group
-    splitDistribution.append("rect")
-        .attr("class", "summary split-rect")
-        .attr("width", (d) => {
-            return xRight(d[1]);
-        })
-        .attr("height", yBand.bandwidth())
-        .attr("x", - nodeRectRatio)
-        .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d, i) => colorScale[i])
-        .style("stroke", "#000")
-        .style("stroke-width", "2px");
+    splitDistribution.selectAll("rect.positive")
+        .data(splitData)
+        .enter()
+        .append("rect")
+            .attr("class", "summary split-rect")
+            .attr("width", (d) => {
+                return xRight(d[1]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", - nodeRectRatio)
+            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
 
-    splitDistribution.append("rect")
-        .attr("class", "summary split-rect")
-        .attr("width", (d) => {
-            return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
-        })
-        .attr("height", yBand.bandwidth())
-        .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
-        .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d, i) => colorScale[i])
-        .style("stroke", "#000")
-        .style("stroke-width", "2px");
+    splitDistribution.selectAll("rect.negative")
+        .data(splitData)
+        .enter()
+        .append("rect")
+            .attr("class", "summary split-rect")
+            .attr("width", (d) => {
+                return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
+            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d, i) => colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
 
     // Append left and right split distribution text into splitDistribution svg group
-    splitDistribution.append("text")
-        .attr("class", "summary split-text")
-        .text( (d) => d[1])
-        .attr("text-anchor", "start")
-        .attr("font-size", "10px")
-        .attr("fill", "black")
-        .attr("transform", (d, i) => {
-            return `translate(${-nodeRectRatio+xRight(d[1])+5},
-                ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
-        })
+    splitDistribution.selectAll("text.positive")
+        .data(splitData)
+        .enter()
+        .append("text")
+            .attr("class", "summary split-text")
+            .text( (d) => d[1])
+            .attr("text-anchor", "start")
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .attr("transform", (d, i) => {
+                return `translate(${-nodeRectRatio+xRight(d[1])+5},
+                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+            })
 
-    splitDistribution.append("text")
-        .attr("class", "summary split-text")
-        .text( (d) => d[0])
-        .attr("text-anchor", "end")
-        .attr("font-size", "10px")
-        .attr("fill", "black")
-        .attr("transform", (d, i) => {
-            return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
-                ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
-        })
+    splitDistribution.selectAll("text.negative")
+        .data(splitData)
+        .enter()
+        .append("text")
+            .attr("class", "summary split-text")
+            .text( (d) => d[0])
+            .attr("text-anchor", "end")
+            .attr("font-size", "10px")
+            .attr("fill", "black")
+            .attr("transform", (d, i) => {
+                return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
+                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+            })
 
     // Append centered axis
     splitDistribution.append("g")
