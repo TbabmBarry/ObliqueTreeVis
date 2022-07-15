@@ -15,9 +15,10 @@ export const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
+    curr.scale = curr.height / 2160;
     // TODO: define inner svg width and height according to returned DOMRect size
-    curr.width *= 1.5;
-    curr.height *= 2.5;
+    curr.height = 2160;
+    curr.width = curr.height;
     return curr;
 };
 

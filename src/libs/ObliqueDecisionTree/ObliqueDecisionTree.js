@@ -97,8 +97,8 @@ class Odt {
      */
     updateContainerDimensions() {
         try {
-            const { width, height } = adjustedClientRect(this.rootElement);
-            _.assign(this, { width, height });
+            const { width, height, scale } = adjustedClientRect(this.rootElement);
+            _.assign(this, { width, height, scale });
         } catch (err) {
             err.message = `Fail to reset the container: ${err.message}`;
             throw err;
@@ -106,19 +106,30 @@ class Odt {
     }
 
     draw() {
-        const { data, parts, height, width } = this;
+        const { data, parts, height, width, scale } = this;
+        const zoomed = ({ transform }) => {
+            parts.svgGroup.attr('transform', transform);
+        }
+
+        const zoomListener = d3.zoom()
+            .on('zoom', zoomed);
         // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
             .append('svg')
             .attr('id', this.id)
             .attr('class', 'oblique-tree-view')
             .attr('width', width)
-            .attr('height', height);
+            .attr('height', height)
+            .call(zoomListener)
+            .call(d3.zoom().transform, 
+                d3.zoomIdentity.translate(0,0).scale(scale));
 
         // Create a container to group other tree diagram related svg elements
         parts.svgGroup = parts.baseSvg
                             .append('g')
                             .attr('class', 'oblique-tree-group')
+                            .attr("transform",`translate(${0},${0})`)
+                            .attr("transform", `scale(${scale})`);
 
         parts.treeMap = d3.tree().size([width, height]);
         let nodes = d3.hierarchy(data);
@@ -130,7 +141,7 @@ class Odt {
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
         // Enable zooming
-        this.enableZooming();
+        // this.enableZooming();
     }
 
     /**
@@ -814,7 +825,10 @@ class Odt {
             .extent([[0,0], [width, height]])
             .scaleExtent([1, 8])
             .on('zoom', zoomed);
-        parts.baseSvg.call(zoomListener);
+        parts.baseSvg.call(zoomListener)
+            .call(d3.zoom().transform, 
+                d3.zoomIdentity.translate(width/2,height/2).scale(0.5));
+            
     }
 
     /**
