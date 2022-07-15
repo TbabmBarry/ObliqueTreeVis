@@ -409,7 +409,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, screenHeight, screenWidth,
+        const { parts, screenHeight, screenWidth, width, height,
             constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
@@ -471,10 +471,13 @@ class Odt {
                     .on("end", () => {
                         // Remove the summary view and render the detailed view after the transition
                         currNodeGroup.selectAll(".summary").remove();
+                        // Center the node rect in the viewport
                         parts.svgGroup.transition()
                             .duration(750)
                             .call(_this.registeredStateListeners[0].transform,
-                                d3.zoomIdentity.translate(screenHeight/2, screenWidth/2).scale(1).translate(-node.x, -node.y),
+                                d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
+                                    .translate(-node.x+nodeRectWidth/2, -node.y-nodeRectWidth)
+                                    .scale(1),
                                 d3.pointer(event));
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
