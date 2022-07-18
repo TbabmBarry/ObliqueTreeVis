@@ -2,7 +2,6 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
-import { parseStringStyle } from '@vue/shared';
 
 /**
  * Draw two-feature scatter plot in each decision node
@@ -114,6 +113,8 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
         doc.on("keyup", (event, d) => {
             if (event.key === "Alt") {
                 // Remove selection of the detailed view
+                const brushEvent = brush(targetSelection, circle, x[currFeatureIdx[0]], y[currFeatureIdx[1]]);
+                targetSelection.call(brushEvent.move, null);
                 targetSelection.selectAll(".overlay").remove();
                 targetSelection.selectAll(".selection").remove();
                 targetSelection.selectAll(".handle").remove();
@@ -131,6 +132,7 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .on("end", brushEnded);
         
         cell.call(brush);
+
         let brushCell;
         function brushStarted() {
             if (brushCell !== this) {
@@ -164,6 +166,7 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             circle.classed("unselected", false);
             // Remove brush event listener
         }
+        return brush;
     }
 }
 
