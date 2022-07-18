@@ -279,58 +279,105 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .domain([0,1,2])
         .padding(.1);
 
-    const splitData = exposedNodeData.data.leftCount.map((val, idx) => ({
-        value: [val, exposedNodeData.data.rightCount[idx]],
-        label: idx,    
+    const mouseover = function(d) {
+        console.log(d3.select(this));
+        tooltip.style("opacity", 1);
+        d3.select(this)
+            .style("stroke", "black")
+            .style("opacity", 1);
+    }
+    
+    const mousemove = function(event, d) {
+        tooltip.html("Count: " + d.count)
+            .style("left", (d3.pointer(event)[0]/4) + "px")
+            .style("top", (d3.pointer(event)[1]) + "px");
+    }
+    
+    const mouseout = function(d) {
+        tooltip.style("opacity", 0);
+        d3.select(this)
+            .style("opacity", 0.8);
+    }
+    
+    const splitDataLeft = exposedNodeData.data.leftCount.map((val, idx) => ({
+        count: val,
+        label: idx
     }));
-    const splitDistribution = targetSelection.selectAll(`g.exposed-split-distribution#${originalNodeData.name}`)
-        .data(splitData)
-        .enter()
-        .append("g")
+
+    const splitDataRight = exposedNodeData.data.rightCount.map((val, idx) => ({
+        count: val,
+        label: idx
+    }));
+    const splitDistribution = targetSelection.append("g")
         .attr("class", "summary exposed-split-distribution")
         .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
 
-    // Append left and right split distribution into splitDistribution svg group
-    splitDistribution.append("rect")
-        .attr("class", "summary exposed-split-rect")
-        .attr("id", `${originalNodeData.name}`)
-        .attr("width", (d) => {
-            return xRight(d.value[1]);
-        })
-        .attr("height", yBand.bandwidth())
-        .attr("x", - nodeRectRatio)
-        .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d) => {
-            const texture = textures.lines()
-                .size(8)
-                .strokeWidth(2)
-                .stroke("#000")
-                .background(colorScale[d.label]);
-            splitDistribution.call(texture);
-            return texture.url();
-        })
-        .style("stroke", "#000")
-        .style("stroke-width", "2px");
+    const tooltip = splitDistribution.append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("width", "80px")
+        .style("height", "30px")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "2px");
 
-    splitDistribution.append("rect")
-        .attr("class", "summary exposed-split-rect")
-        .attr("id", `${originalNodeData.name}`)
-        .attr("width", (d) => {
-            return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d.value[0]);
-        })
-        .attr("height", yBand.bandwidth())
-        .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d.value[0]))
-        .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d) => {
-            const texture = textures.lines()
-                .size(8)
-                .strokeWidth(2)
-                .stroke("#000")
-                .background(colorScale[d.label]);
-            splitDistribution.call(texture);
-            return texture.url();
-        })
-        .style("stroke", "#000")
-        .style("stroke-width", "2px");
+    // Append left and right split distribution into splitDistribution svg group
+    splitDistribution.selectAll(`rect-right#${originalNodeData.name}`)
+        .data(splitDataRight)
+        .enter()
+        .append("rect")
+            .attr("class", "summary exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return xRight(d.count);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", - nodeRectRatio)
+            .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[d.label]);
+                splitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px")
+            .style("opacity", 0.8)
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout)
+
+    splitDistribution.selectAll(`rect-left#${originalNodeData.name}`)
+        .data(splitDataLeft)
+        .enter()
+        .append("rect")
+            .attr("class", "summary exposed-split-rect")
+            .attr("id", `${originalNodeData.name}`)
+            .attr("width", (d) => {
+                return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d.count);
+            })
+            .attr("height", yBand.bandwidth())
+            .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d.count))
+            .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("fill", (d) => {
+                const texture = textures.lines()
+                    .size(8)
+                    .strokeWidth(2)
+                    .stroke("#000")
+                    .background(colorScale[d.label]);
+                splitDistribution.call(texture);
+                return texture.url();
+            })
+            .style("stroke", "#000")
+            .style("stroke-width", "2px")
+            .style("opacity", 0.8)
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
 
 }

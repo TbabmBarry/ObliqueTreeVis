@@ -665,26 +665,31 @@ export function drawExposedSplitHistogramInDetailedView(targetSelection, origina
         .domain([0,1,2])
         .padding(.1);
 
-    const splitData = exposedNodeData.data.leftCount.map((val, idx) => ({
-        value: [val, exposedNodeData.data.rightCount[idx]],
+    const splitDataLeft = exposedNodeData.data.leftCount.map((val, idx) => ({
+        count: val,
         label: idx,    
     }));
 
-    const detailedExposedSplitDistribution = targetSelection.selectAll(`g.detail-exposed-split-distribution#${originalNodeData.name}`)
-        .data(splitData)
-        .enter()
-        .append("g")
+    const splitDataRight = exposedNodeData.data.rightCount.map((val, idx) => ({
+        count: val,
+        label: idx,    
+    }));
+
+    const detailedExposedSplitDistribution = targetSelection.append("g")
         .attr("class", "detailed detail-exposed-split-distribution")
         .attr("transform", 
             `translate(${0.5*detailedViewNodeRectWidth-0.5*histogramHeight-0.25*scatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`);
     
     // Append left and right split distribution into splitDistribution svg group
-    detailedExposedSplitDistribution.append("rect")
+    detailedExposedSplitDistribution.selectAll(`rect-right#${originalNodeData.name}`)
+    .data(splitDataRight)
+    .enter()
+    .append("rect")
         .attr("class", "detailed detail-exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return xRight(d.value[1]);
+            return xRight(d.count);
         })
         .attr("height", yBand.bandwidth())
         .attr("x", -scatterPlotPadding)
@@ -702,14 +707,17 @@ export function drawExposedSplitHistogramInDetailedView(targetSelection, origina
         .style("stroke-width", "2px")
 
 
-    detailedExposedSplitDistribution.append("rect")
+    detailedExposedSplitDistribution.selectAll(`rect-left#${originalNodeData.name}`)
+    .data(splitDataLeft)
+    .enter()
+    .append("rect")
         .attr("class", "detailed detail-exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return 0.5*histogramHeight-xLeft(d.value[0]);
+            return 0.5*histogramHeight-xLeft(d.count);
         })
         .attr("height", yBand.bandwidth())
-        .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d.value[0]))
+        .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d.count))
         .attr("y", (d) => yBand(d.label))
         .attr("fill", (d) => {
             const texture = textures.lines()
