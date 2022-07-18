@@ -589,12 +589,33 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
+        const { constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
         let _this = this;
 
         // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
+                const parentSvgGroup = d3.select(this).node().parentNode;
+                let svgGroupX, svgGroupY;
+
+                d3.select(this)
+                    .on("mouseover", function() {
+                        d3.select(this).attr("clip-path", null)
+                            .select(".node-rect")
+                            .style("stroke", "transparent");
+
+                        d3.select(this).select(".scroll-bar")
+                            .style("opacity", 0);
+                    })
+                    .on("mouseout", function() {
+                        d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)")
+                            .select(".node-rect")
+                            .style("stroke", "#000000");
+
+                        d3.select(this).select(".scroll-bar")
+                            .style("opacity", 1);
+                    })
+
                 // Set up clop-path attribute for leaf node
                 d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)");
                 // Get node rect bbox
@@ -620,7 +641,7 @@ class Odt {
                     .attr("x", leafNodeBBox.x) // -nodeRectStrokeWidth to account for stroke
                     .attr("y", leafNodeBBox.y)
                     .attr("width", leafNodeBBox.width)
-                    .attr("height", leafNodeBBox.height);
+                    .attr("height", leafNodeBBox.height)
                 
                 // Insert an invisible rect that will be used to capture scroll events
                 d3.select(this).insert("rect", "g")
@@ -633,6 +654,7 @@ class Odt {
                 
                 // Position the scroll indicator
                 const scrollBar = d3.select(this).append("rect")
+                    .attr("class", "scroll-bar")
                     .attr("width", scrollBarWidth)
                     .attr("rx", scrollBarWidth/2)
                     .attr("ry", scrollBarWidth/2)
@@ -727,6 +749,8 @@ class Odt {
                             .attr("x2", +0.5*(nodeRectWidth-2*nodeRectRatio))
                             .attr("y2", 3*nodeRectRatio+(idx+1)*(1/2)*(nodeRectWidth-2*nodeRectRatio)-5);
                     }
+                    svgGroupX = -0.5*(nodeRectWidth-2*nodeRectRatio);
+                    svgGroupY = 3*nodeRectRatio+fcArr.length*(1/2)*(nodeRectWidth-2*nodeRectRatio) + nodeRectRatio;
                 });
                 // Calculate maximum scrollable amount
                 const contentBBox = d3.select(this).node().getBBox();
@@ -764,6 +788,15 @@ class Odt {
                     });
                 // Add drag behaviour to scrollbar
                 scrollBar.call(dragBehaviour);
+
+                d3.select(this).append("rect")
+                    .attr("x", leafNodeBBox.x)
+                    .attr("y", leafNodeBBox.y)
+                    .attr("width", leafNodeBBox.width)
+                    .attr("height", svgGroupY-leafNodeBBox.y)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width", nodeRectStrokeWidth+2);
             }
         });
     }
