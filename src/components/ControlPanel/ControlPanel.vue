@@ -25,12 +25,12 @@
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="grid grid-cols-3 gap my-2">
-            <div class="w-full h-full overflow-auto" id="class-overview"></div>
+        <div class="grid grid-cols-3 h-1/2 gap my-2" id="class-overview">
         </div>
     </div>
 </template>
 <script setup>
+import _ from 'lodash';
 import { reactive, ref, toRefs, inject, watch, onMounted } from "vue";
 import { getDatasetChangeSelects } from "@/api/metrics.js";
 
@@ -54,11 +54,17 @@ const state = reactive({
         value: 'penguins',
         label: 'Penguins Data',
     }]),
+    rootElement: {},
+    width: 0,
+    height: 0,
+    padding: 20,
     labelSet: [],
-    classCounts: {}
+    classCounts: {},
+    colorScale: ["#e63946", "#a8dadc", "#457b9d"]
 });
 
 onMounted(async () => {
+    state.rootElement = document.querySelector("#class-overview");
     initiateClassOverview();
 });
 
@@ -76,11 +82,13 @@ const occurrence = (arr) => {
     for (const num of arr) {
         counts[num] = counts[num] ? counts[num] + 1 : 1;
     }
-    return counts;
+    return Object.keys(counts).map((key) => ({
+        label: Number(key),
+        count: counts[key]
+    }));
 }
 
 async function initiateClassOverview () {
-    d3.select("#class-overview").selectAll("*").remove();
     let req = {
         dataset_name: state.value1
     };
@@ -92,6 +100,56 @@ async function initiateClassOverview () {
             console.log("ERROR: ", error);
         });
     state.classCounts = occurrence(state.labelSet);
+    renderClassDistribution();
+}
+
+function renderClassDistribution () {
+    d3.select("#class-overview").selectAll("*").remove();
+    const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
+    state.width = width;
+    state.height = height;
+    console.log(state.width, state.height);
+    // Create the base svg binding it to rootElement
+    const baseSvg = d3.select(state.rootElement)
+            .append('svg')
+            .attr('id', 'class-overview-svg')
+            .attr('class', 'class-overview')
+            .attr('width', width)
+            .attr('height', height);
+    
+    const classDistribution = baseSvg.append("g")
+        .attr("class", "class-distribution-overview");
+
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(state.classCounts, d => d.count)])
+        .range([state.padding, width - state.padding]),
+        yScale = d3.scaleBand()
+            .domain(state.classCounts.map(d => d.label))
+            .range([state.padding, height - state.padding]);
+
+    classDistribution.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0, ${height - state.padding})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    classDistribution.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${state.padding}, 0)`)
+        .call(d3.axisLeft(yScale));
+
+    classDistribution.selectAll(".class-bar")
+        .data(state.classCounts)
+        .enter()
+        .append("rect")
+        .attr("class", "class-bar")
+        .attr("x", d => xScale(0))
+        .attr("y", d => yScale(d.label))
+        .attr("width", d => xScale(d.count))
+        .attr("height", yScale.bandwidth())
+        .attr("fill", d => state.colorScale[d.label]);
 }
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
