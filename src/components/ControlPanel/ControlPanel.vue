@@ -31,6 +31,7 @@
 </template>
 <script setup>
 import _ from 'lodash';
+import textures from 'textures';
 import { reactive, ref, toRefs, inject, watch, onMounted } from "vue";
 import { getDatasetChangeSelects } from "@/api/metrics.js";
 
@@ -59,7 +60,11 @@ const state = reactive({
     height: 0,
     padding: 20,
     labelSet: [],
+    xScale: {},
+    yScale: {},
     classCounts: {},
+    selectedClassCounts: {},
+    baseSvg: {},
     colorScale: ["#e63946", "#a8dadc", "#457b9d"]
 });
 
@@ -110,27 +115,27 @@ function renderClassDistribution () {
     state.height = height;
     console.log(state.width, state.height);
     // Create the base svg binding it to rootElement
-    const baseSvg = d3.select(state.rootElement)
+    state.baseSvg = d3.select(state.rootElement)
             .append('svg')
             .attr('id', 'class-overview-svg')
             .attr('class', 'class-overview')
             .attr('width', width)
             .attr('height', height);
     
-    const classDistribution = baseSvg.append("g")
+    const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
 
-    const xScale = d3.scaleLinear()
+    state.xScale = d3.scaleLinear()
         .domain([0, d3.max(state.classCounts, d => d.count)])
         .range([state.padding, width - state.padding]),
-        yScale = d3.scaleBand()
+    state.yScale = d3.scaleBand()
             .domain(state.classCounts.map(d => d.label))
             .range([state.padding, height - state.padding]);
 
     classDistribution.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0, ${height - state.padding})`)
-        .call(d3.axisBottom(xScale))
+        .call(d3.axisBottom(state.xScale))
         .selectAll("text")
         .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
@@ -138,23 +143,54 @@ function renderClassDistribution () {
     classDistribution.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${state.padding}, 0)`)
-        .call(d3.axisLeft(yScale));
+        .call(d3.axisLeft(state.yScale));
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
         .enter()
         .append("rect")
         .attr("class", "class-bar")
-        .attr("x", d => xScale(0))
-        .attr("y", d => yScale(d.label))
-        .attr("width", d => xScale(d.count))
-        .attr("height", yScale.bandwidth())
+        .attr("x", d => state.xScale(0))
+        .attr("y", d => state.yScale(d.label))
+        .attr("width", d => state.xScale(d.count))
+        .attr("height", state.yScale.bandwidth())
         .attr("fill", d => state.colorScale[d.label]);
 }
 
-watch(() => props.selectedPoints, (newValue, oldValue) => {
-    console.log("selectedPoints changed", newValue);
+function renderSelectedClassDistribution () {
+    d3.selectAll("g.selected-class-overview").remove();
+    const selectedClassDistribution = state.baseSvg.append("g")
+        .attr("class", "selected-class-overview");
+    selectedClassDistribution.selectAll(".selected-class-bar")
+        .data(state.selectedClassCounts)
+        .enter()
+        .append("rect")
+        .attr("class", "selected-class-bar")
+        .attr("x", d => state.xScale(0))
+        .attr("y", d => state.yScale(d.label))
+        .attr("width", d => state.xScale(d.count))
+        .attr("height", state.yScale.bandwidth())
+        .attr("fill", function (d) {
+            const texture = textures.lines()
+                .size(8)
+                .strokeWidth(2)
+                .stroke("#000")
+                .background(state.colorScale[d.label]);
+            selectedClassDistribution.call(texture);
+            return texture.url();
+        });
+}
 
+watch(() => props.selectedPoints, (newValue, oldValue) => {
+    let counts = {};
+    newValue.forEach(selecedPoint => {
+        counts[selecedPoint.label] = counts[selecedPoint.label] ? counts[selecedPoint.label] + 1 : 1;
+    });
+    state.selectedClassCounts = Object.keys(counts).map((key) => ({
+        label: Number(key),
+        count: counts[key]
+    }));
+    renderSelectedClassDistribution();
 }, { immediate: false });
 
 let { value1, options1 } = toRefs(state);
