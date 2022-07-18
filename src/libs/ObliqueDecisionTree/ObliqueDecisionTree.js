@@ -409,7 +409,7 @@ class Odt {
      * @param {nodes} nodes
      */
     renderNodes(nodes) {
-        const { parts, screenHeight, screenWidth, width, height,
+        const { parts, screenHeight, screenWidth, width, height, scale,
             constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
@@ -426,6 +426,13 @@ class Odt {
                 if (currNodeGroup.node().querySelector(".detailed") !== null || 
                     (currNodeGroup.node().querySelector(".detailed") === null &&
                         currNodeGroup.node().querySelector(".summary") === null)) {
+                    // Reset the viewport to the original viewport
+                    parts.svgGroup.transition()
+                    .duration(750)
+                    .call(_this.registeredStateListeners[0].transform,
+                        d3.zoomIdentity.translate(0, 0)
+                            .scale(scale),
+                        d3.pointer(event));
                     // Remove the detailed view and render the summary view
                     currNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(currNodeGroup);
