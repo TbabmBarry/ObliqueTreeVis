@@ -428,13 +428,6 @@ class Odt {
                 if (currNodeGroup.node().querySelector(".detailed") !== null || 
                     (currNodeGroup.node().querySelector(".detailed") === null &&
                         currNodeGroup.node().querySelector(".summary") === null)) {
-                    // Reset the viewport to the original viewport
-                    parts.svgGroup.transition()
-                    .duration(750)
-                    .call(_this.registeredStateListeners[0].transform,
-                        d3.zoomIdentity.translate(0, 0)
-                            .scale(scale),
-                        d3.pointer(event));
                     // Remove the detailed view and render the summary view
                     currNodeGroup.selectAll(".detailed").remove();
                     _this.renderSummaryView(currNodeGroup);
@@ -483,14 +476,13 @@ class Odt {
                             .call(zoomListener.transform,
                                 d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
                                     .translate(-node.x, -node.y-nodeRectWidth/2)
-                                    .scale(1),
-                                d3.pointer(event));
+                                    .scale(1),d3.pointer(event));
                         // Update the transform and scale of zoom listener in the detailed view
                         parts.baseSvg.call(zoomListener)
                                 .call(zoomListener.transform,
                                     d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
                                     .translate(-node.x, -node.y-nodeRectWidth/2)
-                                    .scale(1));
+                                    .scale(1),d3.pointer(event));
                         // Render the detailed view
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
