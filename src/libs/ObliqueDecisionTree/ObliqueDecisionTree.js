@@ -479,7 +479,7 @@ class Odt {
                             .duration(750)
                             .call(_this.registeredStateListeners[0].transform,
                                 d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
-                                    .translate(-node.x+nodeRectWidth/2, -node.y-nodeRectWidth)
+                                    .translate(-node.x, -node.y-nodeRectWidth/2)
                                     .scale(1),
                                 d3.pointer(event));
                         
