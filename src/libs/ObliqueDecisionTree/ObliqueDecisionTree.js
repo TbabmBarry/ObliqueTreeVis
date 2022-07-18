@@ -474,15 +474,21 @@ class Odt {
                     .on("end", () => {
                         // Remove the summary view and render the detailed view after the transition
                         currNodeGroup.selectAll(".summary").remove();
+                        const zoomListener = _this.registeredStateListeners[0];
                         // Center the node rect in the viewport
                         parts.svgGroup.transition()
                             .duration(750)
-                            .call(_this.registeredStateListeners[0].transform,
+                            .call(zoomListener.transform,
                                 d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
                                     .translate(-node.x, -node.y-nodeRectWidth/2)
                                     .scale(1),
                                 d3.pointer(event));
-                        
+                        // Update the transform and scale of zoom listener in the detailed view
+                        parts.baseSvg.call(zoomListener)
+                                .call(zoomListener.transform,
+                                    d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
+                                    .translate(-node.x, -node.y-nodeRectWidth/2)
+                                    .scale(1));
                         // Render the detailed view
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
