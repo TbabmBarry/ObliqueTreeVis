@@ -116,11 +116,13 @@ class Odt {
             .on('zoom', zoomed);
         this.registeredStateListeners.push(zoomListener);
         // Reset zoom listener
-        function reset () {
-            parts.baseSvg.transition()
-                .duration(750)
-                .call(zoomListener.transform,
-                    d3.zoomIdentity.scale(scale));
+        function reset (event, d) {
+            if (event.shiftKey !== true && parts.svgGroup.node().querySelector(".detailed") === null) {
+                parts.baseSvg.transition()
+                    .duration(750)
+                    .call(zoomListener.transform,
+                        d3.zoomIdentity.scale(scale));
+            }
         }
         // Create the base svg binding it to rootElement
         parts.baseSvg = d3.select(this.rootElement)
