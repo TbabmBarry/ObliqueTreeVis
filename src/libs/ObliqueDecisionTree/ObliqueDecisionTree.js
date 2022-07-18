@@ -595,6 +595,7 @@ class Odt {
         // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
+                // Set up clop-path attribute for leaf node
                 d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)");
                 // Get node rect bbox
                 const currLeafNode = d3.select(this).select("rect.node-rect");

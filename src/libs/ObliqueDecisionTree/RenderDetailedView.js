@@ -64,18 +64,6 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding-0.5*brushCellPadding})`)
             .attr("width", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+brushCellPadding)
             .attr("height", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+brushCellPadding)
-            // .on("mouseover", function(d) {
-            //     d3.select(this)
-            //         .transition()
-            //         .duration(200)
-            //         .style("box-shadow", "0px 0px 10px #000000")
-            //         .style("cursor", "pointer")
-            //         .style("stroke", "#ccc")
-            //         .style("stroke-width", "2px");
-            // })
-            // .on("mouseout", function(d) {
-            //     d3.select(this).style("stroke", "none");
-            // })
 
     const circle = targetSelection.selectAll("circle")
         .data(nodeData.data.subTrainingSet)
