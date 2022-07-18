@@ -665,7 +665,11 @@ export function drawExposedSplitHistogramInDetailedView(targetSelection, origina
         .domain([0,1,2])
         .padding(.1);
 
-    const splitData = exposedNodeData.data.leftCount.map((val, idx) => [val, exposedNodeData.data.rightCount[idx]]);
+    const splitData = exposedNodeData.data.leftCount.map((val, idx) => ({
+        value: [val, exposedNodeData.data.rightCount[idx]],
+        label: idx,    
+    }));
+
     const detailedExposedSplitDistribution = targetSelection.selectAll(`g.detail-exposed-split-distribution#${originalNodeData.name}`)
         .data(splitData)
         .enter()
@@ -674,44 +678,45 @@ export function drawExposedSplitHistogramInDetailedView(targetSelection, origina
         .attr("transform", 
             `translate(${0.5*detailedViewNodeRectWidth-0.5*histogramHeight-0.25*scatterPlotPadding},
                 ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`);
-
+    
     // Append left and right split distribution into splitDistribution svg group
     detailedExposedSplitDistribution.append("rect")
         .attr("class", "detailed detail-exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return xRight(d[1]);
+            return xRight(d.value[1]);
         })
         .attr("height", yBand.bandwidth())
         .attr("x", -scatterPlotPadding)
-        .attr("y", (d, i) => yBand(i))
-        .attr("fill", (d, i) => {
+        .attr("y", (d) => yBand(d.label))
+        .attr("fill", (d) => {
             const texture = textures.lines()
                 .size(8)
                 .strokeWidth(2)
                 .stroke("#000")
-                .background(colorScale[i]);
+                .background(colorScale[d.label]);
             detailedExposedSplitDistribution.call(texture);
             return texture.url();
         })
         .style("stroke", "#000")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "2px")
+
 
     detailedExposedSplitDistribution.append("rect")
         .attr("class", "detailed detail-exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return 0.5*histogramHeight-xLeft(d[0]);
+            return 0.5*histogramHeight-xLeft(d.value[0]);
         })
         .attr("height", yBand.bandwidth())
-        .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d[0]))
-        .attr("y", (d, i) => yBand(i))
-        .attr("fill", (d, i) => {
+        .attr("x", (d) => -0.5*(histogramHeight+2*scatterPlotPadding)+xLeft(d.value[0]))
+        .attr("y", (d) => yBand(d.label))
+        .attr("fill", (d) => {
             const texture = textures.lines()
                 .size(8)
                 .strokeWidth(2)
                 .stroke("#000")
-                .background(colorScale[i]);
+                .background(colorScale[d.label]);
             detailedExposedSplitDistribution.call(texture);
             return texture.url();
         })
