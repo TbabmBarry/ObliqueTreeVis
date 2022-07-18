@@ -65,11 +65,13 @@ const state = reactive({
     classCounts: {},
     selectedClassCounts: {},
     baseSvg: {},
+    tooltip: {},
     colorScale: ["#e63946", "#a8dadc", "#457b9d"]
 });
 
 onMounted(async () => {
     state.rootElement = document.querySelector("#class-overview");
+
     initiateClassOverview();
 });
 
@@ -108,19 +110,50 @@ async function initiateClassOverview () {
     renderClassDistribution();
 }
 
+const mouseover = function(d) {
+    state.tooltip.style("opacity", 1);
+    d3.select(this)
+        .style("stroke", "black")
+        .style("opacity", 1);
+}
+
+const mousemove = function(event, d) {
+    state.tooltip.html("Count: " + d.count)
+        .style("left", (d3.pointer(event)[0]) + "px")
+        .style("top", (d3.pointer(event)[1]) + "px");
+}
+
+const mouseout = function(d) {
+    state.tooltip.style("opacity", 0);
+    d3.select(this)
+        .style("stroke", "none")
+        .style("opacity", 0.8);
+}
+
 function renderClassDistribution () {
     d3.select("#class-overview").selectAll("*").remove();
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
     state.width = width;
     state.height = height;
-    console.log(state.width, state.height);
     // Create the base svg binding it to rootElement
     state.baseSvg = d3.select(state.rootElement)
-            .append('svg')
-            .attr('id', 'class-overview-svg')
-            .attr('class', 'class-overview')
-            .attr('width', width)
-            .attr('height', height);
+        .append('svg')
+        .attr('id', 'class-overview-svg')
+        .attr('class', 'class-overview')
+        .attr('width', width)
+        .attr('height', height);
+
+    state.tooltip = d3.select(state.rootElement)
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("width", "80px")
+        .style("height", "30px")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "2px");
     
     const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
@@ -178,7 +211,11 @@ function renderSelectedClassDistribution () {
                 .background(state.colorScale[d.label]);
             selectedClassDistribution.call(texture);
             return texture.url();
-        });
+        })
+        .style("opacity", 0.8)
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseout", mouseout);
 }
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
