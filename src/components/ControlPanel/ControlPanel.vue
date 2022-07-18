@@ -118,7 +118,6 @@ const mouseover = function(d) {
 }
 
 const mousemove = function(event, d) {
-    console.log(d3.pointer(event));
     state.tooltip.html("Count: " + d.count)
         .style("left", (d3.pointer(event)[0]/4) + "px")
         .style("top", (d3.pointer(event)[1]) + "px");
