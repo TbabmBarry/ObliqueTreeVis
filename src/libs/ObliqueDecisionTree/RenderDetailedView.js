@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
 import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
+import { parseStringStyle } from '@vue/shared';
 
 /**
  * Draw two-feature scatter plot in each decision node
@@ -14,7 +15,7 @@ import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
  * @param {that} that
  */
 export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y, that) {
-    const { trainX, trainY, constants : { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale }} = that;
+    const { parts, trainX, trainY, registeredStateListeners, scale, constants : { nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureArr, colorScale }} = that;
     
     // Allow X and Y axis generators to be called
     targetSelection.append("g")
@@ -101,7 +102,24 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             })
             .style("stroke", (d) => colorScale[trainY[d]]);
 
-        targetSelection.call(brush, circle, x[currFeatureIdx[0]], y[currFeatureIdx[1]]);
+        const doc = d3.select(document);
+        const zoomListener = registeredStateListeners[0];
+        doc.on("keydown", (event, d) => {
+            if (event.key === "Alt") {
+                parts.baseSvg.on(".zoom", null);
+                targetSelection.call(brush, circle, x[currFeatureIdx[0]], y[currFeatureIdx[1]]);
+                
+            }
+        })
+        doc.on("keyup", (event, d) => {
+            if (event.key === "Alt") {
+                // Remove selection of the detailed view
+                targetSelection.selectAll(".overlay").remove();
+                targetSelection.selectAll(".selection").remove();
+                targetSelection.selectAll(".handle").remove();
+                parts.baseSvg.call(zoomListener);
+            }
+        })
         
     function brush (cell, circle, x, y) {
         const brush = d3.brush()

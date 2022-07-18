@@ -428,10 +428,6 @@ class Odt {
                         currNodeGroup.node().querySelector(".summary") === null)) {
                     // Remove the detailed view and render the summary view
                     currNodeGroup.selectAll(".detailed").remove();
-                    // Remove selection of the detailed view
-                    currNodeGroup.selectAll(".overlay").remove();
-                    currNodeGroup.selectAll(".selection").remove();
-                    currNodeGroup.selectAll(".handle").remove();
                     _this.renderSummaryView(currNodeGroup);
 
                     // Update the pathsIdInDetailView
@@ -479,6 +475,8 @@ class Odt {
                                     .translate(-node.x+nodeRectWidth/2, -node.y-nodeRectWidth)
                                     .scale(1),
                                 d3.pointer(event));
+                        
+                        // Render the detailed view
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
                             _this.update();
