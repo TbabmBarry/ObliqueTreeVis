@@ -279,7 +279,10 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .domain([0,1,2])
         .padding(.1);
 
-    let splitData = exposedNodeData.data.leftCount.map((val, idx) => [val, exposedNodeData.data.rightCount[idx]]);
+    const splitData = exposedNodeData.data.leftCount.map((val, idx) => ({
+        value: [val, exposedNodeData.data.rightCount[idx]],
+        label: idx,    
+    }));
     const splitDistribution = targetSelection.selectAll(`g.exposed-split-distribution#${originalNodeData.name}`)
         .data(splitData)
         .enter()
@@ -292,17 +295,17 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .attr("class", "summary exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return xRight(d[1]);
+            return xRight(d.value[1]);
         })
         .attr("height", yBand.bandwidth())
         .attr("x", - nodeRectRatio)
-        .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d, i) => {
+        .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+        .attr("fill", (d) => {
             const texture = textures.lines()
                 .size(8)
                 .strokeWidth(2)
                 .stroke("#000")
-                .background(colorScale[i]);
+                .background(colorScale[d.label]);
             splitDistribution.call(texture);
             return texture.url();
         })
@@ -313,17 +316,17 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .attr("class", "summary exposed-split-rect")
         .attr("id", `${originalNodeData.name}`)
         .attr("width", (d) => {
-            return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d[0]);
+            return 0.5*(nodeRectWidth-2*nodeRectRatio)-xLeft(d.value[0]);
         })
         .attr("height", yBand.bandwidth())
-        .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
-        .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
-        .attr("fill", (d, i) => {
+        .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d.value[0]))
+        .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+        .attr("fill", (d) => {
             const texture = textures.lines()
                 .size(8)
                 .strokeWidth(2)
                 .stroke("#000")
-                .background(colorScale[i]);
+                .background(colorScale[d.label]);
             splitDistribution.call(texture);
             return texture.url();
         })
