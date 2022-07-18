@@ -55,16 +55,16 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .style('fill', 'none')
             .style('stroke', 'black')
             .style('stroke-width', '2px');
-
-        targetSelection.append("rect")
+    const brushCellPadding = 20;
+    targetSelection.append("rect")
             .attr("class", "detailed brushable-rect")
             .attr("id", d => `detailed-brushable-rect-${d.data.name}`)
             .attr("fill", "transparent")
             .attr("stroke", "none")
-            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
-                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
-            .attr("width", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding)
-            .attr("height", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding)
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding-0.5*brushCellPadding},
+                ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding-0.5*brushCellPadding})`)
+            .attr("width", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+brushCellPadding)
+            .attr("height", detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+brushCellPadding)
             // .on("mouseover", function(d) {
             //     d3.select(this)
             //         .transition()
@@ -123,8 +123,9 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
         
     function brush (cell, circle, x, y) {
         const brush = d3.brush()
-            .extent([[-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding, -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding], 
-                [0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-histogramScatterPlotPadding, 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding]])
+            .extent([[-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding-0.5*brushCellPadding,
+                -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding-0.5*brushCellPadding], 
+                [0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+0.5*brushCellPadding, 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding+0.5*brushCellPadding]])
             .on("start", brushStarted)
             .on("brush", brushed)
             .on("end", brushEnded);
