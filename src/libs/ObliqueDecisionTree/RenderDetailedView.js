@@ -101,10 +101,12 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             if (event.key === "Alt") {
                 // Remove selection of the detailed view
                 const brushEvent = brush(targetSelection, circle, x[currFeatureIdx[0]], y[currFeatureIdx[1]]);
+                // Remove the brush
                 targetSelection.call(brushEvent.move, null);
                 targetSelection.selectAll(".overlay").remove();
                 targetSelection.selectAll(".selection").remove();
                 targetSelection.selectAll(".handle").remove();
+                // Re-enable zoom
                 parts.baseSvg.call(zoomListener);
             }
         })
@@ -112,8 +114,10 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
     function brush (cell, circle, x, y) {
         const brush = d3.brush()
             .extent([[-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding-0.5*brushCellPadding,
-                -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding-0.5*brushCellPadding], 
-                [0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+0.5*brushCellPadding, 0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding+0.5*brushCellPadding]])
+                    -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding-0.5*brushCellPadding], 
+                    [0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight-histogramScatterPlotPadding+0.5*brushCellPadding,
+                        0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding+0.5*brushCellPadding]]
+            )
             .on("start", brushStarted)
             .on("brush", brushed)
             .on("end", brushEnded);
@@ -138,13 +142,15 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                     || (y0+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) > y(trainX[d][featureArr[currFeatureIdx[1]]]) 
                     || (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) < y(trainX[d][featureArr[currFeatureIdx[1]]]));
 
-                selected = nodeData.data.subTrainingSet.filter((d) =>
-                    d => (x0+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) <= x(trainX[d][featureArr[currFeatureIdx[0]]]) 
+                selected = nodeData.data.subTrainingSet.filter((d) => 
+                    (x0+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) <= x(trainX[d][featureArr[currFeatureIdx[0]]]) 
                     && (x1+0.5*detailedViewNodeRectWidth-2*scatterPlotPadding) >= x(trainX[d][featureArr[currFeatureIdx[0]]]) 
                     && (y0+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) <= y(trainX[d][featureArr[currFeatureIdx[1]]]) 
                     && (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) >= y(trainX[d][featureArr[currFeatureIdx[1]]]));
             }
             // Update the selected  points
+            
+            
         }
 
         function brushEnded ({ selection }) {
