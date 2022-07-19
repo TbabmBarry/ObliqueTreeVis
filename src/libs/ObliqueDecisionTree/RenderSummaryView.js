@@ -266,7 +266,7 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
  * @param {that} that
  */
 export function drawExposedSplitHistogram(targetSelection, originalNodeData, exposedNodeData, that) {
-    const { rootElement, constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
+    const { constants: { nodeRectWidth, nodeRectRatio, colorScale } } = that;
     // Draw split histogram
     let xRight = d3.scaleLinear()
         .domain([0, _.sum(originalNodeData.totalCount)])
@@ -279,6 +279,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .domain([0,1,2])
         .padding(.1);
 
+    // Append tooltip text along with the tooltip rectangle
     const mouseover = function(event, d) {
         tooltip.style("opacity", 1);
             
@@ -293,6 +294,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
             .style("opacity", 1);
     }
     
+    // Update tooltip position
     const mousemove = function(event, d) {
         tooltip
             .attr("x", (d3.pointer(event)[0])+40)
@@ -301,7 +303,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
             .attr("x", (d3.pointer(event)[0])+80)
             .attr("y", (d3.pointer(event)[1]+45));
     }
-    
+    // Clear tooltip text    
     const mouseout = function(d) {
         tooltip.style("opacity", 0);
         splitDistribution.select("text").remove();
@@ -322,6 +324,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .attr("class", "summary exposed-split-distribution")
         .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
 
+    // Append tooltip rect to splitDistribution svg group
     const tooltip = splitDistribution.append("rect")
         .attr("class", "tooltip")
             .attr("rx", "3px")
