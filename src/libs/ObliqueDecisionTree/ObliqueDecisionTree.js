@@ -70,9 +70,9 @@ class Odt {
                 maxZoom: 50,
                 nodeRectRatio: 25,
                 leafNodeRectRatio: 0,
-                nodeRectWidth: 250,
-                detailedViewNodeRectWidth: 360,
-                leafNodeRectHight: 300,
+                nodeRectWidth: 0,
+                detailedViewNodeRectWidth: this.screenHeight * (2/3),
+                leafNodeRectHeight: 300,
                 histogramHeight: 100,
                 scatterPlotPadding: 20,
                 histogramScatterPlotPadding: 10,
@@ -107,7 +107,8 @@ class Odt {
     }
 
     draw() {
-        const { data, parts, height, width, scale, constants: { treeMargins, leafNodeRectHight } } = this;
+        const { data, parts, height, width, scale, constants: { treeMargins, leafNodeRectHeight } } = this;
+
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
         }
@@ -146,7 +147,7 @@ class Odt {
                 d3.zoomIdentity.scale(scale));
 
         parts.treeMap = d3.tree().size([width, 
-            height-leafNodeRectHight-treeMargins.top-treeMargins.bottom]);
+            height-leafNodeRectHeight-treeMargins.top-treeMargins.bottom]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         this.nodes = nodes;
@@ -412,7 +413,7 @@ class Odt {
      */
     renderNodes(nodes) {
         const { parts, screenHeight, screenWidth, width, height, scale,
-            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
+            constants: { nodeRectWidth, nodeRectRatio, leafNodeRectRatio, nodeRectStrokeWidth, leafNodeRectHeight, leafNodeRectStrokeWidth, detailedViewNodeRectWidth, transitionDuration } } = this;
         let _this = this;
 
         // Click event listener to switch between summary and detailed views
@@ -512,7 +513,7 @@ class Odt {
             .attr("class", "node-rect")
             .attr("id", (d) => d.data.name)
             .attr("width", nodeRectWidth)
-            .attr("height", (d) => d.data.type === "leaf" ? leafNodeRectHight : nodeRectWidth)
+            .attr("height", (d) => d.data.type === "leaf" ? leafNodeRectHeight : nodeRectWidth)
             .attr("x",- 0.5 * nodeRectWidth)
             .attr("y",0)
             .attr("rx", (d) => d.data.type === "leaf" ? leafNodeRectRatio : nodeRectRatio)
@@ -898,6 +899,8 @@ class Odt {
      * @param {data} data
      */
     setDataAndOpts(opts, data, trainingData) {
+        this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
+        this.constants.leafNodeRectHeight = this.height*(1/(2*maxDepth(data)));
         this.opts = opts;
         this.data = data;
         this.trainX = trainingData.trainingSet;
