@@ -153,6 +153,7 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
             .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.75*nodeRectRatio)
             .attr("text-anchor", "middle")
+            .attr("fill", "black")
             .text((d) => d.label);
 }
 
