@@ -149,13 +149,13 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                     && (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) >= y(trainX[d][featureArr[currFeatureIdx[1]]]));
             }
             // Update the selected  points
-            
-            
+            parts.baseSvg.property("selectedPointsInDetailedView", selected).dispatch("input");
         }
 
         function brushEnded ({ selection }) {
             if (selection) return;
             // Reset the unselected points to their original style
+            parts.baseSvg.property("selectedPointsInDetailedView", []).dispatch("input");
             circle.classed("unselected", false);
             // Remove brush event listener
         }
