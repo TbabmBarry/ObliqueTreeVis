@@ -279,8 +279,15 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .domain([0,1,2])
         .padding(.1);
 
-    const mouseover = function(d) {
+    const mouseover = function(event, d) {
         tooltip.style("opacity", 1);
+            
+        splitDistribution.append("text")
+            .attr("class", "tooltip-text")
+            .text(`Count: ${d.count}`)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "14px")
+            .style("fill", "black");
         d3.select(this)
             .style("stroke", "black")
             .style("opacity", 1);
@@ -288,12 +295,16 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
     
     const mousemove = function(event, d) {
         tooltip
-            .attr("x", (d3.pointer(event)[0])+10)
-            .style("y", (d3.pointer(event)[1]+5));
+            .attr("x", (d3.pointer(event)[0])+40)
+            .attr("y", (d3.pointer(event)[1]+25));
+        splitDistribution.select("text")
+            .attr("x", (d3.pointer(event)[0])+80)
+            .attr("y", (d3.pointer(event)[1]+45));
     }
     
     const mouseout = function(d) {
         tooltip.style("opacity", 0);
+        splitDistribution.select("text").remove();
         d3.select(this)
             .style("opacity", 0.8);
     }
@@ -311,10 +322,8 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
         .attr("class", "summary exposed-split-distribution")
         .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
 
-    const tooltip = splitDistribution.selectAll("rect.tooltip")
-        .data(splitDataLeft)
-        .enter()
-        .append("rect")
+    const tooltip = splitDistribution.append("rect")
+        .attr("class", "tooltip")
             .attr("rx", "3px")
             .attr("ry", "3px")
             .style("opacity", 0)
@@ -322,7 +331,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
             .style("height", "30px")
             .style("fill", "white")
             .style("stroke", "black")
-            .style("stroke-width", "2px")
+            .style("stroke-width", "2px");
 
     // Append left and right split distribution into splitDistribution svg group
     splitDistribution.selectAll(`rect-right#${originalNodeData.name}`)
