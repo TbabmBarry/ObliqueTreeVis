@@ -84,6 +84,7 @@ const initializeObliqueTree = async (dataset_name) => {
         state.obliqueTreeVis.draw();
 }
 
+
 watch(() => props.selectedPoints, (newValue, oldValue) => {
     // Compute related links nad nodes from selected points
     state.obliqueTreeVis.renderSelectionEffect(newValue);

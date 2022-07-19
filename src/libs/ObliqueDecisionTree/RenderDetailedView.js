@@ -149,8 +149,7 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                     && (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) >= y(trainX[d][featureArr[currFeatureIdx[1]]]));
             }
             // Update the selected  points
-            parts.baseSvg.property("selectedPointsInDetailedView", selected).dispatch("input");
-            
+            parts.baseSvg.property("selectedPointsInDetailedView", selected).dispatch("emitSelectedPointsInDetailedView");
             console.log(getAllProperties(parts.baseSvg.node()).selectedPointsInDetailedView);
         }
 

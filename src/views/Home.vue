@@ -58,7 +58,7 @@
 </div>
 </template>
 <script setup>
-import { reactive, toRefs } from "vue";
+import { reactive, toRefs, onMounted } from "vue";
 import ObliqueTreePanel from "../components/ObliqueTreePanel/ObliqueTreePanel.vue";
 import ControlPanel from "../components/ControlPanel/ControlPanel.vue";
 import ProjectionPanel from "../components/DataRepresentationPanels/ProjectionPanel.vue";
@@ -77,6 +77,11 @@ const selectedPointsChanged = (selectedPoints) => {
 const selectedDatasetChanged = (selectedDataset) => {
     state.selectedDataset = selectedDataset;
 }
+
+onMounted(() => {
+    
+});
+
 const { selectedPoints, selectedDataset } = toRefs(state);
 </script>
 <style scoped>

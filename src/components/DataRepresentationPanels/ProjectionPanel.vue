@@ -32,6 +32,9 @@ const state = reactive({
 onMounted(async() => {
     state.rootElement = document.querySelector("#projection");
     initProjectionView("penguins");
+    console.log(document.querySelector("#odt-0").addEventListener("emitSelectedPointsInDetailedView", function(e) {
+        console.log(e);
+    }));
 })
 
 /**
