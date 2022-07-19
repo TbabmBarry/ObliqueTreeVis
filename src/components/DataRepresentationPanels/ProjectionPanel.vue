@@ -104,6 +104,8 @@ async function initProjectionView (dataset_name) {
     circleGroup.selectAll("circle")
         .data(state.projections)
         .join("circle")
+            .attr("class", "circle")
+            .attr("id", (d) => `dot-${d.id}`)
             .attr("cx", (d) => {
                 return x(d.position[0]);
             })
@@ -176,6 +178,13 @@ function brush (cell, circle, x, y) {
     }
 }
 
+const updateSelectedPointsInDetailedView = (selectedPoints) => {
+    d3.select(state.rootElement).selectAll(".circle").classed("unselected", true);
+    selectedPoints.forEach(d => {
+        d3.select(state.rootElement).select(`circle#dot-${d}`).classed("unselected", false);
+    });
+}
+
 watch(() => state.selectedPoints,
     val => {
         emit("emitSelectedPointsChanged", state.selectedPoints);
@@ -192,7 +201,7 @@ watch(() => props.selectedDataset,
 
 watch(() => state.selectedPointsInDetailedView,
     val => {
-        console.log("selectedPointsInDetailedView: ", val);
+        updateSelectedPointsInDetailedView(val);
     },
     { immediate: false }
 );
