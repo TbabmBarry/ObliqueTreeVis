@@ -25,7 +25,7 @@
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="grid grid-cols-3 h-1/2 gap my-2" id="class-overview">
+        <div class="grid grid-cols-3 h-2/3 gap my-2" id="class-overview">
         </div>
     </div>
 </template>
@@ -114,12 +114,13 @@ const mouseover = function(d) {
     state.tooltip.style("opacity", 1);
     d3.select(this)
         .style("stroke", "black")
+        .style("stroke-width", 2)
         .style("opacity", 1);
 }
 
 const mousemove = function(event, d) {
     state.tooltip.html("Count: " + d.count)
-        .style("left", (d3.pointer(event)[0]/4) + "px")
+        .style("left", (d3.pointer(event)[0]/2) + "px")
         .style("top", (d3.pointer(event)[1]) + "px");
 }
 
@@ -185,7 +186,7 @@ function renderClassDistribution () {
         .attr("class", "class-bar")
         .attr("x", d => state.xScale(0))
         .attr("y", d => state.yScale(d.label))
-        .attr("width", d => state.xScale(d.count))
+        .attr("width", d => state.xScale(d.count)-state.xScale(0))
         .attr("height", state.yScale.bandwidth())
         .attr("fill", d => state.colorScale[d.label]);
 }
@@ -201,7 +202,7 @@ function renderSelectedClassDistribution () {
         .attr("class", "selected-class-bar")
         .attr("x", d => state.xScale(0))
         .attr("y", d => state.yScale(d.label))
-        .attr("width", d => state.xScale(d.count))
+        .attr("width", d => state.xScale(d.count)-state.xScale(0))
         .attr("height", state.yScale.bandwidth())
         .attr("fill", function (d) {
             const texture = textures.lines()
