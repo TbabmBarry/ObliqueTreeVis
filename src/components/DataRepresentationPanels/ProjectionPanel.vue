@@ -6,6 +6,7 @@
 <script setup>
 import _ from 'lodash';
 import { onMounted, inject, reactive, watch } from "vue";
+import { getAllProperties } from '@/libs/ObliqueDecisionTree/Utils';
 import { getProjectionChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
@@ -23,6 +24,7 @@ const state = reactive({
     projections: [],
     rootElement: {},
     selectedPoints: [],
+    selectedPointsInDetailedView: [],
     width: 0,
     height: 0,
     padding: 20,
@@ -32,9 +34,17 @@ const state = reactive({
 onMounted(async() => {
     state.rootElement = document.querySelector("#projection");
     initProjectionView("penguins");
-    console.log(document.querySelector("#odt-0").addEventListener("emitSelectedPointsInDetailedView", function(e) {
-        console.log(e);
-    }));
+    const observer = new MutationObserver(() => {
+        const odt = document.querySelector("#vis").querySelector("#odt-0");
+        odt.addEventListener("emitSelectedPointsInDetailedView", (e) => {
+            state.selectedPointsInDetailedView = getAllProperties(odt).selectedPointsInDetailedView;
+        });
+    });
+    observer.observe(document.querySelector("#vis"), {
+        attributes: true,
+        childList: true,
+        subtree: true
+    });
 })
 
 /**
@@ -176,6 +186,13 @@ watch(() => state.selectedPoints,
 watch(() => props.selectedDataset,
     val => {
         initProjectionView(val);
+    },
+    { immediate: false }
+);
+
+watch(() => state.selectedPointsInDetailedView,
+    val => {
+        console.log("selectedPointsInDetailedView: ", val);
     },
     { immediate: false }
 );
