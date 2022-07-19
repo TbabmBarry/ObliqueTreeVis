@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
-import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
+import { getEndSplitPoint, getAllProperties } from '@/libs/ObliqueDecisionTree/Utils';
 
 /**
  * Draw two-feature scatter plot in each decision node
@@ -150,6 +150,8 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             }
             // Update the selected  points
             parts.baseSvg.property("selectedPointsInDetailedView", selected).dispatch("input");
+            
+            console.log(getAllProperties(parts.baseSvg.node()).selectedPointsInDetailedView);
         }
 
         function brushEnded ({ selection }) {

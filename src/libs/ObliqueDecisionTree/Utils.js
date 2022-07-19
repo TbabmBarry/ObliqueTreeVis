@@ -164,6 +164,16 @@ export const normalizeArr = (count) => {
 };
 
 /**
+ * Retrieve all available properties of the DOM element
+ * @date 2022-07-19
+ * @param {o} o
+ * @param {e = o} parm2
+ * @param {props = []} parm3
+ */
+export const getAllProperties = (o, e = o, props = []) => e.__proto__ ? getAllProperties(o, e.__proto__, props.concat(Object.getOwnPropertyNames(e))) : Object.fromEntries([...new Set(props.concat(Object.getOwnPropertyNames(e)))].map(prop => [prop, o[prop]]));
+
+
+/**
  * KDE estimates the probability distribution of a random variable.
  * The kernel's bandwidth determines the estimates' smoothness.
  * @date 2022-06-30
