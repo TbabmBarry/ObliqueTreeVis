@@ -201,7 +201,11 @@ watch(() => props.selectedDataset,
 
 watch(() => state.selectedPointsInDetailedView,
     val => {
-        updateSelectedPointsInDetailedView(val);
+        if (val.length === 0) {
+            d3.select(state.rootElement).selectAll(".circle").classed("unselected", false);
+        } else {
+            updateSelectedPointsInDetailedView(val);
+        }
     },
     { immediate: false }
 );
