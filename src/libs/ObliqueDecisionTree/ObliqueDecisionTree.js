@@ -5,7 +5,7 @@ import { adjustedClientRect, getEffectiveFeatureContribution,
     traverseTree, maxDepth, maxWidth } from '@/libs/ObliqueDecisionTree/Utils';
 import { drawClassDistribution, drawCoefficientBar, drawSplitHistogram,
     drawExposedSplitHistogram } from '@/libs/ObliqueDecisionTree/RenderSummaryView';
-import { drawScatterPlot, drawBeeswarm, drawFeatureHistogram,
+import { drawScatterPlot, drawBeeswarm, drawFeatureHistogram, drawTwoFeatureBeeswarm,
     drawSplitHistogramInDetailedView, drawExposedSplitHistogramInDetailedView } from '@/libs/ObliqueDecisionTree/RenderDetailedView';
 
 class Odt {
@@ -22,6 +22,7 @@ class Odt {
         Odt.prototype.drawScatterPlot = drawScatterPlot;
         Odt.prototype.drawBeeswarm = drawBeeswarm;
         Odt.prototype.drawFeatureHistogram = drawFeatureHistogram;
+        Odt.prototype.drawTwoFeatureBeeswarm = drawTwoFeatureBeeswarm;
         Odt.prototype.drawSplitHistogramInDetailedView = drawSplitHistogramInDetailedView;
         Odt.prototype.drawExposedSplitHistogramInDetailedView = drawExposedSplitHistogramInDetailedView;
     }
@@ -573,6 +574,7 @@ class Odt {
                 // Draw two-feature scatter plot
                 _this.drawScatterPlot(node, nodeData, currFeatureIdx, x, y, _this);
                 // Draw two-feature histogram
+                // _this.drawTwoFeatureBeeswarm(node, nodeData, currFeatureIdx, _this);
                 _this.drawFeatureHistogram(node, nodeData, currFeatureIdx, x, y, _this);
                 _this.drawSplitHistogramInDetailedView(node, nodeData, _this);
             }

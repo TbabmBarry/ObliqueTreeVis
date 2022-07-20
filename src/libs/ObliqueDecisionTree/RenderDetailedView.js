@@ -524,6 +524,71 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
 }
 
+export function drawTwoFeatureBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
+    const { trainX, trainY, 
+        constants: { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale } } = that;
+        const X1 = nodeData.data.subTrainingSet.map(idx => ({
+            value: trainX[idx][featureArr[currFeatureIdx[0]]],
+            index: idx,
+            label: trainY[idx],
+        })),
+        X2 = nodeData.data.subTrainingSet.map(idx => ({
+            value: trainX[idx][featureArr[currFeatureIdx[1]]],
+            index: idx,
+            label: trainY[idx],
+        }));
+        const xScale1 = d3.scaleLinear()
+            .domain(d3.extent(X1, d => d.value))
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]),
+        xScale2 = d3.scaleLinear()
+            .domain(d3.extent(X2, d => d.value))
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]),
+        xAxis1 = d3.axisBottom(xScale1).tickSizeOuter(0),
+        xAxis2 = d3.axisBottom(xScale2).tickSizeOuter(0);
+        
+        const radius = 3, padding = 1.5;
+        const marginTop = scatterPlotPadding;
+        const marginBottom = detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding;
+        const Y1 = dodge(X1.map(x => xScale1(x.value)), radius*2+padding),
+            Y2 = dodge(X2.map(x => xScale2(x.value)), radius*2+padding);
+        const beeswarmHeight = d3.max(Y1)+(radius+padding)*2+marginTop+marginBottom;
+    
+        // Draw X-axis for beeswarm plot
+        targetSelection.append("g")
+            .attr("class", "detailed beeswarm x-axis")
+            .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}
+                ,${beeswarmHeight-marginBottom})`)
+            .call(xAxis1)
+            .call(g => g.append("text")
+                .attr("x", detailedViewNodeRectWidth-3*scatterPlotPadding)
+                .attr("y", -0.5*detailedViewNodeRectWidth+marginBottom-4)
+                .attr("fill", "currentColor")
+                .attr("text-anchor", "end")
+                .text(`${featureArr[currFeatureIdx[0]]} →`)
+            );
+    
+        // Draw points for beeswarm plot
+        targetSelection.append("g")
+            .attr("class", "detailed beeswarm-chart-group")
+            .selectAll("circle")
+            .data(X1)
+            .join("circle")
+            .attr("class", "detailed dot")
+            .attr("id", d => `dot-${d.index}`)
+                .attr("r", radius)
+                .attr("cx", d => xScale1(d.value)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
+                .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y1[i])
+                .style("fill", (d) => {
+                    if (that.selectedPoints.length && !that.selectedPoints.includes(d.index)) {
+                        return "#fff";
+                    } else {
+                        return colorScale[d.label];
+                    }
+                })
+                .style("stroke", (d) => colorScale[d.label]);
+    
+}
+
 /**
  * Draw split histogram for detailed view.
  * @date 2022-07-11
