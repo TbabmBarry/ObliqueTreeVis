@@ -6,7 +6,6 @@
 <script setup>
 import _ from 'lodash';
 import { onMounted, inject, reactive, watch } from "vue";
-import { getAllProperties } from '@/libs/ObliqueDecisionTree/Utils';
 import { getProjectionChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
@@ -37,7 +36,7 @@ onMounted(async() => {
     const observer = new MutationObserver(() => {
         const odt = document.querySelector("#vis").querySelector("#odt-0");
         odt.addEventListener("emitSelectedPointsInDetailedView", (e) => {
-            state.selectedPointsInDetailedView = getAllProperties(odt).selectedPointsInDetailedView;
+            state.selectedPointsInDetailedView = odt["selectedPointsInDetailedView"];
         });
     });
     observer.observe(document.querySelector("#vis"), {
