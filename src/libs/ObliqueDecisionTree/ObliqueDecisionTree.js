@@ -593,29 +593,32 @@ class Odt {
         const { constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
         let _this = this;
 
+        function clicked (event, d) {
+            if (event.shiftKey) {
+                if (d3.select(this).attr("clip-path") !== null) {
+                    d3.select(this).attr("clip-path", null)
+                        .select(".node-rect")
+                        .style("stroke", "transparent");
+
+                    d3.select(this).select(".scroll-bar")
+                        .style("opacity", 0);
+                } else {
+                    d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)")
+                        .select(".node-rect")
+                        .style("stroke", "#000000");
+
+                    d3.select(this).select(".scroll-bar")
+                        .style("opacity", 1);
+                }
+            }
+        }
+
         // Draw histogram for feature contribution
         node.each(function (nodeData, index) {
             if (nodeData.data.type === "leaf") {
-                const parentSvgGroup = d3.select(this).node().parentNode;
                 let svgGroupX, svgGroupY;
-
                 d3.select(this)
-                    .on("mouseover", function() {
-                        d3.select(this).attr("clip-path", null)
-                            .select(".node-rect")
-                            .style("stroke", "transparent");
-
-                        d3.select(this).select(".scroll-bar")
-                            .style("opacity", 0);
-                    })
-                    .on("mouseout", function() {
-                        d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)")
-                            .select(".node-rect")
-                            .style("stroke", "#000000");
-
-                        d3.select(this).select(".scroll-bar")
-                            .style("opacity", 1);
-                    })
+                    .on("click", clicked);
 
                 // Set up clop-path attribute for leaf node
                 d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)");
