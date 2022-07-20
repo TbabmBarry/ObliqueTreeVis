@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
 import textures from 'textures';
-import { getEndSplitPoint } from '@/libs/ObliqueDecisionTree/Utils';
+import { getEndSplitPoint, dodge } from '@/libs/ObliqueDecisionTree/Utils';
 
 /**
  * Draw two-feature scatter plot in each decision node
@@ -308,47 +308,7 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
         .domain(d3.extent(X, d => d.value))
         .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]);
     const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
-    function dodge(X, radius) {
-        const Y = new Float64Array(X.length);
-        const radius2 = radius ** 2;
-        const epsilon = 1e-3;
-        let head = null, tail = null;
-
-        // Returns true if circle (x, y) intersects with any circle in the queue.
-        function intersects(x, y) {
-            let a = head;
-            while (a) {
-                const ai = a.index;
-                if (radius2 - epsilon > (X[ai] - x) ** 2 + (Y[ai] - y) ** 2) return true;
-                a = a.next;
-            }
-            return false;
-        }
-
-        // Place each circle sequentially in the queue.
-        for (const bi of d3.range(X.length).sort((i, j) => X[i] - X[j])) {
-            // Remove circles from the queue that can't intersect the new circle b.
-            while (head && X[head.index] < X[bi] - radius2) head = head.next;
-
-            // Choose the minimum non-intersecting tangent.
-            if (intersects(X[bi], Y[bi] = 0)) {
-                let a = head;
-                Y[bi] = Infinity;
-                do {
-                    const ai = a.index;
-                    let y = Y[ai] + Math.sqrt(radius2 - (X[ai] - X[bi]) ** 2);
-                    if (y < Y[bi] && !intersects(X[bi], y)) Y[bi] = y;
-                    a = a.next;
-                } while (a);
-            }
-
-            // Add circle b to the queue.
-            const b = { index: bi, next: null };
-            if (head == null) head = tail = b;
-            else tail = tail.next = b;
-        }
-        return Y;
-    }
+    
     const radius = 3, padding = 1.5;
     const marginTop = scatterPlotPadding+histogramHeight+histogramScatterPlotPadding;
     const marginBottom = 0.5*detailedViewNodeRectWidth+2*scatterPlotPadding;
