@@ -592,12 +592,27 @@ class Odt {
      * @param {node} node
      */
     renderPathSummaryView(node) {
-        const { constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
+        const { parts, screenHeight, screenWidth, constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, transitionDuration, colorScale } } = this;
         let _this = this;
 
-        function clicked (event, d) {
+        function clicked (event, node) {
             if (event.shiftKey) {
                 if (d3.select(this).attr("clip-path") !== null) {
+                    const zoomListener = _this.registeredStateListeners[0];
+                    // Center the node rect in the viewport
+                    parts.svgGroup.transition()
+                        .duration(750)
+                        .call(zoomListener.transform,
+                            d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
+                                .translate(-node.x, -node.y-nodeRectWidth)
+                                .scale(1),d3.pointer(event));
+                    // Update the transform and scale of zoom listener in the path summary view
+                    parts.baseSvg.call(zoomListener)
+                            .call(zoomListener.transform,
+                                d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
+                                .translate(-node.x, -node.y-nodeRectWidth)
+                                .scale(1),d3.pointer(event));
+
                     d3.select(this).attr("clip-path", null)
                         .select(".node-rect")
                         .style("stroke", "transparent");
