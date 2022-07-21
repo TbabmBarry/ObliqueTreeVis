@@ -539,11 +539,11 @@ export function drawTwoFeatureBeeswarm(targetSelection, nodeData, currFeatureIdx
         }));
         const xScale1 = d3.scaleLinear()
             .domain(d3.extent(X1, d => d.value))
-            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]),
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding]),
         xScale2 = d3.scaleLinear()
             .domain(d3.extent(X2, d => d.value))
-            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding]),
-        xAxis1 = d3.axisBottom(xScale1).tickSizeOuter(0),
+            .range([0, detailedViewNodeRectWidth-3*scatterPlotPadding-histogramHeight-histogramScatterPlotPadding]),
+        xAxis1 = d3.axisBottom(xScale1).tickSizeOuter(0).tickFormat(""),
         xAxis2 = d3.axisBottom(xScale2).tickSizeOuter(0);
         
         const radius = 3, padding = 1.5;
@@ -557,15 +557,8 @@ export function drawTwoFeatureBeeswarm(targetSelection, nodeData, currFeatureIdx
         targetSelection.append("g")
             .attr("class", "detailed beeswarm x-axis")
             .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}
-                ,${beeswarmHeight-marginBottom})`)
-            .call(xAxis1)
-            .call(g => g.append("text")
-                .attr("x", detailedViewNodeRectWidth-3*scatterPlotPadding)
-                .attr("y", -0.5*detailedViewNodeRectWidth+marginBottom-4)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "end")
-                .text(`${featureArr[currFeatureIdx[0]]} →`)
-            );
+                ,${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
+            .call(xAxis1);
     
         // Draw points for beeswarm plot
         targetSelection.append("g")
@@ -577,7 +570,7 @@ export function drawTwoFeatureBeeswarm(targetSelection, nodeData, currFeatureIdx
             .attr("id", d => `dot-${d.index}`)
                 .attr("r", radius)
                 .attr("cx", d => xScale1(d.value)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding)
-                .attr("cy", (d, i) => beeswarmHeight - marginBottom - radius - padding - Y1[i])
+                .attr("cy", (d, i) => -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding - radius - padding - Y1[i])
                 .style("fill", (d) => {
                     if (that.selectedPoints.length && !that.selectedPoints.includes(d.index)) {
                         return "#fff";
