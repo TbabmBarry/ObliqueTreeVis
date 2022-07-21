@@ -25,8 +25,8 @@
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="grid grid-cols-3 h-2/3 gap my-2" id="class-overview">
-        </div>
+        <!-- <div class="grid grid-cols-3 h-2/3 gap my-2" id="class-overview">
+        </div> -->
     </div>
 </template>
 <script setup>
@@ -80,7 +80,7 @@ const focus = () => {
 };
 
 const handleChange = (value) => {
-    initiateClassOverview();
+    // initiateClassOverview();
     emit("emitSelectedDatasetChanged", value);
 };
 
