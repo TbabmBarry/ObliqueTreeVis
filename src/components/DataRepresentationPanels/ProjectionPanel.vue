@@ -27,7 +27,7 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 20,
-    colorScale: ["#e63946", "#a8dadc", "#457b9d"]
+    colorScale: ["#003366", "#E31B23", "#FFC325"]
 })
 
 onMounted(async() => {
