@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full">
+    <div class="m-2">
         <div class="w-full h-full overflow-auto" id="projection"></div>
     </div>
 </template>

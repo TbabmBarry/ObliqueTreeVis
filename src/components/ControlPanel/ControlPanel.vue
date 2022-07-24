@@ -1,5 +1,5 @@
 <template>
-    <div class="h-full m-2">
+    <div class="m-2">
         <div class="titles">
             Model Info: 
         </div>
