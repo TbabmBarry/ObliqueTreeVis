@@ -419,7 +419,7 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
  * @param {that} that
  */
 export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, x, y, that) {
-    const { trainX, trainY, constants : { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, featureColorScale }} = that;
+    const { trainX, trainY, constants : { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale }} = that;
     // Set the parameters for histograms
     const histogram1 = d3.bin()
         .value((d) => d.value)
@@ -452,25 +452,34 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         bins1Right = histogram1(values1Right),
         bins2Left = histogram2(values2Left),
         bins2Right = histogram2(values2Right);
-    console.log("bins1Left", bins1Left);
-    const keys = [0, 1, 2];
-    const stackData = [];
-    for (const bin1Left of bins1Left) {
-        let pushableObj = {};
-        pushableObj.x0 = bin1Left.x0;
-        pushableObj.x1 = bin1Left.x1;
-        bin1Left.forEach(d => {
-            if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
-            else pushableObj[d.label].push(d.value);
-        });
-        keys.forEach((key) => {
-            if (!pushableObj[key]) pushableObj[key] = [];
-        });
-        stackData.push(pushableObj);
-    };
-    const realStack = d3.stack()
-        .keys(keys)
-        .value((d, key) => d[key].length);
+
+    const stackDataGenerator = (bins) => {
+        const keys = [0, 1, 2];
+        const stackData = [];
+        for (const bin of bins) {
+            let pushableObj = {};
+            pushableObj.x0 = bin.x0;
+            pushableObj.x1 = bin.x1;
+            bin.forEach(d => {
+                if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
+                else pushableObj[d.label].push(d.value);
+            });
+            keys.forEach((key) => {
+                if (!pushableObj[key]) pushableObj[key] = [];
+            });
+            stackData.push(pushableObj);
+        };
+
+        const realStack = d3.stack()
+            .keys(keys)
+            .value((d, key) => d[key].length);
+        return realStack(stackData);
+    }
+    const stack1Left = stackDataGenerator(bins1Left),
+        stack1Right = stackDataGenerator(bins1Right),
+        stack2Left = stackDataGenerator(bins2Left),
+        stack2Right = stackDataGenerator(bins2Right);
+    
     // Set up y-axis value encodings for histograms
     const yHistogram1 = d3.scaleLinear()
             .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
@@ -479,28 +488,36 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
             .domain([0, Math.max(d3.max(bins2Left, d => d.length), d3.max(bins2Right, d => d.length))])
             .range([0, histogramHeight]);
     // Draw histograms
-    targetSelection.selectAll("rect.histogram.x-histogram.left")
-        .data(bins1Left)
+    targetSelection.append("g")
+        .selectAll("g.histogram.x-histogram.left")
+        .data(stack1Left)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])    
+        .selectAll("rect.histogram.x-histogram.left")
+        .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
-        .attr("y", d => yHistogram1(d.length))
-        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+        .attr("y", d => Math.min(yHistogram1(d[1]), yHistogram1(d[0])))
+        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
-        .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
-        .attr("height", d => histogramHeight-yHistogram1(d.length))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+        .attr("width", d => x[currFeatureIdx[0]](d.data.x1)-x[currFeatureIdx[0]](d.data.x0))
+        .attr("height", d => Math.abs(yHistogram1(d[0])-yHistogram1(d[1])))
         .style("opacity", 0.4);
 
-    targetSelection.selectAll("rect.histogram.x-histogram.right")
-        .data(bins1Right)
+    targetSelection.append("g")
+        .selectAll("g.histogram.x-histogram.right")
+        .data(stack1Right)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])    
+        .selectAll("rect.histogram.x-histogram.right")
+        .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
-        .attr("y", d => yHistogram1(d.length))
-        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+        .attr("y", d => Math.min(yHistogram1(d[1]), yHistogram1(d[0])))
+        .attr("transform", d => `translate(${x[currFeatureIdx[0]](d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
-            .attr("width", d => x[currFeatureIdx[0]](d.x1)-x[currFeatureIdx[0]](d.x0))
-            .attr("height", d => histogramHeight-yHistogram1(d.length))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[0]]))
+            .attr("width", d => x[currFeatureIdx[0]](d.data.x1)-x[currFeatureIdx[0]](d.data.x0))
+            .attr("height", d => Math.abs(yHistogram1(d[0])-yHistogram1(d[1])))
         .style("opacity", 0.6);
 
     // Draw axis for histogram on the first feature
@@ -509,33 +526,41 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding})`)
         .call(d3.axisBottom(x[currFeatureIdx[0]]).tickFormat(""));
-
-    targetSelection.selectAll("rect.histogram.y-histogram.left")
-        .data(bins2Left)
+    
+    targetSelection.append("g")
+        .selectAll("g.histogram.y-histogram.left")
+        .data(stack2Left)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])    
+        .selectAll("rect.histogram.y-histogram.left")
+        .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
-        .attr("width", (d) => yHistogram2(d.length))
-        .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
+            ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
+        .attr("width", (d) => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
+        .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.4);
 
-    targetSelection.selectAll("rect.histogram.y-histogram.right")
-        .data(bins2Right)
+    targetSelection.append("g")
+        .selectAll("g.histogram.y-histogram.right")
+        .data(stack2Right)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])
+        .selectAll("rect.histogram.y-histogram.right")
+        .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${x[currFeatureIdx[1]](d.x0)+scatterPlotPadding})`)
-        .attr("width", d => yHistogram2(d.length))
-        .attr("height", d => x[currFeatureIdx[1]](d.x1)-x[currFeatureIdx[1]](d.x0))
-        .attr("fill", featureColorScale(featureArr[currFeatureIdx[1]]))
+            ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
+        .attr("width", d => Math.min(yHistogram2(d[1]), yHistogram2(d[0])))
+        .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.6);
 
-    // Draw axis for histogram on the second feature
-    targetSelection.append("g")
+     // Draw axis for histogram on the second feature
+     targetSelection.append("g")
         .attr("class", "detailed histogram axis-right")
         .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
