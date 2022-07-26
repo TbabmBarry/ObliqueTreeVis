@@ -539,7 +539,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
             ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
-        .attr("width", (d) => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
+        .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.4);
 
@@ -555,7 +555,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
             ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
-        .attr("width", d => Math.min(yHistogram2(d[1]), yHistogram2(d[0])))
+        .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.6);
 
