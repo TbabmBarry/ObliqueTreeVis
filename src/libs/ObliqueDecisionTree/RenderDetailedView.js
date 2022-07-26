@@ -452,7 +452,25 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         bins1Right = histogram1(values1Right),
         bins2Left = histogram2(values2Left),
         bins2Right = histogram2(values2Right);
-
+    console.log("bins1Left", bins1Left);
+    const keys = [0, 1, 2];
+    const stackData = [];
+    for (const bin1Left of bins1Left) {
+        let pushableObj = {};
+        pushableObj.x0 = bin1Left.x0;
+        pushableObj.x1 = bin1Left.x1;
+        bin1Left.forEach(d => {
+            if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
+            else pushableObj[d.label].push(d.value);
+        });
+        keys.forEach((key) => {
+            if (!pushableObj[key]) pushableObj[key] = [];
+        });
+        stackData.push(pushableObj);
+    };
+    const realStack = d3.stack()
+        .keys(keys)
+        .value((d, key) => d[key].length);
     // Set up y-axis value encodings for histograms
     const yHistogram1 = d3.scaleLinear()
             .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
