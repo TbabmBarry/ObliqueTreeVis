@@ -452,7 +452,6 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         bins1Right = histogram1(values1Right),
         bins2Left = histogram2(values2Left),
         bins2Right = histogram2(values2Right);
-
     const stackDataGenerator = (bins) => {
         const keys = [0, 1, 2];
         const stackData = [];
@@ -479,7 +478,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         stack1Right = stackDataGenerator(bins1Right),
         stack2Left = stackDataGenerator(bins2Left),
         stack2Right = stackDataGenerator(bins2Right);
-    
+    console.log(stack2Left, stack2Right);
     // Set up y-axis value encodings for histograms
     const yHistogram1 = d3.scaleLinear()
             .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
@@ -529,7 +528,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
     
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.left")
-        .data(stack2Left)
+        .data(stack2Right)
         .join("g")
             .attr("fill", (d,i) => colorScale[i])    
         .selectAll("rect.histogram.y-histogram.left")
@@ -538,14 +537,14 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("class", "detailed histogram")
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
+            ${y[currFeatureIdx[1]](d.data.x0)-histogramScatterPlotPadding})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
-        .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
+        .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.4);
 
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.right")
-        .data(stack2Right)
+        .data(stack2Left)
         .join("g")
             .attr("fill", (d,i) => colorScale[i])
         .selectAll("rect.histogram.y-histogram.right")
@@ -554,9 +553,9 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("class", "detailed histogram")
         .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
         .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${x[currFeatureIdx[1]](d.data.x0)+scatterPlotPadding})`)
+            ${y[currFeatureIdx[1]](d.data.x0)+histogramScatterPlotPadding})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
-        .attr("height", d => x[currFeatureIdx[1]](d.data.x1)-x[currFeatureIdx[1]](d.data.x0))
+        .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.6);
 
      // Draw axis for histogram on the second feature
