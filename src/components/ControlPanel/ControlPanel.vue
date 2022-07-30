@@ -66,7 +66,7 @@ const state = reactive({
     selectedClassCounts: {},
     baseSvg: {},
     tooltip: {},
-    colorScale: ["#003366", "#E31B23", "#FFC325"]
+    colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"]
 });
 
 onMounted(async () => {
