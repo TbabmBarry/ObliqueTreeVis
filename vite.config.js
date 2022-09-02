@@ -16,12 +16,15 @@ export default defineConfig({
     cors: true,
     proxy: {
         '^/api/': {
-            // target: 'http://localhost:3000',
-            target: 'https://vercel-flask-oblique-tree.vercel.app',
+            target: 'http://localhost:3000',
+            // target: 'https://vercel-flask-oblique-tree.vercel.app',
             changeOrigin: true,
             secure: false,
             rewrite: (path) => path.replace(/^\/api/, '/api')
         }
     },
 },
+define: {
+  "process.env": {}
+}
 })

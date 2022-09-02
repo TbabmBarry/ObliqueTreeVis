@@ -1,5 +1,6 @@
 import axios from 'axios';
 import qs from 'qs';
+
 export default function (config, options) {
     // Determine if loading should be displayed. Configuration is required when adding {loading:true} default false
     let loadingStatus = options?.loading || undefined;
@@ -19,7 +20,6 @@ export default function (config, options) {
             // return qs.stringify(data)
             return JSON.stringify(data);
         }],
-
         // `transformResponse` Allow modification of response data before passing to then/catch
         transformResponse: [function (data) {
             // Customized conversion of data
@@ -42,5 +42,4 @@ export default function (config, options) {
         withCredentials: false, // default
     });
     return service(config);
-
 };
