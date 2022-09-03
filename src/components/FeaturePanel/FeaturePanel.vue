@@ -6,7 +6,9 @@
             </div>
         </div>
         <hr style="height:1px" />
-
+        <div class="m-2">
+            <div class="w-full h-screen overflow-auto" id="feature"></div>
+        </div>
     </div>
 </template>
 <script setup>
@@ -24,11 +26,18 @@ const props = defineProps({
 });
 
 const state = reactive({
+    rootElement: {},
     trainingData: {},
     featureTable: [],
+    min: 0,
+    max: 0,
+    width: 0,
+    height: 0,
+    padding: 40,
 });
 
 onMounted(async() => {
+    state.rootElement = document.querySelector("#feature");
     initGlobalFeatureView("penguins");
 });
 
@@ -57,10 +66,12 @@ async function initGlobalFeatureView(dataset_name) {
         features.forEach(feature => featureData[feature].push(obj[feature]));
     })
     features.forEach(feature => {
+        state.min < d3.min(featureData[feature]) ? state.min : state.min = d3.min(featureData[feature]);
+        state.max > d3.max(featureData[feature]) ? state.max : state.max = d3.max(featureData[feature]);
         state.featureTable.push({
             name: feature,
-            min: Math.min(...featureData[feature]),
-            max: Math.max(...featureData[feature]),
+            min: d3.min(featureData[feature]),
+            max: d3.max(featureData[feature]),
             mean: _.mean(featureData[feature]),
             median: d3.quantile(featureData[feature], 0.5),
             q3: d3.quantile(featureData[feature], 0.75),
@@ -68,6 +79,110 @@ async function initGlobalFeatureView(dataset_name) {
             iqr: d3.quantile(featureData[feature], 0.75) - d3.quantile(featureData[feature], 0.25),
         })
     });
+    const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
+    state.width = width;
+    state.height = height;
+    // Create the base svg element binding to the root element
+    const baseSvg = d3.select("#feature")
+        .append("svg")
+        .attr("width", state.width)
+        .attr("height", state.height)
+        .attr("class", "feature-view")
+        .attr("id", "feature-view");
+
+    const y = d3.scaleBand()
+        .domain(features)
+        .range([state.height - state.padding, state.padding])
+        .padding(0.1);
+    // Show the y scale
+    baseSvg.append("g")
+        .attr("transform", `translate(${state.padding}, 0)`)
+        .call(d3.axisLeft(y).tickSize(0).tickPadding(10));
+
+    const x = d3.scaleLinear()
+        .domain([state.min, state.max])
+        .range([state.padding, state.width - state.padding]);
+    
+    // Show the x scale
+    baseSvg.append("g")
+        .attr("transform", `translate(0, ${state.height - state.padding})`)
+        .call(d3.axisBottom(x).tickPadding(10));
+
+    // Color scale
+    const myColor = d3.scaleSequential()
+        .interpolator(d3.interpolateInferno)
+        .domain([0,1]);
+
+    // Add the axis labels
+    baseSvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", state.width + state.padding)
+        .attr("y", state.height - 6)
+        .text("Feature Value");
+
+    // Show the main vertical line
+    baseSvg
+        .selectAll("vertLines")
+        .data(state.featureTable)
+        .enter()
+        .append("line")
+            .attr("x1", function(d){ return(x(d.min))})
+            .attr("x2", function(d){ return(x(d.max))})
+            .attr("y1", function(d){ return(y(d.name)+y.bandwidth()/2)})
+            .attr("y2", function(d){ return(y(d.name)+y.bandwidth()/2)})
+            .attr("stroke", "black")
+            .style("width", 40)
+    
+    // Draw rectangle for the main box
+    baseSvg
+        .selectAll("boxes")
+        .data(state.featureTable)
+        .enter()
+        .append("rect")
+            .attr("x", function(d){ return(x(d.q1))})
+            .attr("y", function(d){ return(y(d.name))})
+            .attr("height", function(d){ return(y.bandwidth())})
+            .attr("width", function(d){ return(x(d.q3)-x(d.q1))})
+            .attr("stroke", "black")
+            .style("fill", "#69b3a2")
+            .style("opacity", 0.5)
+    
+    // Show the median
+    baseSvg
+        .selectAll("medianLines")
+        .data(state.featureTable)
+        .enter()
+        .append("line")
+            .attr("x1", function(d){ return(x(d.median))})
+            .attr("x2", function(d){ return(x(d.median))})
+            .attr("y1", function(d){ return(y(d.name))})
+            .attr("y2", function(d){ return(y(d.name)+y.bandwidth())})
+            .attr("stroke", "black")
+            .style("width", 80)
+
+    // Create a tooltip
+    let tooltip = d3.select("#feature-tooltip")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "5px")
+        .style("font-size", "12px");
+    
+    // Three function that change the tooltip when user hover / move / leave a cell
+    // let mouseover = function(d) {
+    //     tooltip
+    //         .transition()
+    //         .duration(200)
+    //         .style("opacity", 1);
+    //     tooltip
+    //         .html("<span style='color:grey'>Feature Value: </span>" + )
+    // }
+
+
 }
 
 watch(() => props.selectedDataset, (newVal, oldVal) => {
@@ -78,6 +193,7 @@ watch(() => props.selectedDataset, (newVal, oldVal) => {
 });
 
 watch(() => state.trainingData, (newVal, oldVal) => {
+    console.log(state.featureTable);
 },
 {
     immediate: false
