@@ -419,7 +419,7 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
  * @param {that} that
  */
 export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, x, y, that) {
-    const { trainX, trainY, constants : { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale }} = that;
+    const { trainX, trainY, constants : { featureArr, nodeRectWidth, nodeRectRatio, detailedViewNodeRectWidth, histogramHeight, scatterPlotPadding, histogramScatterPlotPadding, colorScale }} = that;
     // Set the parameters for histograms
     const histogram1 = d3.bin()
         .value((d) => d.value)
@@ -535,9 +535,9 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
-        .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
-        .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${y[currFeatureIdx[1]](d.data.x0)-histogramScatterPlotPadding})`)
+        .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding+scatterPlotPadding)
+        .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight+yHistogram2(d[0])}, 
+            ${y[currFeatureIdx[1]](d.data.x1)})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.4);
@@ -551,9 +551,9 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .data(d => d)
         .join("rect")
         .attr("class", "detailed histogram")
-        .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding)
-        .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight}, 
-            ${y[currFeatureIdx[1]](d.data.x0)+histogramScatterPlotPadding})`)
+        .attr("y", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+histogramScatterPlotPadding+scatterPlotPadding)
+        .attr("transform", d => `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight+yHistogram2(d[0])}, 
+            ${y[currFeatureIdx[1]](d.data.x1)})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.6);
@@ -563,7 +563,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("class", "detailed histogram axis-right")
         .attr("transform", `translate(${0.5*detailedViewNodeRectWidth-scatterPlotPadding-histogramHeight},
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
-        .call(d3.axisLeft(x[currFeatureIdx[1]]).tickFormat(""));
+        .call(d3.axisLeft(y[currFeatureIdx[1]]).tickFormat(""));
 }
 
 export function drawTwoFeatureBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
