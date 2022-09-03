@@ -1,12 +1,6 @@
 <template>
     <div class="w-full h-screen">
         <div class="m-2">
-            <div class="col-span-1 titles">
-                Global Feature View
-            </div>
-        </div>
-        <hr style="height:1px" />
-        <div class="m-2">
             <div class="w-full h-screen overflow-auto" id="feature"></div>
         </div>
     </div>
@@ -81,7 +75,7 @@ async function initGlobalFeatureView(dataset_name) {
     });
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     state.width = width;
-    state.height = height;
+    state.height = height*(3/5);
     // Create the base svg element binding to the root element
     const baseSvg = d3.select("#feature")
         .append("svg")
@@ -116,8 +110,8 @@ async function initGlobalFeatureView(dataset_name) {
     // Add the axis labels
     baseSvg.append("text")
         .attr("text-anchor", "end")
-        .attr("x", state.width + state.padding)
-        .attr("y", state.height - 6)
+        .attr("x", state.width)
+        .attr("y", state.height)
         .text("Feature Value");
 
     // Show the main vertical line
