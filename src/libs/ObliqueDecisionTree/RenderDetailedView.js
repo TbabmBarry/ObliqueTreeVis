@@ -478,7 +478,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         stack1Right = stackDataGenerator(bins1Right),
         stack2Left = stackDataGenerator(bins2Left),
         stack2Right = stackDataGenerator(bins2Right);
-    console.log(stack2Left, stack2Right);
+        
     // Set up y-axis value encodings for histograms
     const yHistogram1 = d3.scaleLinear()
             .domain([0, Math.max(d3.max(bins1Left, d => d.length), d3.max(bins1Right, d => d.length))])
