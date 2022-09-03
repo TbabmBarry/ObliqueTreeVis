@@ -72,7 +72,7 @@ class Odt {
                 nodeRectRatio: 25,
                 leafNodeRectRatio: 0,
                 nodeRectWidth: 0,
-                detailedViewNodeRectWidth: this.screenHeight * (2/3),
+                detailedViewNodeRectWidth: 0,
                 leafNodeRectHeight: 300,
                 histogramHeight: 100,
                 scatterPlotPadding: 20,
@@ -108,7 +108,7 @@ class Odt {
     }
 
     draw() {
-        const { data, parts, height, width, scale, constants: { treeMargins, leafNodeRectHeight } } = this;
+        const { data, parts, height, width, scale, constants: { nodeRectWidth, treeMargins, leafNodeRectHeight } } = this;
 
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
@@ -151,6 +151,8 @@ class Odt {
             height-leafNodeRectHeight-treeMargins.top-treeMargins.bottom]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
+        // Assign y-axis position difference plus half of the node rect width to detail view node rect width
+        this.constants.detailedViewNodeRectWidth = Math.abs(nodes.y - nodes.children[0].y) + 0.5 * nodeRectWidth;
         this.nodes = nodes;
         // Modify element for each node recursively
         // traverseTree(nodes);
