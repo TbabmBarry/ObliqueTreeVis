@@ -2,6 +2,7 @@
     <div class="w-full h-screen">
         <div class="m-2">
             <div class="w-full h-screen overflow-auto" id="feature"></div>
+            <div class="feature-table"></div>
         </div>
     </div>
 </template>
@@ -33,6 +34,7 @@ const state = reactive({
 onMounted(async() => {
     state.rootElement = document.querySelector("#feature");
     initGlobalFeatureView("penguins");
+    initFeatureTable("penguins");
 });
 
 async function initGlobalFeatureView(dataset_name) {
@@ -175,8 +177,33 @@ async function initGlobalFeatureView(dataset_name) {
     //     tooltip
     //         .html("<span style='color:grey'>Feature Value: </span>" + )
     // }
+}
 
+const initFeatureTable = (featureData) => {
+    let tableSvg = d3.select(".feature-table");
+    // Append a table to the div
+    let table = tableSvg.append("table")
+        .attr("class", "table table-striped table-bordered table-hover table-sm")
+        .classed("display", true);
 
+    // Append a header to the table
+    let thead = table.append("thead")
+        .attr("class", "table-header");
+
+    // Append a body to the table
+    let tbody = table.append("tbody")
+        .attr("class", "table-body");
+
+    // append a row to the header
+    let theadRow = thead.append("tr")
+        .attr("class", "header-row");
+
+    // return a selection of cell elements in the header row
+    // attribute (join) data to the selection
+    // update (enter) the selection with nodes that have data
+    // append the cell elements to the header row
+    // return the text string for each item in the data array
+    
 }
 
 watch(() => props.selectedDataset, (newVal, oldVal) => {
