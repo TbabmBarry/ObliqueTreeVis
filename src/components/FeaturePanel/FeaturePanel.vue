@@ -24,7 +24,8 @@ const props = defineProps({
 });
 
 const state = reactive({
-    trainingData: {}
+    trainingData: {},
+    featureTable: [],
 });
 
 onMounted(async() => {
@@ -47,6 +48,26 @@ async function initGlobalFeatureView(dataset_name) {
         .catch(function (error) {
             console.log(error);
         }); 
+    const features = Object.keys(state.trainingData[0]);
+    const featureData = {};
+    features.forEach(feature => {
+        featureData[feature] = [];
+    });
+    state.trainingData.forEach(obj => {
+        features.forEach(feature => featureData[feature].push(obj[feature]));
+    })
+    features.forEach(feature => {
+        state.featureTable.push({
+            name: feature,
+            min: Math.min(...featureData[feature]),
+            max: Math.max(...featureData[feature]),
+            mean: _.mean(featureData[feature]),
+            median: d3.quantile(featureData[feature], 0.5),
+            q3: d3.quantile(featureData[feature], 0.75),
+            q1: d3.quantile(featureData[feature], 0.25),
+            iqr: d3.quantile(featureData[feature], 0.75) - d3.quantile(featureData[feature], 0.25),
+        })
+    });
 }
 
 watch(() => props.selectedDataset, (newVal, oldVal) => {
@@ -57,7 +78,6 @@ watch(() => props.selectedDataset, (newVal, oldVal) => {
 });
 
 watch(() => state.trainingData, (newVal, oldVal) => {
-    console.log(newVal);
 },
 {
     immediate: false
