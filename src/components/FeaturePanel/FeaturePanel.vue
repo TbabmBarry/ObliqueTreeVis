@@ -1,7 +1,6 @@
 <template>
     <div class="w-full h-screen">
         <div class="m-2">
-            <div class="w-full h-full overflow-auto" id="feature"></div>
             <div class="feature-table"></div>
         </div>
     </div>
@@ -32,13 +31,13 @@ const state = reactive({
 });
 
 onMounted(async() => {
-    state.rootElement = document.querySelector("#feature");
+    state.rootElement = document.querySelector(".feature-table");
     initGlobalFeatureView("penguins");
 });
 
 async function initGlobalFeatureView(dataset_name) {
     // remove all existing elements
-    d3.select("#feature").selectAll("*").remove();
+    d3.select(".feature-table").selectAll("*").remove();
     let req = {
         dataset_name: dataset_name
     };
@@ -125,10 +124,7 @@ const initFeatureTable = () => {
             if (typeof d === "string") return d;
         })
         .filter((d) => typeof d !== "string")
-        .append((d) => {
-            console.log(d);
-            return drawBoxplot(d);
-        })
+        .append((d) => drawBoxplot(d))
 }
 
 const drawBoxplot = (boxplotData) => {
@@ -157,22 +153,22 @@ const drawBoxplot = (boxplotData) => {
         .data([boxplotData])
         .enter()
         .append("line")
-            .attr("x1", function(d){ return(x(d.min))})
-            .attr("x2", function(d){ return(x(d.max))})
-            .attr("y1", function(d){ return(h/2)})
-            .attr("y2", function(d){ return(h/2)})
+            .attr("x1", (d) => x(d.min))
+            .attr("x2", (d) => x(d.max))
+            .attr("y1", h/2)
+            .attr("y2", h/2)
             .attr("stroke", "black")
-            .style("width", 40)
+            .style("width", 60)
     
     // Draw rectangle for the main box
     cell.selectAll("boxes")
         .data([boxplotData])
         .enter()
         .append("rect")
-            .attr("x", function(d){ return(x(d.q1))})
-            .attr("y", function(d){ return(padding)})
-            .attr("height", function(d){ return(h-2*padding)})
-            .attr("width", function(d){ return(x(d.q3)-x(d.q1))})
+            .attr("x", (d) => x(d.q1))
+            .attr("y", padding)
+            .attr("height", h-2*padding)
+            .attr("width", (d) => x(d.q3)-x(d.q1))
             .attr("stroke", "black")
             .style("fill", "#69b3a2")
             .style("opacity", 0.5)
@@ -182,12 +178,12 @@ const drawBoxplot = (boxplotData) => {
         .data([boxplotData])
         .enter()
         .append("line")
-            .attr("x1", function(d){ return(x(d.median))})
-            .attr("x2", function(d){ return(x(d.median))})
-            .attr("y1", function(d){ return(padding)})
-            .attr("y2", function(d){ return(h-padding)})
+            .attr("x1", (d) => x(d.median))
+            .attr("x2", (d) => x(d.median))
+            .attr("y1", padding)
+            .attr("y2", h-padding)
             .attr("stroke", "black")
-            .style("width", 80);
+            .style("width", 120);
     
     return boxplot;
 }
@@ -200,7 +196,6 @@ watch(() => props.selectedDataset, (newVal, oldVal) => {
 });
 
 watch(() => state.trainingData, (newVal, oldVal) => {
-    console.log(state.featureTable);
 },
 {
     immediate: false
