@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-screen">
         <div class="m-2">
-            <div class="w-full h-screen overflow-auto" id="feature"></div>
+            <div class="w-full h-full overflow-auto" id="feature"></div>
             <div class="feature-table"></div>
         </div>
     </div>
@@ -34,7 +34,6 @@ const state = reactive({
 onMounted(async() => {
     state.rootElement = document.querySelector("#feature");
     initGlobalFeatureView("penguins");
-    initFeatureTable("penguins");
 });
 
 async function initGlobalFeatureView(dataset_name) {
@@ -66,15 +65,16 @@ async function initGlobalFeatureView(dataset_name) {
         state.max > d3.max(featureData[feature]) ? state.max : state.max = d3.max(featureData[feature]);
         state.featureTable.push({
             name: feature,
-            min: d3.min(featureData[feature]),
-            max: d3.max(featureData[feature]),
-            mean: _.mean(featureData[feature]),
-            median: d3.quantile(featureData[feature], 0.5),
-            q3: d3.quantile(featureData[feature], 0.75),
-            q1: d3.quantile(featureData[feature], 0.25),
-            iqr: d3.quantile(featureData[feature], 0.75) - d3.quantile(featureData[feature], 0.25),
+            boxplot: {
+                min: d3.min(featureData[feature]),
+                max: d3.max(featureData[feature]),
+                q1: d3.quantile(featureData[feature], 0.25),
+                q2: d3.quantile(featureData[feature], 0.5),
+                q3: d3.quantile(featureData[feature], 0.75),
+            }
         })
     });
+    initFeatureTable("penguins");
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     state.width = width;
     state.height = height*(3/5);
@@ -122,8 +122,8 @@ async function initGlobalFeatureView(dataset_name) {
         .data(state.featureTable)
         .enter()
         .append("line")
-            .attr("x1", function(d){ return(x(d.min))})
-            .attr("x2", function(d){ return(x(d.max))})
+            .attr("x1", function(d){ return(x(d.boxplot.min))})
+            .attr("x2", function(d){ return(x(d.boxplot.max))})
             .attr("y1", function(d){ return(y(d.name)+y.bandwidth()/2)})
             .attr("y2", function(d){ return(y(d.name)+y.bandwidth()/2)})
             .attr("stroke", "black")
@@ -135,10 +135,10 @@ async function initGlobalFeatureView(dataset_name) {
         .data(state.featureTable)
         .enter()
         .append("rect")
-            .attr("x", function(d){ return(x(d.q1))})
+            .attr("x", function(d){ return(x(d.boxplot.q1))})
             .attr("y", function(d){ return(y(d.name))})
             .attr("height", function(d){ return(y.bandwidth())})
-            .attr("width", function(d){ return(x(d.q3)-x(d.q1))})
+            .attr("width", function(d){ return(x(d.boxplot.q3)-x(d.boxplot.q1))})
             .attr("stroke", "black")
             .style("fill", "#69b3a2")
             .style("opacity", 0.5)
@@ -149,8 +149,8 @@ async function initGlobalFeatureView(dataset_name) {
         .data(state.featureTable)
         .enter()
         .append("line")
-            .attr("x1", function(d){ return(x(d.median))})
-            .attr("x2", function(d){ return(x(d.median))})
+            .attr("x1", function(d){ return(x(d.boxplot.median))})
+            .attr("x2", function(d){ return(x(d.boxplot.median))})
             .attr("y1", function(d){ return(y(d.name))})
             .attr("y2", function(d){ return(y(d.name)+y.bandwidth())})
             .attr("stroke", "black")
@@ -183,7 +183,7 @@ const initFeatureTable = (featureData) => {
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")
-        .attr("class", "table table-striped table-bordered table-hover table-sm")
+        .attr("class", "table table-auto border-separate border-spacing-2 border border-slate-400")
         .classed("display", true);
 
     // Append a header to the table
@@ -203,7 +203,48 @@ const initFeatureTable = (featureData) => {
     // update (enter) the selection with nodes that have data
     // append the cell elements to the header row
     // return the text string for each item in the data array
+    theadRow.selectAll("th")
+        .data(Object.keys(state.featureTable[0]))
+        .enter()
+        .append("th")
+        .attr("class", "border border-slate-300")
+        .text((d) => d);
     
+    // Append table body rows
+    let tbdoyRow = tbody.selectAll("tr")
+        .data(state.featureTable)
+        .enter()
+        .append("tr")
+        .attr("class", "body-row");
+    
+    // Append table body cells
+    tbdoyRow.selectAll("td")
+        .data((d) => Object.values(d))
+        .enter()
+        .append("td")
+        .attr("class", "border border-slate-300")
+        .text((d) => d)
+        .filter((d) => typeof d !== "string")
+        .append((d) => {
+            let w = 50, h = 50;
+            let boxplot = document.createElement("div");
+            let boxplotSvg = d3.select(boxplot).append("svg")
+                .attr("width", w)
+                .attr("height", h);
+            
+            let cell = boxplotSvg.selectAll("div")
+                .data([d]);
+            
+            let cellEnter = cell.enter()
+                .append("g")
+                .attr("transform", `translate(${w/2}, ${h/2})`);
+            
+            cellEnter.append("circle")
+                .attr("r", 20)
+                .attr("fill", "red");
+
+            return boxplot;
+        })
 }
 
 watch(() => props.selectedDataset, (newVal, oldVal) => {
