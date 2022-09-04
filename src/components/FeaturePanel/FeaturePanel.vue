@@ -1,14 +1,13 @@
 <template>
     <div class="w-full h-screen">
-        <div class="m-2">
-            <div class="feature-table"></div>
-        </div>
+        <div class="feature-table"></div>
     </div>
 </template>
 <script setup>
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
 import { getDatasetChangeSelects } from "@/api/metrics.js";
+import { func } from 'vue-types';
 
 let d3 = inject("d3");
 
@@ -81,7 +80,7 @@ const initFeatureTable = () => {
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")
-        .attr("class", "table table-auto border-separate border-spacing-2 border border-slate-400")
+        .attr("class", "table table-auto w-full rounded border-separate border-spacing-2 border border-slate-400")
         .classed("display", true);
 
     // Append a header to the table
@@ -105,7 +104,7 @@ const initFeatureTable = () => {
         .data(Object.keys(state.featureTable[0]))
         .enter()
         .append("th")
-        .attr("class", "border border-slate-300")
+        .attr("class", "border rounded font-bold text-base border-slate-300")
         .text((d) => d);
     
     // Append table body rows
@@ -120,18 +119,27 @@ const initFeatureTable = () => {
         .data((d) => Object.values(d))
         .enter()
         .append("td")
-        .attr("class", "border border-slate-300")
-        .text((d) => {
-            if (typeof d === "string") return d;
-        })
+        .attr("class", "border rounded text-center border-slate-300");
+        
+
+    tbdoyRow.selectAll("td")
+        .filter((d) => typeof d === "string")
+        .attr("id", "feature-name")
+        .attr("width", "20%")
+        .text((d) => d);
+
+    tbdoyRow.selectAll("td")
         .filter((d) => typeof d !== "string")
-        .append((d) => drawBoxplot(d))
+        .attr("id", "feature-boxplot")
+        .attr("width", "80%")
+        .append((d) => drawBoxplot(d));
 }
 
 const drawBoxplot = (boxplotData) => {
+    // Create SVG element
+    let boxplot = document.createElement("div");
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     let w = width * 0.8, h = w * 0.2, padding = 10;
-    const features = Object.keys(state.trainingData[0]);
 
     const x = d3.scaleLinear()
         .domain([state.min, state.max])
@@ -141,12 +149,10 @@ const drawBoxplot = (boxplotData) => {
         .interpolator(d3.interpolateInferno)
         .domain([state.min, state.max]);
     
-    // Create SVG element
-    let boxplot = document.createElement("div");
+    
     let boxplotSvg = d3.select(boxplot).append("svg")
         .attr("width", w)
         .attr("height", h);
-    
     let cell = boxplotSvg.append("g");
 
     // Show the x scale
