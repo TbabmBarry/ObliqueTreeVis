@@ -24,6 +24,8 @@ const state = reactive({
     featureTable: [],
     min: 0,
     max: 0,
+    contributionMin: Number.POSITIVE_INFINITY,
+    contributionMax: Number.NEGATIVE_INFINITY,
     width: 0,
     height: 0,
     padding: 40,
@@ -61,8 +63,13 @@ async function initGlobalFeatureView(dataset_name) {
     features.forEach(feature => {
         state.min < d3.min(featureData[feature]) ? state.min : state.min = d3.min(featureData[feature]);
         state.max > d3.max(featureData[feature]) ? state.max : state.max = d3.max(featureData[feature]);
+        // Generate dummy feature contribution data
+        let currFeatureContribution = (Math.round(Math.random()) * 2 - 1) * Math.random();
+        state.contributionMin < currFeatureContribution ? state.contributionMin : state.contributionMin = currFeatureContribution;
+        state.contributionMax > currFeatureContribution ? state.contributionMax : state.contributionMax = currFeatureContribution;
         state.featureTable.push({
             name: feature,
+            contribution: currFeatureContribution,
             boxplot: {
                 min: d3.min(featureData[feature]),
                 max: d3.max(featureData[feature]),
@@ -77,6 +84,9 @@ async function initGlobalFeatureView(dataset_name) {
 }
 
 const initFeatureTable = () => {
+    const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
+    state.width = width;
+    state.height = height;
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")
@@ -129,21 +139,59 @@ const initFeatureTable = () => {
         .text((d) => d);
 
     tbdoyRow.selectAll("td")
-        .filter((d) => typeof d !== "string")
+        .filter((d) => typeof d === "number")
+        .attr("id", "feature-contribution")
+        .attr("width", "30%")
+        .append((d) => drawBarchart(d));
+
+    tbdoyRow.selectAll("td")
+        .filter((d) => typeof d === "object")
         .attr("id", "feature-boxplot")
-        .attr("width", "80%")
+        .attr("width", "50%")
         .append((d) => drawBoxplot(d));
 }
+
+const drawBarchart = (featureContributionData) => {
+    // Create SVG element
+    let barchart = document.createElement("div");
+    barchart.setAttribute("class", "barchart");
+    let w = state.width * 0.3, h = w * 0.2, padding = 10;
+    const x = d3.scaleLinear()
+        .domain([state.contributionMin, state.contributionMax])
+        .range([padding, w - padding]);
+
+    let barchartSvg = d3.select(barchart)
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "barchart-svg");
+
+    let cell = barchartSvg.append("g");
+
+    cell.selectAll("bars")
+        .data([featureContributionData])
+        .enter()
+        .append("rect")
+        .attr("class", "feature-bar")
+        .attr("x", (d) => x(Math.min(0, d)))
+        .attr("width", (d) => Math.abs(x(d) - x(0)))
+        .attr("y", 0)
+        .attr("height", h)
+        .attr("fill", (d) => d > 0 ? "green" : "red");
+
+    return barchart;
+}
+
 
 const drawBoxplot = (boxplotData) => {
     // Create SVG element
     let boxplot = document.createElement("div");
-    const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
-    let w = width * 0.8, h = w * 0.2, padding = 10;
+    boxplot.setAttribute("class", "boxplot");
+    let w = state.width * 0.5, h = w * 0.4, padding = 10;
 
     const x = d3.scaleLinear()
         .domain([state.min, state.max])
-        .range([padding, w-padding]);
+        .range([padding, w - padding]);
     // Color scale
     const myColor = d3.scaleSequential()
         .interpolator(d3.interpolateInferno)
@@ -152,7 +200,8 @@ const drawBoxplot = (boxplotData) => {
     
     let boxplotSvg = d3.select(boxplot).append("svg")
         .attr("width", w)
-        .attr("height", h);
+        .attr("height", h)
+        .attr("class", "boxplot-svg");
     let cell = boxplotSvg.append("g");
 
     // Show the x scale

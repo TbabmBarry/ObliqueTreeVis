@@ -328,7 +328,7 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
             .attr("text-anchor", "end")
             .text(`${featureArr[currFeatureIdx[0]]} →`)
         );
-
+    
     // Draw points for beeswarm plot
     targetSelection.append("g")
         .attr("class", "detailed beeswarm-chart-group")
@@ -541,7 +541,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
         .style("opacity", 0.4);
-
+    
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.right")
         .data(stack2Left)
