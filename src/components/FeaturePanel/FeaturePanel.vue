@@ -70,6 +70,7 @@ async function initGlobalFeatureView(dataset_name) {
                 q1: d3.quantile(featureData[feature], 0.25),
                 median: d3.quantile(featureData[feature], 0.5),
                 q3: d3.quantile(featureData[feature], 0.75),
+                dataset: featureData[feature].slice(),
             }
         })
     });
@@ -135,7 +136,12 @@ const drawBoxplot = (boxplotData) => {
     const x = d3.scaleLinear()
         .domain([state.min, state.max])
         .range([padding, w-padding]);
-
+    // Color scale
+    const myColor = d3.scaleSequential()
+        .interpolator(d3.interpolateInferno)
+        .domain([state.min, state.max]);
+    
+    // Create SVG element
     let boxplot = document.createElement("div");
     let boxplotSvg = d3.select(boxplot).append("svg")
         .attr("width", w)
@@ -185,6 +191,50 @@ const drawBoxplot = (boxplotData) => {
             .attr("stroke", "black")
             .style("width", 120);
     
+    // create a tooltip
+  let tooltip = d3.select(".feature-table")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("font-size", "16px")
+  // Three function that change the tooltip when user hover / move / leave a cell
+  const mouseover = function(event, d) {
+        tooltip
+            .transition()
+            .duration(200)
+            .style("opacity", 1)
+        tooltip
+            .html("<span style='color:grey'>Feature Value: </span>" + d)
+            .style("left", (d3.pointer(event)[0]+30) + "px")
+            .style("top", (d3.pointer(event)[1]+30) + "px")
+  }
+  const mousemove = function(event, d) {
+        tooltip
+            .style("left", (d3.pointer(event)[0]+30) + "px")
+            .style("top", (d3.pointer(event)[1]+30) + "px")
+  }
+  const mouseleave = function(d) {
+        tooltip
+            .transition()
+            .duration(200)
+            .style("opacity", 0)
+  }
+
+  // Add individual points with jitter
+  const jitterWidth = 50
+  cell.selectAll("indPoints")
+    .data(boxplotData.dataset)
+    .enter()
+    .append("circle")
+      .attr("cx", (d) => x(d))
+      .attr("cy", (h/2-padding)-jitterWidth/2+Math.random()*jitterWidth)
+      .attr("r", 4)
+      .style("fill", (d) => myColor(d))
+      .attr("stroke", "black")
+      .on("mouseover", mouseover)
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave);
+
     return boxplot;
 }
 
