@@ -228,12 +228,15 @@ const drawBoxplot = (boxplotData) => {
 
   // Add individual points with jitter
   const jitterWidth = 50
+  const randomJitterWidth = () => Math.random()*jitterWidth-jitterWidth/2;
   cell.selectAll("indPoints")
     .data(boxplotData.dataset)
     .enter()
     .append("circle")
       .attr("cx", (d) => x(d))
-      .attr("cy", (h/2-padding)-jitterWidth/2+Math.random()*jitterWidth)
+      .attr("cy", (d) => {
+        return (h/2)+randomJitterWidth();
+      })
       .attr("r", 4)
       .style("fill", (d) => myColor(d))
       .attr("stroke", "black")
