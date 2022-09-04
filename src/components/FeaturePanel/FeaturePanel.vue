@@ -187,7 +187,7 @@ const drawBoxplot = (boxplotData) => {
     // Create SVG element
     let boxplot = document.createElement("div");
     boxplot.setAttribute("class", "boxplot");
-    let w = state.width * 0.5, h = w * 0.4, padding = 10;
+    let w = state.width * 0.5, h = w * 0.2, padding = 10;
 
     const x = d3.scaleLinear()
         .domain([state.min, state.max])
@@ -276,7 +276,7 @@ const drawBoxplot = (boxplotData) => {
   }
 
   // Add individual points with jitter
-  const jitterWidth = 50
+  const jitterWidth = 30
   const randomJitterWidth = () => Math.random()*jitterWidth-jitterWidth/2;
   cell.selectAll("indPoints")
     .data(boxplotData.dataset)
@@ -286,7 +286,7 @@ const drawBoxplot = (boxplotData) => {
       .attr("cy", (d) => {
         return (h/2)+randomJitterWidth();
       })
-      .attr("r", 4)
+      .attr("r", 2)
       .style("fill", (d) => myColor(d))
       .attr("stroke", "black")
       .on("mouseover", mouseover)
