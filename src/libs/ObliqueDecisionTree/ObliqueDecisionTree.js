@@ -81,7 +81,8 @@ class Odt {
                 leafNodeRectStrokeWidth: 8,
                 colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
-                featureArr: Array.from({length: 8}, (_, i) => `f_${i+1}`),
+                featureArr: null,
+                featureTable: null,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
                 treeMargins: { top: 20, left: 20, bottom: 20, right: 20 },
@@ -108,8 +109,12 @@ class Odt {
     }
 
     draw() {
-        const { data, parts, height, width, scale, constants: { nodeRectWidth, treeMargins, leafNodeRectHeight } } = this;
+        const { opts, data, parts, height, width, scale, constants: { nodeRectWidth, treeMargins, leafNodeRectHeight } } = this;
 
+        // Assign feature name array to featureArr
+        if (opts.dataset_name == "penguins") this.constants.featureArr = Array.from({length: 8}, (_, i) => `f_${i+1}`);
+        if (opts.dataset_name == "iris") this.constants.featureArr = Array.from({length: 4}, (_, i) => `f_${i+1}`);
+        this.computeGlobalFeatureContribution();
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
         }
@@ -997,6 +1002,49 @@ class Odt {
             })
         }
         return resFlows;
+    }
+
+    /**
+     * Compute the global feature contribution of the whole tree.
+     * @date 2022-09-05
+     */
+    computeGlobalFeatureContribution() {
+        const { data, trainX, constants: { featureArr } } = this;
+        const featureData = {};
+        featureArr.forEach((featureName) => {
+            featureData[featureName] = trainX.map((ele) => ele[featureName]);
+        });
+        const featureTable = featureArr.map(featureName => ({
+            name: featureName,
+            contribution: Array.from({length: 3}, () => []),
+            boxplot: {
+                min: d3.min(featureData[featureName]),
+                max: d3.max(featureData[featureName]),
+                q1: d3.quantile(featureData[featureName], 0.25),
+                median: d3.quantile(featureData[featureName], 0.5),
+                q3: d3.quantile(featureData[featureName], 0.75),
+                dataset: featureData[featureName].slice()
+            }
+        }));
+        const helper = (curr) => {
+            if (!curr) return;
+
+            if (curr.children && curr.children.length > 0) {
+                curr.children.map(child => helper(child));
+            }
+            curr.featureContribution.map((contributionArr, idx) => {
+                contributionArr.map((contribution, idx2) => {
+                    contribution !== 0 && 
+                    (featureTable[idx].contribution[idx2] = featureTable[idx].contribution[idx2].concat(Array(curr.subTrainingSet.length).fill(contribution)));
+                })
+            })
+        }
+        helper(data);
+        featureTable.map((feature) => {
+            feature.contribution = feature.contribution.map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr, 0.5): 0);
+        });
+        this.featureTable = {...featureTable};
+        return featureTable;
     }
 }
 
