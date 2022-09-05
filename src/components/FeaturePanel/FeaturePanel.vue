@@ -22,6 +22,7 @@ const state = reactive({
     rootElement: {},
     trainingData: {},
     featureTable: [],
+    colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
     min: 0,
     max: 0,
     contributionMin: Number.POSITIVE_INFINITY,
@@ -64,9 +65,9 @@ async function initGlobalFeatureView(dataset_name) {
         state.min < d3.min(featureData[feature]) ? state.min : state.min = d3.min(featureData[feature]);
         state.max > d3.max(featureData[feature]) ? state.max : state.max = d3.max(featureData[feature]);
         // Generate dummy feature contribution data
-        let currFeatureContribution = (Math.round(Math.random()) * 2 - 1) * Math.random();
-        state.contributionMin < currFeatureContribution ? state.contributionMin : state.contributionMin = currFeatureContribution;
-        state.contributionMax > currFeatureContribution ? state.contributionMax : state.contributionMax = currFeatureContribution;
+        let currFeatureContribution = Array.from({length: 3}, () => (Math.round(Math.random()) * 2 - 1) * Math.random());
+        state.contributionMin < d3.min(currFeatureContribution) ? state.contributionMin : state.contributionMin = d3.min(currFeatureContribution);
+        state.contributionMax > d3.max(currFeatureContribution) ? state.contributionMax : state.contributionMax = d3.max(currFeatureContribution);
         state.featureTable.push({
             name: feature,
             contribution: currFeatureContribution,
@@ -126,40 +127,45 @@ const initFeatureTable = () => {
     
     // Append table body cells
     tbdoyRow.selectAll("td")
-        .data((d) => Object.values(d))
+        .data((d) => Object.entries(d))
         .enter()
         .append("td")
         .attr("class", "border rounded text-center border-slate-300");
         
 
     tbdoyRow.selectAll("td")
-        .filter((d) => typeof d === "string")
+        .filter((d) => d[0] === "name")
         .attr("id", "feature-name")
         .attr("width", "20%")
-        .text((d) => d);
+        .text((d) => d[1]);
 
     tbdoyRow.selectAll("td")
-        .filter((d) => typeof d === "number")
+        .filter((d) => d[0] === "contribution")
         .attr("id", "feature-contribution")
         .attr("width", "30%")
-        .append((d) => drawBarchart(d));
+        .append((d) => drawBarchart(d[1]));
 
     tbdoyRow.selectAll("td")
-        .filter((d) => typeof d === "object")
+        .filter((d) => d[0] === "boxplot")
         .attr("id", "feature-boxplot")
         .attr("width", "50%")
-        .append((d) => drawBoxplot(d));
+        .append((d) => drawBoxplot(d[1]));
 }
 
 const drawBarchart = (featureContributionData) => {
     // Create SVG element
     let barchart = document.createElement("div");
     barchart.setAttribute("class", "barchart");
-    let w = state.width * 0.3, h = w * 0.2, padding = 10;
+    let w = state.width * 0.3, h = w * 0.4, padding = 10;
     const x = d3.scaleLinear()
         .domain([state.contributionMin, state.contributionMax])
         .range([padding, w - padding]);
 
+    const y = d3.scaleBand()
+        .domain(featureContributionData.map((d, i) => i))
+        .range([padding, h - padding])
+        .padding(0.1);
+    
     let barchartSvg = d3.select(barchart)
         .append("svg")
         .attr("width", w)
@@ -169,15 +175,15 @@ const drawBarchart = (featureContributionData) => {
     let cell = barchartSvg.append("g");
 
     cell.selectAll("bars")
-        .data([featureContributionData])
+        .data(featureContributionData)
         .enter()
         .append("rect")
         .attr("class", "feature-bar")
         .attr("x", (d) => x(Math.min(0, d)))
+        .attr("y", (d, i) => y(i))
         .attr("width", (d) => Math.abs(x(d) - x(0)))
-        .attr("y", 0)
-        .attr("height", h)
-        .attr("fill", (d) => d > 0 ? "green" : "red");
+        .attr("height", y.bandwidth())
+        .attr("fill", (d, i) => state.colorScale[i]);
 
     return barchart;
 }
