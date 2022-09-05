@@ -11,6 +11,8 @@ import { getDatasetChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
+const emit = defineEmits(["emitFeatureTable"]);
+
 const props = defineProps({
     selectedPoints: {
         type: Array,
@@ -84,6 +86,8 @@ const initializeObliqueTree = async (dataset_name) => {
     state.obliqueTreeVis.init();
     state.obliqueTreeVis.setDataAndOpts(opts, state.rootNode, state.trainingData);
     state.obliqueTreeVis.draw();
+    let featureTable = state.obliqueTreeVis.computeGlobalFeatureContribution();
+    emit("emitFeatureTable", featureTable);
 }
 
 

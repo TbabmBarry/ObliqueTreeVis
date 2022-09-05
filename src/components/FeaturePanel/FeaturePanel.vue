@@ -6,25 +6,22 @@
 <script setup>
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
-import { getDatasetChangeSelects } from "@/api/metrics.js";
-import { func } from 'vue-types';
 
 let d3 = inject("d3");
 
 const props = defineProps({
-    selectedDataset: {
-        type: String,
-        default: "iris"
-    }
+    featureTable: {
+        type: Array,
+        default: () => []
+    },
 });
 
 const state = reactive({
     rootElement: {},
-    trainingData: {},
     featureTable: [],
     colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
-    min: 0,
-    max: 0,
+    boxplotMin: Number.POSITIVE_INFINITY,
+    boxplotMax: Number.NEGATIVE_INFINITY,
     contributionMin: Number.POSITIVE_INFINITY,
     contributionMax: Number.NEGATIVE_INFINITY,
     width: 0,
@@ -32,57 +29,9 @@ const state = reactive({
     padding: 40,
 });
 
-onMounted(async() => {
+onMounted(() => {
     state.rootElement = document.querySelector(".feature-table");
-    initGlobalFeatureView("penguins");
 });
-
-async function initGlobalFeatureView(dataset_name) {
-    // remove all existing elements
-    d3.select(".feature-table").selectAll("*").remove();
-    let req = {
-        dataset_name: dataset_name
-    };
-    state.trainingData = await getDatasetChangeSelects(req)
-        .then(function (bundle) {
-            let { trainingSet, labelSet } = bundle.data;
-            trainingSet = dataset_name === "penguins" ? trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }))
-                    : trainingSet.map(([f_1, f_2, f_3, f_4]) => ({ f_1, f_2, f_3, f_4 }));
-            return trainingSet;
-        })
-        .catch(function (error) {
-            console.log(error);
-        }); 
-    const features = Object.keys(state.trainingData[0]);
-    const featureData = {};
-    features.forEach(feature => {
-        featureData[feature] = [];
-    });
-    state.trainingData.forEach(obj => {
-        features.forEach(feature => featureData[feature].push(obj[feature]));
-    })
-    features.forEach(feature => {
-        state.min < d3.min(featureData[feature]) ? state.min : state.min = d3.min(featureData[feature]);
-        state.max > d3.max(featureData[feature]) ? state.max : state.max = d3.max(featureData[feature]);
-        // Generate dummy feature contribution data
-        let currFeatureContribution = Array.from({length: 3}, () => (Math.round(Math.random()) * 2 - 1) * Math.random());
-        state.contributionMin < d3.min(currFeatureContribution) ? state.contributionMin : state.contributionMin = d3.min(currFeatureContribution);
-        state.contributionMax > d3.max(currFeatureContribution) ? state.contributionMax : state.contributionMax = d3.max(currFeatureContribution);
-        state.featureTable.push({
-            name: feature,
-            contribution: currFeatureContribution,
-            boxplot: {
-                min: d3.min(featureData[feature]),
-                max: d3.max(featureData[feature]),
-                q1: d3.quantile(featureData[feature], 0.25),
-                median: d3.quantile(featureData[feature], 0.5),
-                q3: d3.quantile(featureData[feature], 0.75),
-                dataset: featureData[feature].slice(),
-            }
-        })
-    });
-    initFeatureTable();
-}
 
 const initFeatureTable = () => {
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
@@ -105,7 +54,15 @@ const initFeatureTable = () => {
     // append a row to the header
     let theadRow = thead.append("tr")
         .attr("class", "header-row");
-
+    
+    state.featureTable.forEach((feature) => {
+        // Find the min and max of the feature contribution
+        state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
+        state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
+        // Find the min and max of the feature boxplot
+        state.boxplotMin > feature.boxplot.min ? state.boxplotMin = feature.boxplot.min : state.boxplotMin;
+        state.boxplotMax < feature.boxplot.max ? state.boxplotMax = feature.boxplot.max : state.boxplotMax;
+    })
     // return a selection of cell elements in the header row
     // attribute (join) data to the selection
     // update (enter) the selection with nodes that have data
@@ -196,12 +153,12 @@ const drawBoxplot = (boxplotData) => {
     let w = state.width * 0.5, h = w * 0.2, padding = 10;
 
     const x = d3.scaleLinear()
-        .domain([state.min, state.max])
+        .domain([state.boxplotMin, state.boxplotMax])
         .range([padding, w - padding]);
     // Color scale
     const myColor = d3.scaleSequential()
         .interpolator(d3.interpolateInferno)
-        .domain([state.min, state.max]);
+        .domain([state.boxplotMin, state.boxplotMax]);
     
     
     let boxplotSvg = d3.select(boxplot).append("svg")
@@ -302,8 +259,9 @@ const drawBoxplot = (boxplotData) => {
     return boxplot;
 }
 
-watch(() => props.selectedDataset, (newVal, oldVal) => {
-    initGlobalFeatureView(newVal);
+watch(() => props.featureTable, (newVal, oldVal) => {
+    state.featureTable = newVal.slice();
+    initFeatureTable();
 },
 {
     immediate: false

@@ -1043,7 +1043,7 @@ class Odt {
         featureTable.map((feature) => {
             feature.contribution = feature.contribution.map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr, 0.5): 0);
         });
-        this.featureTable = {...featureTable};
+        this.featureTable = featureTable;
         return featureTable;
     }
 }

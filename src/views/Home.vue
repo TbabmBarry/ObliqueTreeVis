@@ -10,10 +10,10 @@
             </div>
         </div>
         <div class="col-start-2 col-end-4 bg-white shadow hover:shadow-lg shadow-slate-200/20 rounded-md h-screen">
-            <ObliqueTreePanel :selectedPoints="selectedPoints" :selectedDataset="selectedDataset" />
+            <ObliqueTreePanel @emit-feature-table="featureTableEmitted" :selectedPoints="selectedPoints" :selectedDataset="selectedDataset" />
         </div>
         <div class="col-start-4 col-end-5 bg-white shadow hover:shadow-lg shadow-slate-200/20 rounded-md h-screen">
-            <FeaturePanel />
+            <FeaturePanel :featureTable="featureTable" />
         </div>
     </div>
 </div>
@@ -27,7 +27,8 @@ import FeaturePanel from "../components/FeaturePanel/FeaturePanel.vue";
 
 const state = reactive({
     selectedPoints: [],
-    selectedDataset: "penguins"
+    selectedDataset: "penguins",
+    featureTable: []
 });
 
 const selectedPointsChanged = (selectedPoints) => {
@@ -38,11 +39,15 @@ const selectedDatasetChanged = (selectedDataset) => {
     state.selectedDataset = selectedDataset;
 }
 
+const featureTableEmitted = (featureTable) => {
+    state.featureTable = featureTable;
+}
+
 onMounted(() => {
     
 });
 
-const { selectedPoints, selectedDataset } = toRefs(state);
+const { selectedPoints, selectedDataset, featureTable } = toRefs(state);
 </script>
 <style scoped>
 </style>
