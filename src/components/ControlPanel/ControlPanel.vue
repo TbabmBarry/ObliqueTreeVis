@@ -76,7 +76,7 @@ const state = reactive({
     rootElement: {},
     width: 0,
     height: 0,
-    padding: 20,
+    padding: 40,
     labelSet: [],
     dataAmount: 0,
     xScale: {},
@@ -90,7 +90,6 @@ const state = reactive({
 
 onMounted(async () => {
     state.rootElement = document.querySelector("#class-overview");
-
     initiateClassOverview();
 });
 
@@ -179,35 +178,39 @@ function renderClassDistribution () {
     const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
 
-    state.xScale = d3.scaleLinear()
+    state.xScale = d3.scaleBand()
+        .domain(state.classCounts.map(d => d.label))
+        .range([state.padding, width - state.padding])
+        .padding(0.2);
+    
+    state.yScale = d3.scaleLinear()
         .domain([0, d3.max(state.classCounts, d => d.count)])
-        .range([state.padding, width - state.padding]),
-    state.yScale = d3.scaleBand()
-            .domain(state.classCounts.map(d => d.label))
-            .range([state.padding, height - state.padding]);
+        .range([height - state.padding, state.padding]);
 
     classDistribution.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0, ${height - state.padding})`)
         .call(d3.axisBottom(state.xScale))
         .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
 
     classDistribution.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${state.padding}, 0)`)
-        .call(d3.axisLeft(state.yScale));
+        .call(d3.axisLeft(state.yScale))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
         .enter()
         .append("rect")
         .attr("class", "class-bar")
-        .attr("x", d => state.xScale(0))
-        .attr("y", d => state.yScale(d.label))
-        .attr("width", d => state.xScale(d.count)-state.xScale(0))
-        .attr("height", state.yScale.bandwidth())
+        .attr("x", d => state.xScale(d.label))
+        .attr("y", d => state.yScale(d.count))
+        .attr("width", state.xScale.bandwidth())
+        .attr("height", d => height - state.padding - state.yScale(d.count))
         .attr("fill", d => state.colorScale[d.label]);
 }
 
@@ -220,10 +223,10 @@ function renderSelectedClassDistribution () {
         .enter()
         .append("rect")
         .attr("class", "selected-class-bar")
-        .attr("x", d => state.xScale(0))
-        .attr("y", d => state.yScale(d.label))
-        .attr("width", d => state.xScale(d.count)-state.xScale(0))
-        .attr("height", state.yScale.bandwidth())
+        .attr("x", d => state.xScale(d.label))
+        .attr("y", d => state.yScale(d.count))
+        .attr("width", state.xScale.bandwidth())
+        .attr("height", d => state.height - state.padding - state.yScale(d.count))
         .attr("fill", function (d) {
             const texture = textures.lines()
                 .size(8)
