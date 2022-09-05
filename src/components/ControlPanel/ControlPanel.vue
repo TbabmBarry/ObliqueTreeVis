@@ -43,7 +43,7 @@
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="grid grid-cols-3 h-1/2 gap my-2" id="class-overview">
+        <div class="h-1/2 gap my-2" id="class-overview">
         </div>
     </div>
 </template>
@@ -140,7 +140,7 @@ const mouseover = function(d) {
 const mousemove = function(event, d) {
     state.tooltip.html("Count: " + d.count)
         .style("left", (d3.pointer(event)[0]/2) + "px")
-        .style("top", (d3.pointer(event)[1]) + "px");
+        .style("top", (d3.pointer(event)[1]/16) + "px");
 }
 
 const mouseout = function(d) {
@@ -165,7 +165,7 @@ function renderClassDistribution () {
 
     state.tooltip = d3.select(state.rootElement)
         .append("div")
-        .attr("class", "tooltip")
+        .attr("class", "tooltip-class-overview")
         .style("opacity", 0)
         .style("width", "80px")
         .style("height", "30px")
@@ -197,10 +197,7 @@ function renderClassDistribution () {
     classDistribution.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${state.padding}, 0)`)
-        .call(d3.axisLeft(state.yScale))
-        .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-45)")
-        .style("text-anchor", "end");
+        .call(d3.axisLeft(state.yScale));
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
