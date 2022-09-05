@@ -3,16 +3,16 @@
         <div class="titles">
             Model Info: 
         </div>
-        <div class="leading-normal gap my-2">
+        <div class="leading-normal grid grid-cols-2 gap my-2">
             <span class="col-span-1 titles align-bottom">Type: </span>
-            <span class="col-span-2 info align-bottom">Bivariate Decision Tree</span>
+            <span class="col-span-1 info align-bottom text-center">Bivariate Decision Tree</span>
         </div>
         <hr style="height:1px" />
-        <div class="grid grid-cols-3 gap my-2">
+        <div class="grid grid-cols-2 gap my-2">
             <div class="col-span-1 titles">
                 Datasets: 
             </div>
-            <div class="col-span-2">
+            <div class="col-span-1 text-center">
                 <a-select
                     ref="select"
                     v-model:value="value1"
@@ -22,6 +22,24 @@
                     @focus="focus"
                     @change="handleChange"
                 ></a-select>
+            </div>
+        </div>
+        <hr style="height:1px" />
+        <div class="grid grid-cols-2 gap my-2">
+            <div class="col-span-1 titles">
+                Data Amount:
+            </div>
+            <div class="col-span-1 text-center">
+                {{ dataAmount }}
+            </div>
+        </div>
+        <hr style="height:1px" />
+        <div class="grid grid-cols-2 gap my-2">
+            <div class="col-span-1 titles">
+                Selected Instances:
+            </div>
+            <div class="col-span-1 rounded shadow text-center">
+                {{ props.selectedPoints.length }}
             </div>
         </div>
         <hr style="height:1px" />
@@ -60,6 +78,7 @@ const state = reactive({
     height: 0,
     padding: 20,
     labelSet: [],
+    dataAmount: 0,
     xScale: {},
     yScale: {},
     classCounts: {},
@@ -107,6 +126,7 @@ async function initiateClassOverview () {
             console.log("ERROR: ", error);
         });
     state.classCounts = occurrence(state.labelSet);
+    state.dataAmount = state.labelSet.length;
     renderClassDistribution();
 }
 
@@ -231,7 +251,7 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
     renderSelectedClassDistribution();
 }, { immediate: false });
 
-let { value1, options1 } = toRefs(state);
+let { value1, options1, dataAmount } = toRefs(state);
 </script>
 <style scoped>
 </style>
