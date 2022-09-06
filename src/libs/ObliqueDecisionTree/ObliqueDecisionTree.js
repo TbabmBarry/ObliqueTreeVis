@@ -1009,22 +1009,26 @@ class Odt {
      * @date 2022-09-05
      */
     computeGlobalFeatureContribution() {
-        const { data, trainX, constants: { featureArr } } = this;
+        const { data, trainX, trainY, constants: { featureArr } } = this;
         const featureData = {};
         featureArr.forEach((featureName) => {
-            featureData[featureName] = trainX.map((ele) => ele[featureName]);
+            // featureData[featureName] = trainX.map((ele) => ele[featureName]);
+            featureData[featureName] = Object.assign(...Array.from(new Set(trainY)).map((val) => ({[val]: []})));
+            trainY.forEach((val, idx) => {
+                featureData[featureName][val].push(trainX[idx][featureName]);
+            });
         });
         const featureTable = featureArr.map(featureName => ({
             name: featureName,
             contribution: Array.from({length: 3}, () => []),
-            boxplot: {
-                min: d3.min(featureData[featureName]),
-                max: d3.max(featureData[featureName]),
-                q1: d3.quantile(featureData[featureName], 0.25),
-                median: d3.quantile(featureData[featureName], 0.5),
-                q3: d3.quantile(featureData[featureName], 0.75),
-                dataset: featureData[featureName].slice()
-            }
+            boxplot: Object.keys(featureData[featureName]).map((val) => ({
+                min: d3.min(featureData[featureName][val]),
+                max: d3.max(featureData[featureName][val]),
+                q1: d3.quantile(featureData[featureName][val], 0.25),
+                median: d3.quantile(featureData[featureName][val], 0.5),
+                q3: d3.quantile(featureData[featureName][val], 0.75),
+                dataset: featureData[featureName][val].slice()
+            }))
         }));
         const helper = (curr) => {
             if (!curr) return;

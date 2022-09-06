@@ -60,8 +60,10 @@ const initFeatureTable = () => {
         state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
         state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
         // Find the min and max of the feature boxplot
-        state.boxplotMin > feature.boxplot.min ? state.boxplotMin = feature.boxplot.min : state.boxplotMin;
-        state.boxplotMax < feature.boxplot.max ? state.boxplotMax = feature.boxplot.max : state.boxplotMax;
+        feature.boxplot.forEach((ele) => {
+            state.boxplotMin > ele.min ? state.boxplotMin = ele.min : state.boxplotMin;
+            state.boxplotMax < ele.max ? state.boxplotMax = ele.max : state.boxplotMax;
+        })
     })
     // return a selection of cell elements in the header row
     // attribute (join) data to the selection
@@ -173,6 +175,11 @@ const drawBoxplot = (boxplotData) => {
     const x = d3.scaleLinear()
         .domain([state.boxplotMin, state.boxplotMax])
         .range([padding, w - padding]);
+
+    const y = d3.scaleBand()
+        .domain(Array.from({length: boxplotData.length}, (v, i) => i))
+        .range([padding, h - padding])
+        .padding(0.2);
     // Color scale
     const myColor = d3.scaleSequential()
         .interpolator(d3.interpolateInferno)
@@ -192,87 +199,111 @@ const drawBoxplot = (boxplotData) => {
 
     // Show the main vertical line
     cell.selectAll("vertLines")
-        .data([boxplotData])
+        .data(boxplotData)
         .enter()
         .append("line")
             .attr("x1", (d) => x(d.min))
             .attr("x2", (d) => x(d.max))
-            .attr("y1", h/2-padding)
-            .attr("y2", h/2-padding)
+            .attr("y1", (d, i) => y(i) + y.bandwidth() / 2 - padding)
+            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding)
             .attr("stroke", "black")
             .style("width", 60)
     
     // Draw rectangle for the main box
     cell.selectAll("boxes")
-        .data([boxplotData])
+        .data(boxplotData)
         .enter()
         .append("rect")
             .attr("x", (d) => x(d.q1))
-            .attr("y", 0)
-            .attr("height", h-2*padding)
+            .attr("y", (d, i) => y(i) - padding)
+            .attr("height", y.bandwidth())
             .attr("width", (d) => x(d.q3)-x(d.q1))
             .attr("stroke", "black")
-            .style("fill", "#69b3a2")
+            .style("fill", (d, i) => state.colorScale[i])
             .style("opacity", 0.5)
     
     // Show the median
     cell.selectAll("medianLines")
-        .data([boxplotData])
+        .data(boxplotData)
         .enter()
         .append("line")
             .attr("x1", (d) => x(d.median))
             .attr("x2", (d) => x(d.median))
-            .attr("y1", 0)
-            .attr("y2", h-2*padding)
+            .attr("y1", (d, i) => y(i) - padding)
+            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding/2)
             .attr("stroke", "black")
             .style("width", 120);
     
-    // create a tooltip
-  let tooltip = d3.select(".feature-table")
-        .append("div")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("font-size", "16px")
-  // Three function that change the tooltip when user hover / move / leave a cell
-  const mouseover = function(event, d) {
-        tooltip
-            .transition()
-            .duration(200)
-            .style("opacity", 1)
-        tooltip
-            .html("<span style='color:grey'>Feature Value: </span>" + d)
-            .style("left", (d3.pointer(event)[0]+30) + "px")
-            .style("top", (d3.pointer(event)[1]+30) + "px")
-  }
-  const mousemove = function(event, d) {
-        tooltip
-            .style("left", (d3.pointer(event)[0]+30) + "px")
-            .style("top", (d3.pointer(event)[1]+30) + "px")
-  }
-  const mouseleave = function(d) {
-        tooltip
-            .transition()
-            .duration(200)
-            .style("opacity", 0)
-  }
+    // Show the min and max
+    cell.selectAll("minLines")
+        .data(boxplotData)
+        .enter()
+        .append("line")
+            .attr("x1", (d) => x(d.min))
+            .attr("x2", (d) => x(d.min))
+            .attr("y1", (d, i) => y(i) - padding*(3/4))
+            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding*(3/4))
+            .attr("stroke", "black")
+            .style("width", 120);
 
-  // Add individual points with jitter
-  const jitterWidth = 20
-  const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
-  cell.selectAll("indPoints")
-    .data(boxplotData.dataset)
-    .enter()
-    .append("circle")
-      .attr("cx", (d) => x(d))
-      .attr("cy", (d) => {
-        return (h/2-padding)+randomJitterWidth();
-      })
-      .attr("r", 2)
-      .style("fill", (d) => myColor(d))
-      .attr("stroke", "black")
-      .on("mouseover", mouseover)
-      .on("mousemove", mousemove)
-      .on("mouseleave", mouseleave);
+    cell.selectAll("maxLines")
+        .data(boxplotData)
+        .enter()
+        .append("line")
+            .attr("x1", (d) => x(d.max))
+            .attr("x2", (d) => x(d.max))
+            .attr("y1", (d, i) => y(i) - padding*(3/4))
+            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding*(3/4))
+            .attr("stroke", "black")
+            .style("width", 120);
+
+    // create a tooltip
+//   let tooltip = d3.select(".feature-table")
+//         .append("div")
+//         .style("opacity", 0)
+//         .attr("class", "tooltip")
+//         .style("font-size", "16px")
+//   // Three function that change the tooltip when user hover / move / leave a cell
+//   const mouseover = function(event, d) {
+//         tooltip
+//             .transition()
+//             .duration(200)
+//             .style("opacity", 1)
+//         tooltip
+//             .html("<span style='color:grey'>Feature Value: </span>" + d)
+//             .style("left", (d3.pointer(event)[0]+30) + "px")
+//             .style("top", (d3.pointer(event)[1]+30) + "px")
+//   }
+//   const mousemove = function(event, d) {
+//         tooltip
+//             .style("left", (d3.pointer(event)[0]+30) + "px")
+//             .style("top", (d3.pointer(event)[1]+30) + "px")
+//   }
+//   const mouseleave = function(d) {
+//         tooltip
+//             .transition()
+//             .duration(200)
+//             .style("opacity", 0)
+//   }
+
+//   // Add individual points with jitter
+//   const jitterWidth = 6;
+//   const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
+//   const datasets = boxplotData.map((d, i) => d.dataset);
+//   datasets.forEach((dataset, i) => {
+//     cell.selectAll(`.boxplot-points-${i}`)
+//         .data(dataset)
+//         .enter()
+//         .append("circle")
+//         .attr("cx", (d) => x(d))
+//         .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
+//         .attr("r", 2)
+//         .style("fill", (d) => myColor(d))
+//         .attr("stroke", "black")
+//         .on("mouseover", mouseover)
+//         .on("mousemove", mousemove)
+//         .on("mouseleave", mouseleave);
+//   });
 
     return boxplot;
 }
@@ -280,12 +311,6 @@ const drawBoxplot = (boxplotData) => {
 watch(() => props.featureTable, (newVal, oldVal) => {
     state.featureTable = newVal.slice();
     initFeatureTable();
-});
-
-watch(() => state.trainingData, (newVal, oldVal) => {
-},
-{
-    immediate: false
 });
 
 </script>
