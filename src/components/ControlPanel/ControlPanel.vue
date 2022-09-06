@@ -5,7 +5,7 @@
         </div>
         <div class="leading-normal grid grid-cols-2 gap my-2">
             <span class="col-span-1 titles align-bottom">Type: </span>
-            <span class="col-span-1 info align-bottom text-center">Bivariate Decision Tree</span>
+            <span class="col-span-1 info text-sm align-bottom text-center">Bivariate Decision Tree</span>
         </div>
         <hr style="height:1px" />
         <div class="grid grid-cols-2 gap my-2">
@@ -29,7 +29,7 @@
             <div class="col-span-1 titles">
                 Data Amount:
             </div>
-            <div class="col-span-1 text-center">
+            <div class="col-span-1 text-center" id="data-amount">
                 {{ dataAmount }}
             </div>
         </div>
