@@ -102,7 +102,6 @@ const initFeatureTable = () => {
 
     tbdoyRow.selectAll("td")
         .filter((d) => d.key === "name")
-        .attr("class", "feature-name")
         .attr("id", (d) => `feature-name-${d.index}`)
         .attr("width", "20%")
         .text((d) => d.value);
