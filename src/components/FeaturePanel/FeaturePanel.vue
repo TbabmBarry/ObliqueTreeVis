@@ -37,7 +37,6 @@ const initFeatureTable = () => {
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     state.width = width;
     state.height = height;
-    console.log(state.height);
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")

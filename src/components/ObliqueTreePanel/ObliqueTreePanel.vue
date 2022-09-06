@@ -44,7 +44,8 @@ const state = reactive({
             [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
         ]
     },
-    obliqueTreeVis: null
+    obliqueTreeVis: null,
+    exposedFeatureContributions: []
 })
 
 onMounted(async () => {
@@ -93,7 +94,7 @@ const initializeObliqueTree = async (dataset_name) => {
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
     // Compute related links nad nodes from selected points
-    state.obliqueTreeVis.renderSelectionEffect(newValue);
+    state.exposedFeatureContributions = state.obliqueTreeVis.renderSelectionEffect(newValue);
     // Update current oblique tree view
     state.obliqueTreeVis.update();
     // Select all related svg groups and apply opacity 1 when selection process is over
@@ -105,6 +106,11 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 watch(() => props.selectedDataset, (val) => {
     initializeObliqueTree(val);
 });
+
+watch(() => state.exposedFeatureContributions, (val) => {
+    console.log("exposedFeatureContributions", val);
+});
+
 </script>
 <style scoped>
 </style>

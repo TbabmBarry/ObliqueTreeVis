@@ -58,6 +58,7 @@ class Odt {
             selectedPoints: [],
             exposedFlowLinks: [],
             uniqueDecisionPaths: [],
+            exposedFeatureContributions: [],
             registeredStateListeners: [],
             pathsIdInDetailView: {
                 upper: [],
@@ -83,6 +84,7 @@ class Odt {
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
                 featureTable: null,
+                localFeatureContribution: null,
                 maxCollisionResolutionAttempts: 7,
                 transitionDuration: 400,
                 treeMargins: { top: 20, left: 20, bottom: 20, right: 20 },
@@ -893,6 +895,39 @@ class Odt {
             }
         });
         this.exposedFlowLinks = flowLinks.map(link => ({...link}));
+        const exposedFeatureContributions = [];
+        res.forEach((decisionPath) => {
+            let leafNodeName = decisionPath.path[decisionPath.path.length-1];
+            let currFeatureContribution = this.constants.localFeatureContribution[leafNodeName];
+            currFeatureContribution.forEach((val, i) => {
+                if (!val.every(e => e === 0)) {
+                    exposedFeatureContributions.push({
+                        featureId: i,
+                        fcArr: val,
+                        count: decisionPath.idArr.length
+                    });
+                }
+            })
+        });
+        const uniqueExposedFeatureContributions = exposedFeatureContributions.reduce((acc, curr) => {
+            const found = acc.find(e => e.featureId === curr.featureId);
+            if (found) {
+                curr.fcArr.map((fc, i) => {
+                    found.contribution[i] = found.contribution[i].concat(Array(curr.count).fill(fc));
+                })
+            } else {
+                acc.push({
+                    featureId: curr.featureId,
+                    contribution: curr.fcArr.map(fc => Array(curr.count).fill(fc))
+                });
+            }
+            return acc;
+        }, []);
+        this.exposedFeatureContributions = uniqueExposedFeatureContributions.map((ele) => ({
+            featureId: ele.featureId,
+            contribution: ele.contribution.map((arr) => d3.quantile(arr.sort(d3.ascending), 0.5))
+        }));
+        return this.exposedFeatureContributions;
     }
 
 
@@ -1024,26 +1059,32 @@ class Odt {
             boxplot: Object.keys(featureData[featureName]).map((val) => ({
                 min: d3.min(featureData[featureName][val]),
                 max: d3.max(featureData[featureName][val]),
-                q1: d3.quantile(featureData[featureName][val], 0.25),
-                median: d3.quantile(featureData[featureName][val], 0.5),
-                q3: d3.quantile(featureData[featureName][val], 0.75),
+                q1: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.25),
+                median: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.5),
+                q3: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.75),
                 dataset: featureData[featureName][val].slice()
             }))
         }));
+        const tmpLocalFeatureContribution = {};
         const helper = (curr) => {
             if (!curr) return;
 
             if (curr.children && curr.children.length > 0) {
                 curr.children.map(child => helper(child));
-            }
-            curr.featureContribution.map((contributionArr, idx) => {
-                contributionArr.map((contribution, idx2) => {
-                    contribution !== 0 && 
-                    (featureTable[idx].contribution[idx2] = featureTable[idx].contribution[idx2].concat(Array(curr.subTrainingSet.length).fill(contribution)));
+            } else {
+                tmpLocalFeatureContribution[curr.name] = curr.featureContribution;
+
+                curr.featureContribution.map((contributionArr, idx) => {
+                    contributionArr.map((contribution, idx2) => {
+                        contribution !== 0 && 
+                        (featureTable[idx].contribution[idx2] = featureTable[idx].contribution[idx2].concat(Array(curr.subTrainingSet.length).fill(contribution)));
+                    })
                 })
-            })
+        }
         }
         helper(data);
+
+        this.constants.localFeatureContribution = tmpLocalFeatureContribution;
         featureTable.map((feature) => {
             feature.contribution = feature.contribution.map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr, 0.5): 0);
         });
