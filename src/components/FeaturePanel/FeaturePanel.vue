@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen">
-        <div class="feature-table"></div>
+        <div class="feature-table w-full"></div>
     </div>
 </template>
 <script setup>
@@ -37,6 +37,7 @@ const initFeatureTable = () => {
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     state.width = width;
     state.height = height;
+    console.log(state.height);
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")
@@ -101,13 +102,13 @@ const initFeatureTable = () => {
     tbdoyRow.selectAll("td")
         .filter((d) => d[0] === "contribution")
         .attr("id", "feature-contribution")
-        .attr("width", "30%")
+        .attr("width", "40%")
         .append((d) => drawBarchart(d[1]));
 
     tbdoyRow.selectAll("td")
         .filter((d) => d[0] === "boxplot")
         .attr("id", "feature-boxplot")
-        .attr("width", "50%")
+        .attr("width", "40%")
         .append((d) => drawBoxplot(d[1]));
 }
 
@@ -115,7 +116,7 @@ const drawBarchart = (featureContributionData) => {
     // Create div element
     const barchart = document.createElement("div");
     barchart.setAttribute("class", "barchart");
-    const w = state.width * 0.3, h = w * 0.4, padding = 10;
+    const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
     // Create svg element
     const barchartSvg = d3.select(barchart)
         .append("svg")
@@ -133,8 +134,8 @@ const drawBarchart = (featureContributionData) => {
         // Create y scale
         const y = d3.scaleBand()
             .domain(featureContributionData.map((d, i) => i))
-            .range([padding, h - padding])
-            .padding(0.1);
+            .range([h - padding, padding])
+            .padding(0.4);
 
         // // Render y axis
         // cell.append("g")
@@ -170,7 +171,7 @@ const drawBoxplot = (boxplotData) => {
     // Create SVG element
     let boxplot = document.createElement("div");
     boxplot.setAttribute("class", "boxplot");
-    let w = state.width * 0.5, h = w * 0.2, padding = 10;
+    let w = state.width * 0.4, h = state.width * 0.2, padding = 10;
 
     const x = d3.scaleLinear()
         .domain([state.boxplotMin, state.boxplotMax])
@@ -178,8 +179,8 @@ const drawBoxplot = (boxplotData) => {
 
     const y = d3.scaleBand()
         .domain(Array.from({length: boxplotData.length}, (v, i) => i))
-        .range([padding, h - padding])
-        .padding(0.2);
+        .range([h - padding, padding])
+        .padding(0.4);
     // Color scale
     const myColor = d3.scaleSequential()
         .interpolator(d3.interpolateInferno)
@@ -193,9 +194,9 @@ const drawBoxplot = (boxplotData) => {
     let cell = boxplotSvg.append("g");
 
     // Show the x scale
-    cell.append("g")
-        .attr("transform", `translate(0, ${h-2*padding})`)
-        .call(d3.axisBottom(x));
+    // cell.append("g")
+    //     .attr("transform", `translate(0, ${h-2*padding})`)
+    //     .call(d3.axisBottom(x));
 
     // Show the main vertical line
     cell.selectAll("vertLines")
@@ -204,8 +205,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.min))
             .attr("x2", (d) => x(d.max))
-            .attr("y1", (d, i) => y(i) + y.bandwidth() / 2 - padding)
-            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding)
+            .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
+            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
             .attr("stroke", "black")
             .style("width", 60)
     
@@ -215,7 +216,7 @@ const drawBoxplot = (boxplotData) => {
         .enter()
         .append("rect")
             .attr("x", (d) => x(d.q1))
-            .attr("y", (d, i) => y(i) - padding)
+            .attr("y", (d, i) => y(i))
             .attr("height", y.bandwidth())
             .attr("width", (d) => x(d.q3)-x(d.q1))
             .attr("stroke", "black")
@@ -229,8 +230,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.median))
             .attr("x2", (d) => x(d.median))
-            .attr("y1", (d, i) => y(i) - padding)
-            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding/2)
+            .attr("y1", (d, i) => y(i))
+            .attr("y2", (d, i) => y(i) + y.bandwidth())
             .attr("stroke", "black")
             .style("width", 120);
     
@@ -241,8 +242,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.min))
             .attr("x2", (d) => x(d.min))
-            .attr("y1", (d, i) => y(i) - padding*(3/4))
-            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding*(3/4))
+            .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
+            .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
             .attr("stroke", "black")
             .style("width", 120);
 
@@ -252,8 +253,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.max))
             .attr("x2", (d) => x(d.max))
-            .attr("y1", (d, i) => y(i) - padding*(3/4))
-            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2 - padding*(3/4))
+            .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
+            .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
             .attr("stroke", "black")
             .style("width", 120);
 
