@@ -110,38 +110,56 @@ const initFeatureTable = () => {
 }
 
 const drawBarchart = (featureContributionData) => {
-    // Create SVG element
-    let barchart = document.createElement("div");
+    // Create div element
+    const barchart = document.createElement("div");
     barchart.setAttribute("class", "barchart");
-    let w = state.width * 0.3, h = w * 0.4, padding = 10;
-    const x = d3.scaleLinear()
-        .domain([state.contributionMin, state.contributionMax])
-        .range([padding, w - padding]);
-
-    const y = d3.scaleBand()
-        .domain(featureContributionData.map((d, i) => i))
-        .range([padding, h - padding])
-        .padding(0.1);
-    
-    let barchartSvg = d3.select(barchart)
+    const w = state.width * 0.3, h = w * 0.4, padding = 10;
+    // Create svg element
+    const barchartSvg = d3.select(barchart)
         .append("svg")
         .attr("width", w)
         .attr("height", h)
         .attr("class", "barchart-svg");
+    // Create group element
+    const cell = barchartSvg.append("g");
+    const isZero = (curr) => curr === 0;
+    if (!featureContributionData.every(isZero)) {
+        // Create x scale
+        const x = d3.scaleLinear()
+            .domain([state.contributionMin, state.contributionMax])
+            .range([padding, w - padding]);
+        // Create y scale
+        const y = d3.scaleBand()
+            .domain(featureContributionData.map((d, i) => i))
+            .range([padding, h - padding])
+            .padding(0.1);
 
-    let cell = barchartSvg.append("g");
+        // // Render y axis
+        // cell.append("g")
+        //     .attr("class", "y-axis")
+        //     .attr("transform", `translate(${x(0)}, 0)`)
+        //     .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
 
-    cell.selectAll("bars")
-        .data(featureContributionData)
-        .enter()
-        .append("rect")
-        .attr("class", "feature-bar")
-        .attr("x", (d) => x(Math.min(0, d)))
-        .attr("y", (d, i) => y(i))
-        .attr("width", (d) => Math.abs(x(d) - x(0)))
-        .attr("height", y.bandwidth())
-        .attr("fill", (d, i) => state.colorScale[i]);
-
+        // Render bar chart
+        cell.selectAll("bars")
+            .data(featureContributionData)
+            .enter()
+            .append("rect")
+            .attr("class", "feature-bar")
+            .attr("x", (d) => x(Math.min(0, d)))
+            .attr("y", (d, i) => y(i))
+            .attr("width", (d) => Math.abs(x(d) - x(0)))
+            .attr("height", y.bandwidth())
+            .attr("fill", (d, i) => state.colorScale[i]);
+    } else {
+        cell.append("text")
+            .attr("x", w / 2)
+            .attr("y", h / 2 + padding / 2)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "16px")
+            .text("No data");
+    }
+    
     return barchart;
 }
 
@@ -169,8 +187,8 @@ const drawBoxplot = (boxplotData) => {
 
     // Show the x scale
     cell.append("g")
-        .attr("transform", `translate(0, ${h-padding})`)
-        .call(d3.axisBottom(x).tickPadding(10));
+        .attr("transform", `translate(0, ${h-2*padding})`)
+        .call(d3.axisBottom(x));
 
     // Show the main vertical line
     cell.selectAll("vertLines")
@@ -179,8 +197,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.min))
             .attr("x2", (d) => x(d.max))
-            .attr("y1", h/2)
-            .attr("y2", h/2)
+            .attr("y1", h/2-padding)
+            .attr("y2", h/2-padding)
             .attr("stroke", "black")
             .style("width", 60)
     
@@ -190,7 +208,7 @@ const drawBoxplot = (boxplotData) => {
         .enter()
         .append("rect")
             .attr("x", (d) => x(d.q1))
-            .attr("y", padding)
+            .attr("y", 0)
             .attr("height", h-2*padding)
             .attr("width", (d) => x(d.q3)-x(d.q1))
             .attr("stroke", "black")
@@ -204,8 +222,8 @@ const drawBoxplot = (boxplotData) => {
         .append("line")
             .attr("x1", (d) => x(d.median))
             .attr("x2", (d) => x(d.median))
-            .attr("y1", padding)
-            .attr("y2", h-padding)
+            .attr("y1", 0)
+            .attr("y2", h-2*padding)
             .attr("stroke", "black")
             .style("width", 120);
     
@@ -239,15 +257,15 @@ const drawBoxplot = (boxplotData) => {
   }
 
   // Add individual points with jitter
-  const jitterWidth = 30
-  const randomJitterWidth = () => Math.random()*jitterWidth-jitterWidth/2;
+  const jitterWidth = 20
+  const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
   cell.selectAll("indPoints")
     .data(boxplotData.dataset)
     .enter()
     .append("circle")
       .attr("cx", (d) => x(d))
       .attr("cy", (d) => {
-        return (h/2)+randomJitterWidth();
+        return (h/2-padding)+randomJitterWidth();
       })
       .attr("r", 2)
       .style("fill", (d) => myColor(d))
@@ -262,9 +280,6 @@ const drawBoxplot = (boxplotData) => {
 watch(() => props.featureTable, (newVal, oldVal) => {
     state.featureTable = newVal.slice();
     initFeatureTable();
-},
-{
-    immediate: false
 });
 
 watch(() => state.trainingData, (newVal, oldVal) => {
