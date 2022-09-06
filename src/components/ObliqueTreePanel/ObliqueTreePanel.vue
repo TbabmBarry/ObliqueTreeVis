@@ -11,7 +11,7 @@ import { getDatasetChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
-const emit = defineEmits(["emitFeatureTable"]);
+const emit = defineEmits(["emitFeatureTable", "emitExposedFeatureContributions"]);
 
 const props = defineProps({
     selectedPoints: {
@@ -108,7 +108,7 @@ watch(() => props.selectedDataset, (val) => {
 });
 
 watch(() => state.exposedFeatureContributions, (val) => {
-    console.log("exposedFeatureContributions", val);
+    emit("emitExposedFeatureContributions", val);
 });
 
 </script>

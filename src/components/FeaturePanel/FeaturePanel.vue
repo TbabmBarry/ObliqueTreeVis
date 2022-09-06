@@ -14,6 +14,10 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    exposedFeatureContributions: {
+        type: Array,
+        default: () => []
+    }
 });
 
 const state = reactive({
@@ -86,29 +90,34 @@ const initFeatureTable = () => {
     
     // Append table body cells
     tbdoyRow.selectAll("td")
-        .data((d) => Object.entries(d))
+        .data((d,i) => Object.entries(d).map(([key, value]) => ({
+                    key: key,
+                    value: value,
+                    index: i
+                })))
         .enter()
         .append("td")
         .attr("class", "border rounded text-center border-slate-300");
         
 
     tbdoyRow.selectAll("td")
-        .filter((d) => d[0] === "name")
-        .attr("id", "feature-name")
+        .filter((d) => d.key === "name")
+        .attr("class", "feature-name")
+        .attr("id", (d) => `feature-name-${d.index}`)
         .attr("width", "20%")
-        .text((d) => d[1]);
+        .text((d) => d.value);
 
     tbdoyRow.selectAll("td")
-        .filter((d) => d[0] === "contribution")
+        .filter((d) => d.key === "contribution")
         .attr("id", "feature-contribution")
         .attr("width", "40%")
-        .append((d) => drawBarchart(d[1]));
+        .append((d) => drawBarchart(d.value, d.index));
 
     tbdoyRow.selectAll("td")
-        .filter((d) => d[0] === "boxplot")
+        .filter((d) => d.key === "boxplot")
         .attr("id", "feature-boxplot")
         .attr("width", "40%")
-        .append((d) => drawBoxplot(d[1]));
+        .append((d) => drawBoxplot(d.value));
 
     theadRow.selectAll("th")
         .filter((d) => d === "name")
@@ -150,7 +159,7 @@ const drawLegend = (type) => {
     return legend;
 }
 
-const drawBarchart = (featureContributionData) => {
+const drawBarchart = (featureContributionData, featureId) => {
     // Create div element
     const barchart = document.createElement("div");
     barchart.setAttribute("class", "barchart");
@@ -160,9 +169,10 @@ const drawBarchart = (featureContributionData) => {
         .append("svg")
         .attr("width", w)
         .attr("height", h)
-        .attr("class", "barchart-svg");
+        .attr("class", `barchart-svg-${featureId}`);
     // Create group element
-    const cell = barchartSvg.append("g");
+    const cell = barchartSvg.append("g")
+        .attr("class", `barchart-g-${featureId}`);
     const isZero = (curr) => curr === 0;
     if (!featureContributionData.every(isZero)) {
         // Create x scale
@@ -347,9 +357,26 @@ const drawBoxplot = (boxplotData) => {
     return boxplot;
 }
 
+const drawExposedFeatureContributions = (exposedFeatureContributions) => {
+    exposedFeatureContributions.forEach((exposedFeatureContribution) => {
+        console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
+        // d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`)
+        //     .style("background-color", "yellow");
+        // console.log(d3.selectAll(`g.barchart-g-${exposedFeatureContribution.featureId}`));
+
+        // TODO: add effects on feature name and feature contribution bar chart
+    });
+}
+
 watch(() => props.featureTable, (newVal, oldVal) => {
     state.featureTable = newVal.slice();
     initFeatureTable();
+});
+
+watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
+    drawExposedFeatureContributions(newVal);
+
+    // TODO: reset style when no selection in projection view
 });
 
 </script>
