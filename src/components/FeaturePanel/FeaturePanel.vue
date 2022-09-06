@@ -104,7 +104,7 @@ const initFeatureTable = () => {
         .filter((d) => d.key === "name")
         .attr("id", (d) => `feature-name-${d.index}`)
         .attr("width", "20%")
-        .text((d) => d.value);
+        .append((d) => drawFeatureName(d.value, d.index));
 
     tbdoyRow.selectAll("td")
         .filter((d) => d.key === "contribution")
@@ -156,6 +156,34 @@ const drawLegend = (type) => {
         .call(d3.axisTop(x).ticks(5));
 
     return legend;
+}
+
+const drawFeatureName = (featureName, featureId) => {
+    // Create div element
+    const featureNameDiv = document.createElement("div");
+    featureNameDiv.setAttribute("class", "feature-name");
+    const w = state.width * 0.15, h = state.width * 0.2, padding = 10;
+    // Create svg element
+    const featureNameSvg = d3.select(featureNameDiv)
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "feature-name-svg")
+        .attr("id", `feature-name-svg-${featureId}`);
+    // Create g element
+    const featureNameG = featureNameSvg.append("g")
+        .attr("class", "feature-name-g")
+        .attr("id", `feature-name-g-${featureId}`);
+    // Create text element
+    featureNameG.append("text")
+        .attr("class", "feature-name-text")
+        .attr("x", w/2-padding)
+        .attr("y", h/2)
+        .attr("dominant-baseline", "middle")
+        .text(featureName);
+
+    return featureNameDiv;
+
 }
 
 const drawBarchart = (featureContributionData, featureId) => {
@@ -358,7 +386,9 @@ const drawBoxplot = (boxplotData) => {
 
 const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     exposedFeatureContributions.forEach((exposedFeatureContribution) => {
-        console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
+        // console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
+        d3.selectAll(`g#feature-name-g-${exposedFeatureContribution.featureId}`)
+            .attr("fill", "red");
         // d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`)
         //     .style("background-color", "yellow");
         // console.log(d3.selectAll(`g.barchart-g-${exposedFeatureContribution.featureId}`));
@@ -376,6 +406,10 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     drawExposedFeatureContributions(newVal);
 
     // TODO: reset style when no selection in projection view
+    if (newVal.length  === 0) {
+        d3.selectAll(`g.feature-name-g`)
+            .attr("fill", "black");
+    }
 });
 
 </script>
