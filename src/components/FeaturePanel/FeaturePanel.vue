@@ -76,7 +76,7 @@ const initFeatureTable = () => {
         .enter()
         .append("th")
         .attr("class", "border rounded font-bold text-base border-slate-300")
-        .text((d) => d);
+        .attr("id", (d) => `header-${d}`); // set the id attribute for each cell
     
     // Append table body rows
     let tbdoyRow = tbody.selectAll("tr")
@@ -110,6 +110,45 @@ const initFeatureTable = () => {
         .attr("id", "feature-boxplot")
         .attr("width", "40%")
         .append((d) => drawBoxplot(d[1]));
+
+    theadRow.selectAll("th")
+        .filter((d) => d === "name")
+        .text((d) => d);
+
+    theadRow.selectAll("th")
+        .filter((d) => d !== "name")
+        .append((d) => drawLegend(d));
+}
+
+const drawLegend = (type) => {
+    const legend = document.createElement("div");
+    legend.setAttribute("class", `legend-${type}`);
+    const w = state.width * 0.4, h = state.width * 0.1, padding = 10;
+    const legendSvg = d3.select(legend)
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "legend-svg");
+
+    const legendG = legendSvg.append("g");
+
+    const x = d3.scaleLinear()
+        .domain(type === "contribution" ? [state.contributionMin, state.contributionMax] : [state.boxplotMin, state.boxplotMax])
+        .range([padding, w - padding]);
+    
+    legendG.append("text")
+        .attr("class", "legend-text font-bold")
+        .attr("x", padding)
+        .attr("y", padding)
+        .attr("dominant-baseline", "middle")
+        .text(type === "contribution" ? "Contribution" : "Boxplot");
+
+    legendG.append("g")
+        .attr("class", "legend-axis")
+        .attr("transform", `translate(0, ${h})`)
+        .call(d3.axisTop(x).ticks(5));
+
+    return legend;
 }
 
 const drawBarchart = (featureContributionData) => {
@@ -195,7 +234,7 @@ const drawBoxplot = (boxplotData) => {
 
     // Show the x scale
     // cell.append("g")
-    //     .attr("transform", `translate(0, ${h-2*padding})`)
+    //     .attr("transform", `translate(0, ${h-padding})`)
     //     .call(d3.axisBottom(x));
 
     // Show the main vertical line
