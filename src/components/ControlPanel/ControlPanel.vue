@@ -187,6 +187,30 @@ function renderClassDistribution () {
         .domain([0, d3.max(state.classCounts, d => d.count)])
         .range([height - state.padding, state.padding]);
 
+    const selectedClassDistribution = state.baseSvg.append("g")
+        .attr("class", "selected-class-overview");
+
+    // Create an empty y axis on the right
+    selectedClassDistribution.append("g")
+        .attr("class", "y-axis-right")
+        .attr("transform", `translate(${width - state.padding}, 0)`)
+        .call(d3.axisRight(d3.scaleLinear()
+            .range([height - state.padding, state.padding])).tickValues([]));
+
+    // Append the y axis title on the top left
+    classDistribution.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", state.padding)
+        .attr("y", state.padding-10)
+        .text("All");
+    
+    // Append the y axis title on the top right
+    selectedClassDistribution.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", width - state.padding/2)
+        .attr("y", state.padding-10)
+        .text("Subsets");
+
     classDistribution.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0, ${height - state.padding})`)
@@ -206,7 +230,7 @@ function renderClassDistribution () {
         .attr("class", "class-bar")
         .attr("x", d => state.xScale(d.label))
         .attr("y", d => state.yScale(d.count))
-        .attr("width", state.xScale.bandwidth())
+        .attr("width", state.xScale.bandwidth()/2)
         .attr("height", d => height - state.padding - state.yScale(d.count))
         .attr("fill", d => state.colorScale[d.label]);
 }
@@ -215,28 +239,37 @@ function renderSelectedClassDistribution () {
     d3.selectAll("g.selected-class-overview").remove();
     const selectedClassDistribution = state.baseSvg.append("g")
         .attr("class", "selected-class-overview");
+
+    const yScaleRight = d3.scaleLinear()
+        .domain([0, d3.max(state.selectedClassCounts, d => d.count)])
+        .range([state.height - state.padding, state.padding]);
+    
+    // Create the y axis on the right
+    selectedClassDistribution.append("g")
+    .attr("class", "y-axis-right")
+        .attr("transform", `translate(${state.width - state.padding}, 0)`)
+        .call(d3.axisRight(yScaleRight));
+
+    // Append the y axis title on the top right
+    selectedClassDistribution.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", state.width - state.padding/2)
+        .attr("y", state.padding-10)
+        .text("Subsets");
+
     selectedClassDistribution.selectAll(".selected-class-bar")
         .data(state.selectedClassCounts)
         .enter()
         .append("rect")
         .attr("class", "selected-class-bar")
-        .attr("x", d => state.xScale(d.label))
-        .attr("y", d => state.yScale(d.count))
-        .attr("width", state.xScale.bandwidth())
-        .attr("height", d => state.height - state.padding - state.yScale(d.count))
-        .attr("fill", function (d) {
-            const texture = textures.lines()
-                .size(8)
-                .strokeWidth(2)
-                .stroke("#000")
-                .background(state.colorScale[d.label]);
-            selectedClassDistribution.call(texture);
-            return texture.url();
-        })
-        .style("opacity", 0.8)
-        .on("mouseover", mouseover)
-        .on("mousemove", mousemove)
-        .on("mouseout", mouseout);
+        .attr("x", d => state.xScale(d.label)+state.xScale.bandwidth()/2)
+        .attr("y", d => yScaleRight(d.count))
+        .attr("width", state.xScale.bandwidth()/2)
+        .attr("height", d => state.height - state.padding - yScaleRight(d.count))
+        .attr("fill", d => state.colorScale[d.label])
+        // .on("mouseover", mouseover)
+        // .on("mousemove", mousemove)
+        // .on("mouseout", mouseout);
 }
 
 watch(() => props.selectedPoints, (newValue, oldValue) => {
@@ -249,6 +282,17 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
         count: counts[key]
     }));
     renderSelectedClassDistribution();
+    if (newValue.length > 0) {
+        d3.selectAll("rect.class-bar")
+            .style("opacity", 0.6);
+    }
+
+    if (newValue.length === 0) {
+        d3.selectAll("rect.class-bar")
+            .style("opacity", 1);
+    }
+
+
 }, { immediate: false });
 
 let { value1, options1, dataAmount } = toRefs(state);
