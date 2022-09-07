@@ -165,7 +165,6 @@ function brush (cell, circle, x, y) {
         }
         // Update the selected points
         state.selectedPoints = selected;
-
     }
 
     function brushEnded ({ selection }) {
@@ -180,7 +179,7 @@ function brush (cell, circle, x, y) {
 const updateSelectedPointsInDetailedView = (selectedPoints) => {
     d3.select(state.rootElement).selectAll(".circle").classed("unselected", true);
     selectedPoints.forEach(d => {
-        d3.select(state.rootElement).select(`circle#dot-${d}`).classed("unselected", false);
+        d3.select(state.rootElement).select(`circle#dot-${d.id}`).classed("unselected", false);
     });
 }
 

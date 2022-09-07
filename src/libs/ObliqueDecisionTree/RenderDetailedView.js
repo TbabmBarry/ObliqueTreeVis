@@ -148,14 +148,18 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
                     && (y0+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) <= y(trainX[d][featureArr[currFeatureIdx[1]]]) 
                     && (y1+0.5*(detailedViewNodeRectWidth-nodeRectWidth)-histogramHeight-scatterPlotPadding-histogramScatterPlotPadding) >= y(trainX[d][featureArr[currFeatureIdx[1]]]));
             }
-            // Update the selected  points
+            // Process and update the selected  points
+            selected = selected.map((id) => ({
+                id,
+                label: trainY[id],
+            }));
             parts.baseSvg.property("selectedPointsInDetailedView", selected).dispatch("emitSelectedPointsInDetailedView");
         }
 
         function brushEnded ({ selection }) {
             if (selection) return;
             // Reset the unselected points to their original style
-            parts.baseSvg.property("selectedPointsInDetailedView", []).dispatch("input");
+            parts.baseSvg.property("selectedPointsInDetailedView", []).dispatch("emitSelectedPointsInDetailedView");
             circle.classed("unselected", false);
             // Remove brush event listener
         }
