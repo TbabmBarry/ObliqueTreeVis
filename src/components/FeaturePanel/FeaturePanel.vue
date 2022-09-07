@@ -38,6 +38,10 @@ onMounted(() => {
 });
 
 const initFeatureTable = () => {
+    // remove all existing elements
+    d3.select(".feature-table").selectAll("*").remove();
+    state.boxplotMin = Number.POSITIVE_INFINITY;
+    state.boxplotMax = Number.NEGATIVE_INFINITY;
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ["width", "height"]);
     state.width = width;
     state.height = height;
