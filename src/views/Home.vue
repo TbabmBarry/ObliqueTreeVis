@@ -1,5 +1,5 @@
 <template>
-<div class="container bg-slate-200 w-full h-screen min-w-full max-w-screen-2xl overflow-hidden">
+<div class="container bg-slate-200 w-full h-screen min-w-full overflow-hidden">
     <div class="grid grid-cols-4 gap-2">
         <div class="col-start-1 col-end-2 grid grid-rows-2 grid-flow-col gap-2 h-screen">
             <div class="grid row-span-1 grid-flow-col gap bg-white shadow hover:shadow-lg shadow-slate-200/20 rounded-md">

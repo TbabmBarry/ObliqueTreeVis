@@ -1,6 +1,6 @@
 <template>
     <div class="m-2">
-        <div class="w-full h-full overflow-auto" id="projection"></div>
+        <div class="w-full h-full" id="projection"></div>
     </div>
 </template>
 <script setup>

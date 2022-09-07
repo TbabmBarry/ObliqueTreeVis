@@ -1,5 +1,5 @@
 <template>
-    <div class="m-2">
+    <div class="m-2 flex flex-col">
         <div class="titles">
             Model Info: 
         </div>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="h-1/2 gap my-2" id="class-overview">
+        <div class="gap grow justify-center" id="class-overview">
         </div>
     </div>
 </template>
