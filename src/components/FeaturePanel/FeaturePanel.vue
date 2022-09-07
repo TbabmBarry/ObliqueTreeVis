@@ -26,8 +26,8 @@ const state = reactive({
     colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
     boxplotMin: Number.POSITIVE_INFINITY,
     boxplotMax: Number.NEGATIVE_INFINITY,
-    contributionMin: Number.POSITIVE_INFINITY,
-    contributionMax: Number.NEGATIVE_INFINITY,
+    contributionMin: -1,
+    contributionMax: 1,
     width: 0,
     height: 0,
     padding: 40,
@@ -61,8 +61,8 @@ const initFeatureTable = () => {
     
     state.featureTable.forEach((feature) => {
         // Find the min and max of the feature contribution
-        state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
-        state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
+        // state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
+        // state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
         // Find the min and max of the feature boxplot
         feature.boxplot.forEach((ele) => {
             state.boxplotMin > ele.min ? state.boxplotMin = ele.min : state.boxplotMin;
@@ -196,21 +196,23 @@ const drawBarchart = (featureContributionData, featureId) => {
         .append("svg")
         .attr("width", w)
         .attr("height", h)
-        .attr("class", `barchart-svg-${featureId}`);
+        .attr("class", "barchart-svg")
+        .attr("id", `barchart-svg-${featureId}`)
     // Create group element
     const cell = barchartSvg.append("g")
         .attr("class", `barchart-g-${featureId}`);
     const isZero = (curr) => curr === 0;
+    // Create x scale
+    const x = d3.scaleLinear()
+        .domain([state.contributionMin, state.contributionMax])
+        .range([padding, w - padding]);
+    // Create y scale
+    const y = d3.scaleBand()
+        .domain(featureContributionData.map((d, i) => i))
+        .range([h - padding, padding])
+        .padding(0.4);
     if (!featureContributionData.every(isZero)) {
-        // Create x scale
-        const x = d3.scaleLinear()
-            .domain([state.contributionMin, state.contributionMax])
-            .range([padding, w - padding]);
-        // Create y scale
-        const y = d3.scaleBand()
-            .domain(featureContributionData.map((d, i) => i))
-            .range([h - padding, padding])
-            .padding(0.4);
+        
 
         // // Render y axis
         // cell.append("g")
@@ -224,6 +226,7 @@ const drawBarchart = (featureContributionData, featureId) => {
             .enter()
             .append("rect")
             .attr("class", "feature-bar")
+            .attr("id", `feature-bar-${featureId}`)
             .attr("x", (d) => x(Math.min(0, d)))
             .attr("y", (d, i) => y(i))
             .attr("width", (d) => Math.abs(x(d) - x(0)))
@@ -265,7 +268,8 @@ const drawBoxplot = (boxplotData) => {
     let boxplotSvg = d3.select(boxplot).append("svg")
         .attr("width", w)
         .attr("height", h)
-        .attr("class", "boxplot-svg");
+        .attr("class", "boxplot-svg")
+
     let cell = boxplotSvg.append("g");
 
     // Show the x scale
@@ -385,15 +389,45 @@ const drawBoxplot = (boxplotData) => {
 }
 
 const drawExposedFeatureContributions = (exposedFeatureContributions) => {
+    // Clear the previous exposed bar charts
+    d3.selectAll("g.exposed-barchart-g").remove();
     exposedFeatureContributions.forEach((exposedFeatureContribution) => {
         // console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
         d3.selectAll(`svg#feature-name-svg-${exposedFeatureContribution.featureId}`)
             .style("background", "red");
-        // d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`)
-        //     .style("background-color", "yellow");
-        // console.log(d3.selectAll(`g.barchart-g-${exposedFeatureContribution.featureId}`));
+
+        // Change opacity of the feature bar
+        d3.selectAll(`rect#feature-bar-${exposedFeatureContribution.featureId}`)
+            .style("opacity", 0.6);
 
         // TODO: add effects on feature name and feature contribution bar chart
+        const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
+        const barchartSvg = d3.selectAll(`svg#barchart-svg-${exposedFeatureContribution.featureId}`);
+        const exposedCell = barchartSvg.append("g")
+            .attr("class", "exposed-barchart-g");
+    
+        // Create x scale
+        const x = d3.scaleLinear()
+            .domain([state.contributionMin, state.contributionMax])
+            .range([padding, w - padding]);
+        // Create y scale
+        const y = d3.scaleBand()
+            .domain(exposedFeatureContribution.contribution.map((d, i) => i))
+            .range([h - padding, padding])
+            .padding(0.4);
+
+        // Render exposed bar chart
+        exposedCell.selectAll("exposed-bars")
+            .data(exposedFeatureContribution.contribution)
+            .enter()
+            .append("rect")
+            .attr("class", "exposed-feature-bar")
+            .attr("x", (d) => x(Math.min(0, d)))
+            .attr("y", (d, i) => y(i) + y.bandwidth()/4)
+            .attr("width", (d) => Math.abs(x(d) - x(0)))
+            .attr("height", y.bandwidth()/2)
+            .attr("fill", (d, i) => state.colorScale[i]);
+        
     });
 }
 
@@ -409,6 +443,9 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     if (newVal.length  === 0) {
         d3.selectAll(`svg.feature-name-svg`)
             .style("background", "transparent");
+
+        d3.selectAll(`rect.feature-bar`)
+            .style("opacity", 1);
     }
 });
 
