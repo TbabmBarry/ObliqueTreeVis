@@ -626,13 +626,19 @@ class Odt {
                     d3.select(this).attr("clip-path", null)
                         .select(".node-rect")
                         .style("stroke", "transparent");
-
+                        
+                    d3.select(this).select(".hidden-rect")
+                        .style("stroke", "black");
+                    
                     d3.select(this).select(".scroll-bar")
                         .style("opacity", 0);
                 } else {
                     d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)")
                         .select(".node-rect")
-                        .style("stroke", "#000000");
+                        .style("stroke", "black");
+
+                    d3.select(this).select(".hidden-rect")
+                        .style("stroke", "transparent");
 
                     d3.select(this).select(".scroll-bar")
                         .style("opacity", 1);
@@ -821,12 +827,13 @@ class Odt {
                 scrollBar.call(dragBehaviour);
 
                 d3.select(this).append("rect")
+                    .attr("class", "hidden-rect")
                     .attr("x", leafNodeBBox.x)
                     .attr("y", leafNodeBBox.y)
                     .attr("width", leafNodeBBox.width)
                     .attr("height", svgGroupY-leafNodeBBox.y)
                     .style("fill", "none")
-                    .style("stroke", "black")
+                    .style("stroke", "transparent")
                     .style("stroke-width", nodeRectStrokeWidth+2);
             }
         });
