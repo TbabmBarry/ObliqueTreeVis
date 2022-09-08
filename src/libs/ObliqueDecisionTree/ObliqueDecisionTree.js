@@ -155,7 +155,7 @@ class Odt {
                 d3.zoomIdentity.scale(scale));
 
         parts.treeMap = d3.tree().size([width, 
-            height-leafNodeRectHeight-treeMargins.top-treeMargins.bottom]);
+            height-leafNodeRectHeight]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         // Assign y-axis position difference plus half of the node rect width to detail view node rect width
