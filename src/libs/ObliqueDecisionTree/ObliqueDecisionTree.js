@@ -200,6 +200,7 @@ class Odt {
 
                 d3.selectAll("circle.detailed.dot")
                     .style("fill", "white");
+                
                 selectedPoints.forEach((id) => {
                     d3.selectAll(`circle#dot-${id}`)
                         .style("fill", colorScale[trainY[id]]);

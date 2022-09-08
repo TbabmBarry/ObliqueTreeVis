@@ -203,8 +203,8 @@ watch(() => state.selectedPointsInDetailedView,
             d3.select(state.rootElement).selectAll(".circle").classed("unselected", false);
         } else {
             updateSelectedPointsInDetailedView(val);
-            state.selectedPoints = val;
         }
+        state.selectedPoints = val;
     },
     { immediate: false }
 );
