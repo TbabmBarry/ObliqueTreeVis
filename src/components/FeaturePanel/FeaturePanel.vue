@@ -31,6 +31,7 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 40,
+    highlightedFeatureClass: "rounded-md outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
 });
 
 onMounted(() => {
@@ -48,7 +49,7 @@ const initFeatureTable = () => {
     let tableSvg = d3.select(".feature-table");
     // Append a table to the div
     let table = tableSvg.append("table")
-        .attr("class", "w-full rounded border-separate border border-slate-400")
+        .attr("class", "table-auto w-full rounded border-separate border border-slate-400")
         .classed("display", true);
 
     // Append a header to the table
@@ -398,7 +399,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     exposedFeatureContributions.forEach((exposedFeatureContribution) => {
         // console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
         d3.selectAll(`svg#feature-name-svg-${exposedFeatureContribution.featureId}`)
-            .style("background", "red");
+            .classed(state.highlightedFeatureClass, true);
 
         // Change opacity of the feature bar
         d3.selectAll(`rect#feature-bar-${exposedFeatureContribution.featureId}`)
@@ -446,7 +447,7 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     // TODO: reset style when no selection in projection view
     if (newVal.length  === 0) {
         d3.selectAll(`svg.feature-name-svg`)
-            .style("background", "transparent");
+            .classed(state.highlightedFeatureClass, false);
 
         d3.selectAll(`rect.feature-bar`)
             .style("opacity", 1);
