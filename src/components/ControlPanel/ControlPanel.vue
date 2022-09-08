@@ -1,7 +1,7 @@
 <template>
     <div class="m-2 flex flex-col">
-        <div class="titles">
-            Model Info: 
+        <div class="titles text-2xl underline decoration-4 decoration-sky-500 my-2">
+            ObliqueTreeVis
         </div>
         <div class="leading-normal grid grid-cols-2 gap my-2">
             <span class="col-span-1 titles align-bottom">Type: </span>
@@ -221,7 +221,7 @@ function renderClassDistribution () {
     classDistribution.append("g")
         .attr("class", "y-axis")
         .attr("transform", `translate(${state.padding}, 0)`)
-        .call(d3.axisLeft(state.yScale));
+        .call(d3.axisLeft(state.yScale).ticks(5));
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
@@ -248,7 +248,7 @@ function renderSelectedClassDistribution () {
     selectedClassDistribution.append("g")
     .attr("class", "y-axis-right")
         .attr("transform", `translate(${state.width - state.padding}, 0)`)
-        .call(d3.axisRight(yScaleRight));
+        .call(d3.axisRight(yScaleRight).ticks(5));
 
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
