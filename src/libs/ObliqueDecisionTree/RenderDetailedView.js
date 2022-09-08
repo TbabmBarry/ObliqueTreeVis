@@ -413,6 +413,109 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
 }
  
 /**
+ * Draw stacked feature histogram for one-feature decision node in detailed view.
+ * @date 2022-09-08
+ * @param { * } targetSelection
+ * @param { * } nodeData
+ * @param { * } currFeatureIdx
+ * @param { * } that
+ */
+export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureIdx, that) {
+    const { trainX, trainY, 
+        constants: { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, 
+            scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale } } = that;
+    
+    // Set up histogram parameters
+    const X = nodeData.data.subTrainingSet.map(idx => ({
+        value: trainX[idx][featureArr[currFeatureIdx[0]]],
+        index: idx,
+        label: trainY[idx],
+    }));
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(X, d => d.value))
+        .range([0, detailedViewNodeRectWidth-4*scatterPlotPadding]);
+
+    const oneFeatureHistogram = d3.bin()
+        .value((d) => d.value)
+        .domain(xScale.domain())
+        .thresholds(xScale.ticks(20));
+
+    const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
+
+    // Get the original data for histograms
+    const valuesLeft = nodeData.data.leftSubTrainingSet.map(idx => ({
+        value: trainX[idx][featureArr[currFeatureIdx[0]]],
+        label: trainY[idx],
+    })),
+        valuesRight = nodeData.data.rightSubTrainingSet.map(idx => ({
+            value: trainX[idx][featureArr[currFeatureIdx[0]]],
+            label: trainY[idx],
+        }));
+
+    // Get the histogram data according to pre-defined histogram functions
+    const binsLeft = oneFeatureHistogram(valuesLeft),
+        binsRight = oneFeatureHistogram(valuesRight);
+
+    const stackLeft = stackDataGenerator(binsLeft),
+        stackRight = stackDataGenerator(binsRight);
+
+    // Set up y-axis value encodings for histograms
+    const yHistogram = d3.scaleLinear()
+        .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])
+        .range([detailedViewNodeRectWidth-4*scatterPlotPadding, 0]);
+
+    // Draw stacked histograms
+    targetSelection.append("g")
+        .selectAll("g.histogram.x-histogram.left")
+        .data(stackLeft)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])    
+        .selectAll("rect.histogram.x-histogram.left")
+        .data(d => d)
+        .join("rect")
+        .attr("class", "detailed histogram")
+        .attr("y", d => Math.min(yHistogram(d[1]), yHistogram(d[0])))
+        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+        .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
+        .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
+        .style("opacity", 0.4);
+
+    targetSelection.append("g")
+        .selectAll("g.histogram.x-histogram.right")
+        .data(stackRight)
+        .join("g")
+            .attr("fill", (d,i) => colorScale[i])    
+        .selectAll("rect.histogram.x-histogram.right")
+        .data(d => d)
+        .join("rect")
+        .attr("class", "detailed histogram")
+        .attr("y", d => Math.min(yHistogram(d[1]), yHistogram(d[0])))
+        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+            .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
+            .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
+        .style("opacity", 0.6);
+
+    // Draw x-axis for histogram
+    targetSelection.append("g")
+        .attr("class", "detailed histogram x-axis")
+        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+            ${0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding})`)
+        .call(xAxis);
+
+    // Draw y-axis for histogram
+    targetSelection.append("g")
+        .attr("class", "detailed histogram y-axis")
+        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+        .call(d3.axisLeft(yHistogram).ticks(5).tickFormat((e) => {
+            if(Math.floor(e) != e) return;
+            return e;
+        }));
+}
+
+/**
  * Draw feature distribution in detailed view.
  * @date 2022-07-11
  * @param {targetSelection} targetSelection
@@ -456,28 +559,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
         bins1Right = histogram1(values1Right),
         bins2Left = histogram2(values2Left),
         bins2Right = histogram2(values2Right);
-    const stackDataGenerator = (bins) => {
-        const keys = [0, 1, 2];
-        const stackData = [];
-        for (const bin of bins) {
-            let pushableObj = {};
-            pushableObj.x0 = bin.x0;
-            pushableObj.x1 = bin.x1;
-            bin.forEach(d => {
-                if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
-                else pushableObj[d.label].push(d.value);
-            });
-            keys.forEach((key) => {
-                if (!pushableObj[key]) pushableObj[key] = [];
-            });
-            stackData.push(pushableObj);
-        };
-
-        const realStack = d3.stack()
-            .keys(keys)
-            .value((d, key) => d[key].length);
-        return realStack(stackData);
-    }
+    
     const stack1Left = stackDataGenerator(bins1Left),
         stack1Right = stackDataGenerator(bins1Right),
         stack2Left = stackDataGenerator(bins2Left),
@@ -801,4 +883,27 @@ export function drawExposedSplitHistogramInDetailedView(targetSelection, origina
         .style("stroke", "#000")
         .style("stroke-width", "2px");
 
+}
+
+const stackDataGenerator = (bins) => {
+    const keys = [0, 1, 2];
+    const stackData = [];
+    for (const bin of bins) {
+        let pushableObj = {};
+        pushableObj.x0 = bin.x0;
+        pushableObj.x1 = bin.x1;
+        bin.forEach(d => {
+            if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
+            else pushableObj[d.label].push(d.value);
+        });
+        keys.forEach((key) => {
+            if (!pushableObj[key]) pushableObj[key] = [];
+        });
+        stackData.push(pushableObj);
+    };
+
+    const realStack = d3.stack()
+        .keys(keys)
+        .value((d, key) => d[key].length);
+    return realStack(stackData);
 }
