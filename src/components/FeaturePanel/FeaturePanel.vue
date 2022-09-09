@@ -56,10 +56,6 @@ const initFeatureTable = () => {
     let thead = table.append("thead")
         .attr("class", "table-header");
 
-    // Append a body to the table
-    let tbody = table.append("tbody")
-        .attr("class", "table-body");
-
     // append a row to the header
     let theadRow = thead.append("tr")
         .attr("class", "header-row");
@@ -86,9 +82,25 @@ const initFeatureTable = () => {
         .attr("class", "border rounded font-bold text-base border-slate-300")
         .attr("id", (d) => `header-${d}`); // set the id attribute for each cell
     
+    theadRow.selectAll("th")
+        .filter((d) => d === "name")
+        .text((d) => d);
+
+    theadRow.selectAll("th")
+        .filter((d) => d !== "name")
+        .append((d) => drawLegend(d));
+
+    // Render the table body
+    renderTableBody(table, state.featureTable);
+}
+
+const renderTableBody = (targetSelection, tableData) => {
+    // Append a body to the table
+    let tbody = targetSelection.append("tbody")
+        .attr("class", "table-body");
     // Append table body rows
     let tbdoyRow = tbody.selectAll("tr")
-        .data(state.featureTable)
+        .data(tableData)
         .enter()
         .append("tr")
         .attr("class", "body-row align-middle");
@@ -122,14 +134,6 @@ const initFeatureTable = () => {
         .attr("id", "feature-boxplot")
         .attr("width", "44%")
         .append((d) => drawBoxplot(d.value));
-
-    theadRow.selectAll("th")
-        .filter((d) => d === "name")
-        .text((d) => d);
-
-    theadRow.selectAll("th")
-        .filter((d) => d !== "name")
-        .append((d) => drawLegend(d));
 }
 
 const drawLegend = (type) => {
