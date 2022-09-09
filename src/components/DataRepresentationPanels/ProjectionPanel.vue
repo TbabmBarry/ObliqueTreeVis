@@ -27,6 +27,8 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 20,
+    brush: null,
+    isBrushed: false,
     colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"]
 })
 
@@ -37,6 +39,10 @@ onMounted(async() => {
         const odt = document.querySelector("#vis").querySelector("#odt-0");
         odt.addEventListener("emitSelectedPointsInDetailedView", (e) => {
             state.selectedPointsInDetailedView = odt["selectedPointsInDetailedView"];
+            if (state.isBrushed) {
+                d3.select("g.projection-view-group").call(state.brush.move, null);
+                state.isBrushed = false;
+            }
         });
     });
     observer.observe(document.querySelector("#vis"), {
@@ -130,18 +136,18 @@ async function initProjectionView (dataset_name) {
  * @returns {any}
  */
 function brush (cell, circle, x, y) {
-    const brush = d3.brush()
+    state.brush = d3.brush()
         .extent([[0,0], [state.width, state.height]])
         .on("start", brushStarted)
         .on("brush", brushed)
         .on("end", brushEnded);
     
-    cell.call(brush);
+    cell.call(state.brush);
     let brushCell;
 
     function brushStarted () {
         if (brushCell !== this) {
-            d3.select(brushCell).call(brush.move, null);
+            d3.select(brushCell).call(state.brush.move, null);
             brushCell = this;
         }
     }
@@ -149,6 +155,7 @@ function brush (cell, circle, x, y) {
     function brushed ({selection}) {
         let selected = [];
         if (selection) {
+            state.isBrushed = true;
             const [[x0, y0], [x1, y1]] = selection; // selection is a list of two lists of two numbers
             // Label unselected points as "unselected" and update their style
             circle.classed("unselected", d => 
@@ -173,6 +180,7 @@ function brush (cell, circle, x, y) {
         state.selectedPoints = [];
         // Reset the unselected points to their original style
         circle.classed("unselected", false);
+        state.isBrushed = false;
     }
 }
 
