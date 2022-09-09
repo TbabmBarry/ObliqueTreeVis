@@ -21,7 +21,11 @@ const props = defineProps({
     selectedDataset: {
         type: String,
         default: "penguins"
-    }
+    },
+    selectedFeatures: {
+        type: Object,
+        default: () => {}
+    },
 });
 
 const state = reactive({
@@ -109,6 +113,25 @@ watch(() => props.selectedDataset, (val) => {
 
 watch(() => state.exposedFeatureContributions, (val) => {
     emit("emitExposedFeatureContributions", val);
+});
+
+watch(() => props.selectedFeatures, (val) => {
+    console.log("selectedFeatures", val);
+    // TODO: update oblique tree view using featureUpdate
+    // let res = [];
+    // Object.entries(val).forEach(([key, value]) => {
+    //     if (value) {
+    //         res.push(key);
+    //     }
+    // });
+    // if (res.length > 0) {
+    //     state.obliqueTreeVis.renderSelectedFeaturesUpdate(res);
+    // }
+    
+},
+{
+    deep: true,
+    immediate: false
 });
 
 </script>

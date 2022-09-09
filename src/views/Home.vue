@@ -14,10 +14,14 @@
                 @emit-feature-table="featureTableEmitted" 
                 @emit-exposed-feature-contributions="exposedFeatureContributionsEmitted" 
                 :selectedPoints="selectedPoints" 
-                :selectedDataset="selectedDataset" />
+                :selectedDataset="selectedDataset"
+                :selectedFeatures="selectedFeatures" />
         </div>
         <div class="col-start-4 col-end-5 bg-white shadow hover:shadow-lg shadow-slate-200/20 rounded-md h-screen">
-            <FeaturePanel :featureTable="featureTable" :exposedFeatureContributions="exposedFeatureContributions" />
+            <FeaturePanel 
+                @emit-selected-features-changed="selectedFeaturesChanged"
+                :featureTable="featureTable" 
+                :exposedFeatureContributions="exposedFeatureContributions" />
         </div>
     </div>
 </div>
@@ -33,7 +37,8 @@ const state = reactive({
     selectedPoints: [],
     selectedDataset: "penguins",
     featureTable: [],
-    exposedFeatureContributions: []
+    exposedFeatureContributions: [],
+    selectedFeatures: {}
 });
 
 const selectedPointsChanged = (selectedPoints) => {
@@ -52,11 +57,15 @@ const exposedFeatureContributionsEmitted = (exposedFeatureContributions) => {
     state.exposedFeatureContributions = exposedFeatureContributions;
 }
 
+const selectedFeaturesChanged = (selectedFeatures) => {
+    state.selectedFeatures = selectedFeatures;
+}
+
 onMounted(() => {
     
 });
 
-const { selectedPoints, selectedDataset, featureTable, exposedFeatureContributions } = toRefs(state);
+const { selectedPoints, selectedDataset, featureTable, exposedFeatureContributions, selectedFeatures } = toRefs(state);
 </script>
 <style scoped>
 </style>

@@ -1052,6 +1052,20 @@ class Odt {
     }
 
     /**
+     * Render the tree diagram to highlight selected features.
+     * @date 2022-09-09
+     * @param { * } selectedFeatures
+     */
+    renderSelectedFeaturesUpdate(selectedFeaturesArr) {
+        d3.selectAll("path.coefficients-donut-chart")
+            .attr("opacity", 0.5)
+        selectedFeaturesArr.forEach((featureName) => {
+            d3.selectAll(`path#donut-chart-${featureName}`)
+                .attr("opacity", 1)
+        })
+    }
+
+    /**
      * Compute the global feature contribution of the whole tree.
      * @date 2022-09-05
      */

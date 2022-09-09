@@ -202,6 +202,7 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         .data(pieData)
         .join("path")
         .attr("class", "summary coefficients-donut-chart")
+        .attr("id", (d, i) => `donut-chart-${d.data.name}`)
         .attr("d", (d, i) => smallArc(d))
         .style("fill", d => color(d.data.name));
 

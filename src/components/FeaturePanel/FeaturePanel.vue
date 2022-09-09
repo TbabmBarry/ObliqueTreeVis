@@ -9,6 +9,8 @@ import { inject, reactive, toRefs, watch, onMounted } from "vue";
 
 let d3 = inject("d3");
 
+const emit = defineEmits(["emitSelectedFeaturesChanged"]);
+
 const props = defineProps({
     featureTable: {
         type: Array,
@@ -32,7 +34,10 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 40,
+    highlightedFeatures: {},
+    selectedFeatures: {},
     highlightedFeatureClass: "rounded-md outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
+    selectedFeatureClass: "rounded-md bg-slate-500 outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
 });
 
 onMounted(() => {
@@ -71,6 +76,7 @@ const initFeatureTable = () => {
             state.boxplotMin > ele.min ? state.boxplotMin = ele.min : state.boxplotMin;
             state.boxplotMax < ele.max ? state.boxplotMax = ele.max : state.boxplotMax;
         })
+        state.selectedFeatures[feature.name] = false;
     })
     // return a selection of cell elements in the header row
     // attribute (join) data to the selection
@@ -233,13 +239,44 @@ const drawFeatureName = (featureName, featureId) => {
     const featureNameDiv = document.createElement("div");
     featureNameDiv.setAttribute("class", "feature-name flex justify-center m-auto");
     const w = state.width * 0.15, h = state.width * 0.2, padding = 10;
+
+    const mouseover = function(event) {
+        console.log("mouseover");
+        d3.select(`svg#feature-name-svg-${featureId}`)
+            .classed(state.highlightedFeatureClass, true);
+            
+    };
+
+    const mouseout = (event) => {
+        console.log("mouseout");
+        d3.select(`svg#feature-name-svg-${featureId}`)
+            .classed(state.highlightedFeatureClass, false);
+
+    };
+
+    const featureClicked = function(event) {
+        console.log("feature clicked");
+        if (!state.selectedFeatures[featureName]) {
+            d3.select(`svg#feature-name-svg-${featureId}`)
+                .classed(state.selectedFeatureClass, true);
+            state.selectedFeatures[featureName] = true;
+        } else {
+            d3.select(`svg#feature-name-svg-${featureId}`)
+                .classed(state.selectedFeatureClass, false);
+                state.selectedFeatures[featureName] = false;
+        }
+    };
+
     // Create svg element
     const featureNameSvg = d3.select(featureNameDiv)
         .append("svg")
         .attr("width", w)
         .attr("height", h)
         .attr("class", "feature-name-svg")
-        .attr("id", `feature-name-svg-${featureId}`);
+        .attr("id", `feature-name-svg-${featureId}`)
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
+        .on("click", featureClicked);
     // Create g element
     const featureNameG = featureNameSvg.append("g")
         .attr("class", "feature-name-g")
@@ -518,6 +555,14 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
             .style("opacity", 1);
     }
 });
+
+watch(() => state.selectedFeatures, (newVal, oldVal) => {
+    emit("emitSelectedFeaturesChanged", newVal);
+},
+{
+    immediate: false,
+    deep: true
+})
 
 </script>
 <style scoped>
