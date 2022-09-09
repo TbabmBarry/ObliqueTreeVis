@@ -1,7 +1,8 @@
 <template>
     <div class="m-2 flex flex-col">
-        <div class="titles text-2xl underline decoration-4 decoration-sky-500 my-2">
-            ObliqueTreeVis
+        <div class="titles my-2">
+            <a href="https://github.com/TbabmBarry/oblique-tree/tree/main" 
+                class="text-2xl text-black underline decoration-4 decoration-sky-500 hover:underline hover:text-sky-800">ObliqueTreeVis</a>
         </div>
         <div class="leading-normal grid grid-cols-2 gap my-2">
             <span class="col-span-1 titles align-bottom">Type: </span>
