@@ -422,8 +422,8 @@ export function drawBeeswarm(targetSelection, nodeData, currFeatureIdx, that) {
  */
 export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureIdx, that) {
     const { trainX, trainY, 
-        constants: { featureArr, nodeRectWidth, detailedViewNodeRectWidth, histogramHeight, 
-            scatterPlotPadding, histogramScatterPlotPadding, colorScale, featureColorScale } } = that;
+        constants: { featureArr, nodeRectWidth, detailedViewNodeRectWidth, 
+            scatterPlotPadding, colorScale } } = that;
     
     // Set up histogram parameters
     const X = nodeData.data.subTrainingSet.map(idx => ({
@@ -433,7 +433,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
     }));
     const xScale = d3.scaleLinear()
         .domain(d3.extent(X, d => d.value))
-        .range([0, detailedViewNodeRectWidth-4*scatterPlotPadding]);
+        .range([0, detailedViewNodeRectWidth-8*scatterPlotPadding]);
 
     const oneFeatureHistogram = d3.bin()
         .value((d) => d.value)
@@ -462,7 +462,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
     // Set up y-axis value encodings for histograms
     const yHistogram = d3.scaleLinear()
         .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])
-        .range([detailedViewNodeRectWidth-4*scatterPlotPadding, 0]);
+        .range([detailedViewNodeRectWidth-8*scatterPlotPadding, 0]);
 
     // Draw stacked histograms
     targetSelection.append("g")
@@ -475,8 +475,8 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .join("rect")
         .attr("class", "detailed histogram")
         .attr("y", d => Math.min(yHistogram(d[1]), yHistogram(d[0])))
-        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding}, 
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
         .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
         .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
         .style("opacity", 0.4);
@@ -491,8 +491,8 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .join("rect")
         .attr("class", "detailed histogram")
         .attr("y", d => Math.min(yHistogram(d[1]), yHistogram(d[0])))
-        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
-            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+        .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding}, 
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
             .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
             .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
         .style("opacity", 0.6);
@@ -500,15 +500,15 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
     // Draw x-axis for histogram
     targetSelection.append("g")
         .attr("class", "detailed histogram x-axis")
-        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
-            ${0.5*(detailedViewNodeRectWidth+nodeRectWidth)-2*scatterPlotPadding})`)
+        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
+            ${0.5*(detailedViewNodeRectWidth+nodeRectWidth)-4*scatterPlotPadding})`)
         .call(xAxis);
 
     // Draw y-axis for histogram
     targetSelection.append("g")
         .attr("class", "detailed histogram y-axis")
-        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding},
-            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+2*scatterPlotPadding})`)
+        .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
         .call(d3.axisLeft(yHistogram).ticks(5).tickFormat((e) => {
             if(Math.floor(e) != e) return;
             return e;
