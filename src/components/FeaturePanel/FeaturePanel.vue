@@ -247,9 +247,13 @@ const drawFeatureName = (featureName, featureId) => {
     };
 
     const mouseout = (event) => {
-        d3.select(`svg#feature-name-svg-${featureId}`)
-            .classed(state.highlightedFeatureClass, false);
-
+        // Consider the case when the user just brushed the projection view
+        if (props.exposedFeatureContributions.length && props.exposedFeatureContributions.map(e => e.featureId).includes(featureId)) {
+            return;
+        } else {
+            d3.select(`svg#feature-name-svg-${featureId}`)
+                .classed(state.highlightedFeatureClass, false);
+        }
     };
 
     const featureClicked = function(event) {
