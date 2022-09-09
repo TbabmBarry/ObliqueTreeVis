@@ -269,7 +269,7 @@ const drawFeatureName = (featureName, featureId) => {
         .append("svg")
         .attr("width", w)
         .attr("height", h)
-        .attr("class", "feature-name-svg")
+        .attr("class", "feature-name-svg cursor-pointer")
         .attr("id", `feature-name-svg-${featureId}`)
         .on("mouseover", mouseover)
         .on("mouseout", mouseout)

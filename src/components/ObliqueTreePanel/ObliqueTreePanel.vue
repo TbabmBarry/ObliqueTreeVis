@@ -123,7 +123,6 @@ watch(() => props.selectedFeatures, (val) => {
             res.push(key);
         }
     });
-    console.log(res);
     state.obliqueTreeVis.renderSelectedFeaturesUpdate(res);
     
 },

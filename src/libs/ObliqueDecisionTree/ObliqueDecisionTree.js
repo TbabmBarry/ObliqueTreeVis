@@ -1057,16 +1057,27 @@ class Odt {
      * @param { * } selectedFeatures
      */
     renderSelectedFeaturesUpdate(selectedFeaturesArr) {
-        console.log(selectedFeaturesArr);
         if (selectedFeaturesArr.length === 0) {
             d3.selectAll("path.coefficients-donut-chart")
                 .attr("opacity", 1)
+                .attr("stroke", "none");
+            d3.selectAll("g.node")
+                .attr("opacity", 1);
         } else {
+            // Weak display of non-target feature decision nodes
             d3.selectAll("path.coefficients-donut-chart")
-                .attr("opacity", 0.2)
+                .attr("opacity", 0.2);
+            d3.selectAll("g.node")
+                .attr("opacity", 0.4);
             selectedFeaturesArr.forEach((featureName) => {
+                // Highlight target feature decision nodes and donut chart
                 d3.selectAll(`path#donut-chart-${featureName}`)
                     .attr("opacity", 1)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 2);
+                d3.selectAll(`path#donut-chart-${featureName}`).nodes().forEach((node) => {
+                    d3.select(node.parentNode.parentNode).attr("opacity", 1);
+                })
             })
         }
     }
