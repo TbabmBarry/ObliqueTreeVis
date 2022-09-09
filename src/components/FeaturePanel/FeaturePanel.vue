@@ -50,6 +50,7 @@ const initFeatureTable = () => {
     // Append a table to the div
     let table = tableSvg.append("table")
         .attr("class", "table-auto w-full rounded border-separate border border-slate-400")
+        .attr("id", "feature-table")
         .classed("display", true);
 
     // Append a header to the table
@@ -92,6 +93,27 @@ const initFeatureTable = () => {
 
     // Render the table body
     renderTableBody(table, state.featureTable);
+
+    sortFeatureTable();
+}
+
+const sortFeatureTable = () => {
+    let tb, rows, switching;
+    tb = document.getElementById("feature-table");
+    rows = tb.rows;
+    switching = true;
+    // Set the sorting direction to descending:
+    while (switching) {
+        switching = false;
+        for (let i = 1; i < (rows.length - 1); i++) {
+            let contributionA = d3.mean(d3.select(rows[i].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
+            let contributionB = d3.mean(d3.select(rows[i+1].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
+            if (contributionA < contributionB) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
 }
 
 const renderTableBody = (targetSelection, tableData) => {
