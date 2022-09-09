@@ -197,6 +197,48 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         .attr("class", "summary donut-chart")
         .attr("transform", `translate(${0}, ${2*nodeRectRatio + radius})`);
     
+    const tooltip = donutChartGroup.append("rect")
+        .attr("class", "summary donut-chart-tooltip")
+        .attr("rx", "3px")
+        .attr("ry", "3px")
+        .style("opacity", 0)
+        .style("width", "90px")
+        .style("height", "30px")
+        .style("fill", "white")
+        .style("stroke", "black")
+        .style("stroke-width", "2px");
+
+    
+    const mouseover = function (event, node) {
+        d3.select(this)
+            .attr("stroke", "black")
+            .attr("stroke-width", "2px");
+
+        tooltip.style("opacity", 1);
+        donutChartGroup.append("text")
+            .attr("class", "summary donut-chart-tooltip-text")
+            .text(`Weight: ${node.data.weight.toFixed(2)}`)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "14px")
+            .style("fill", "black");
+    }
+
+    const mousemove = function (event, node) {
+        tooltip
+            .attr("x", (d3.pointer(event)[0])+40)
+            .attr("y", (d3.pointer(event)[1]+25));
+            donutChartGroup.select("text.donut-chart-tooltip-text")
+            .attr("x", (d3.pointer(event)[0])+80)
+            .attr("y", (d3.pointer(event)[1]+45));
+    }
+
+    const mouseout = function (event, node) {
+        tooltip.style("opacity", 0);
+        donutChartGroup.select("text.donut-chart-tooltip-text").remove();
+        d3.select(this)
+            .attr("stroke", "none");
+    }
+
     // Build the donut chart
     donutChartGroup.selectAll("coefficients-donut-chart")
         .data(pieData)
@@ -204,7 +246,10 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         .attr("class", "summary coefficients-donut-chart")
         .attr("id", (d, i) => `donut-chart-${d.data.name}`)
         .attr("d", (d, i) => smallArc(d))
-        .style("fill", d => color(d.data.name));
+        .style("fill", d => color(d.data.name))
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseout", mouseout);
 
     // Add the polylines between chart and labels
     donutChartGroup.selectAll("coefficients-polylines")
@@ -227,6 +272,8 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         .data(pieData)
         .join('text')
             .text(d => d.data.name)
+            .attr("class", "donut-chart-label")
+            .attr("id", (d, i) => `donut-chart-label-${d.data.name}`)
             .attr('transform', (d) => {
                 const pos = bigArc.centroid(d);
                 const midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
