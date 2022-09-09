@@ -3,7 +3,7 @@ import _ from 'lodash';
 import textures from 'textures';
 import { adjustedClientRect, getEffectiveFeatureContribution,
     traverseTree, maxDepth, maxWidth } from '@/libs/ObliqueDecisionTree/Utils';
-import { drawClassDistribution, drawCoefficientBar, drawSplitHistogram,
+import { drawClassDistribution, drawCoefficientBar, drawCoefficientDonutChart, drawSplitHistogram,
     drawExposedSplitHistogram } from '@/libs/ObliqueDecisionTree/RenderSummaryView';
 import { drawScatterPlot, drawBeeswarm, drawOneFeatureHistogram, drawFeatureHistogram, drawTwoFeatureBeeswarm,
     drawSplitHistogramInDetailedView, drawExposedSplitHistogramInDetailedView } from '@/libs/ObliqueDecisionTree/RenderDetailedView';
@@ -16,6 +16,7 @@ class Odt {
         // Assign functions for rendering summary view
         Odt.prototype.drawClassDistribution = drawClassDistribution;
         Odt.prototype.drawCoefficientBar = drawCoefficientBar;
+        Odt.prototype.drawCoefficientDonutChart = drawCoefficientDonutChart;
         Odt.prototype.drawSplitHistogram = drawSplitHistogram;
         Odt.prototype.drawExposedSplitHistogram = drawExposedSplitHistogram;
         // Assign functions for rendering detailed view
@@ -554,7 +555,8 @@ class Odt {
                     // Draw feature coefficients distribution
                 }
                 // Draw feature coefficients distribution
-                _this.drawCoefficientBar(d3.select(this), nodeData, _this);
+                // _this.drawCoefficientBar(d3.select(this), nodeData, _this);
+                _this.drawCoefficientDonutChart(d3.select(this), nodeData, _this);
                 // Draw split point distribution
                 _this.drawSplitHistogram(d3.select(this), nodeData, _this);
             }

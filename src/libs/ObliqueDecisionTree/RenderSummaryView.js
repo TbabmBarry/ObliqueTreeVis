@@ -158,6 +158,87 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
 }
 
 /**
+ * Draw feature coefficients distribution in the summary view (donut chart).
+ * @date 2022-09-09
+ * @param { * } targetSelection
+ * @param { * } nodeData
+ * @param { * } that
+ */
+export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
+    const { constants: { nodeRectWidth, nodeRectRatio, featureArr } } = that;
+    // Compute coefficient weights of features in the oblique split
+    const {featureIdx, split }  = nodeData.data;
+    const coefficientsNames = featureIdx.map(idx => featureArr[idx]);
+    const coefficientWeights = normalizeArr(featureIdx.map(idx => split[idx]));
+    const radius = (0.5*(nodeRectWidth-2*nodeRectRatio)-nodeRectRatio)/2;
+    const donutData = coefficientWeights.map((val, idx) => ({
+        name: coefficientsNames[idx],
+        weight: val,
+        label: (val === d3.max(coefficientWeights)) ? "big" : "small",
+    }));
+
+    const color = d3.scaleOrdinal()
+        .domain(coefficientsNames)
+        .range(["#BBC2C2", "#777777"]);
+
+    const pie = d3.pie()
+        .sort(null)
+        .value(d => d.weight);
+
+    const pieData = pie(donutData);
+    const bigArc = d3.arc()
+        .innerRadius(radius * 0.9)
+        .outerRadius(radius * 0.9),
+        smallArc = d3.arc()
+        .innerRadius(radius * 0.3)
+        .outerRadius(radius * 0.8);
+
+    let donutChartGroup = targetSelection.append("g")
+        .attr("class", "summary donut-chart")
+        .attr("transform", `translate(${0}, ${2*nodeRectRatio + radius})`);
+    
+    // Build the donut chart
+    donutChartGroup.selectAll("coefficients-donut-chart")
+        .data(pieData)
+        .join("path")
+        .attr("class", "summary coefficients-donut-chart")
+        .attr("d", (d, i) => smallArc(d))
+        .style("fill", d => color(d.data.name));
+
+    // Add the polylines between chart and labels
+    donutChartGroup.selectAll("coefficients-polylines")
+        .data(pieData)
+        .join("polyline")
+            .attr("stroke", "black")
+            .style("fill", "none")
+            .attr("stroke-width", 1)
+            .attr("points", (d) => {
+                const posA = smallArc.centroid(d) // line insertion in the slice
+                const posB = bigArc.centroid(d) // line break: we use the other arc generator that has been built only for that
+                const posC = bigArc.centroid(d); // Label position = almost the same as posB
+                const midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
+                posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
+                return [posA, posB, posC];
+            })
+
+    // Add feature names beside the polyline
+    donutChartGroup.selectAll("coefficients-donut-chart-labels")
+        .data(pieData)
+        .join('text')
+            .text(d => d.data.name)
+            .attr('transform', (d) => {
+                const pos = bigArc.centroid(d);
+                const midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
+                pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
+                return `translate(${pos})`;
+            })
+            .style('text-anchor', (d) => {
+                const midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
+                return (midangle < Math.PI ? 'start' : 'end')
+            })
+}
+
+/**
  * Draw split point distribution in the summary view.
  * @date 2022-07-11
  * @param {targetSelection} targetSelection
