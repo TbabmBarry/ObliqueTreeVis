@@ -211,8 +211,8 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
     
     const mouseover = function (event, node) {
         d3.select(this)
-            .attr("stroke", "black")
-            .attr("stroke-width", "2px");
+            .style("stroke", "black")
+            .style("stroke-width", "2px");
 
         tooltip.style("opacity", 1);
         donutChartGroup.append("text")
@@ -236,7 +236,7 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         tooltip.style("opacity", 0);
         donutChartGroup.select("text.donut-chart-tooltip-text").remove();
         d3.select(this)
-            .attr("stroke", "none");
+            .style("stroke", "none");
     }
 
     // Build the donut chart

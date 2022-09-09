@@ -37,7 +37,7 @@ const state = reactive({
     highlightedFeatures: {},
     selectedFeatures: {},
     highlightedFeatureClass: "rounded-md outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
-    selectedFeatureClass: "rounded-md bg-slate-500 outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
+    selectedFeatureClass: "bg-slate-500",
 });
 
 onMounted(() => {

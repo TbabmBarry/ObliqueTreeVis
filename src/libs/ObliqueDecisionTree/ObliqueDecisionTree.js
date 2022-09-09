@@ -193,9 +193,7 @@ class Odt {
                 parts.svgGroup.selectAll("g.detail-exposed-split-distribution").remove();
                 
                 // Update all the links and nodes' opacity to 0.4 in the vis 
-                d3.selectAll("g.node--internal")
-                    .style("opacity", 0.4);
-                d3.selectAll("g.node--leaf")
+                d3.selectAll("g.node")
                     .style("opacity", 0.4);
                 d3.selectAll("path.link")
                     .style("opacity", 0.4);
@@ -267,9 +265,7 @@ class Odt {
                 // Recover all nodes and links to their original opacity
                 d3.selectAll("path.link")
                     .style("opacity", 1);
-                d3.selectAll("g.node--internal")
-                    .style("opacity", 1);
-                d3.selectAll("g.node--leaf")
+                d3.selectAll("g.node")
                     .style("opacity", 1);
                 
                 // Remove all exposed flow links
@@ -1059,24 +1055,26 @@ class Odt {
     renderSelectedFeaturesUpdate(selectedFeaturesArr) {
         if (selectedFeaturesArr.length === 0) {
             d3.selectAll("path.coefficients-donut-chart")
-                .attr("opacity", 1)
-                .attr("stroke", "none");
+                .style("opacity", 1)
+                .style("stroke", "none");
             d3.selectAll("g.node")
-                .attr("opacity", 1);
+                .style("opacity", 1);
         } else {
             // Weak display of non-target feature decision nodes
             d3.selectAll("path.coefficients-donut-chart")
-                .attr("opacity", 0.2);
+                .style("opacity", 0.2);
             d3.selectAll("g.node")
-                .attr("opacity", 0.4);
+                .style("opacity", 0.4);
             selectedFeaturesArr.forEach((featureName) => {
                 // Highlight target feature decision nodes and donut chart
                 d3.selectAll(`path#donut-chart-${featureName}`)
-                    .attr("opacity", 1)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 2);
+                    .style("opacity", 1)
+                    .style("stroke", "black")
+                    .style("stroke-width", 2);
+
                 d3.selectAll(`path#donut-chart-${featureName}`).nodes().forEach((node) => {
-                    d3.select(node.parentNode.parentNode).attr("opacity", 1);
+                    d3.select(node.parentNode.parentNode)
+                        .style("opacity", 1);
                 })
             })
         }
