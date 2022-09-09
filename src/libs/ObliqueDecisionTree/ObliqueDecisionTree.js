@@ -1057,12 +1057,18 @@ class Odt {
      * @param { * } selectedFeatures
      */
     renderSelectedFeaturesUpdate(selectedFeaturesArr) {
-        d3.selectAll("path.coefficients-donut-chart")
-            .attr("opacity", 0.5)
-        selectedFeaturesArr.forEach((featureName) => {
-            d3.selectAll(`path#donut-chart-${featureName}`)
+        console.log(selectedFeaturesArr);
+        if (selectedFeaturesArr.length === 0) {
+            d3.selectAll("path.coefficients-donut-chart")
                 .attr("opacity", 1)
-        })
+        } else {
+            d3.selectAll("path.coefficients-donut-chart")
+                .attr("opacity", 0.2)
+            selectedFeaturesArr.forEach((featureName) => {
+                d3.selectAll(`path#donut-chart-${featureName}`)
+                    .attr("opacity", 1)
+            })
+        }
     }
 
     /**

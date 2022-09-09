@@ -241,21 +241,18 @@ const drawFeatureName = (featureName, featureId) => {
     const w = state.width * 0.15, h = state.width * 0.2, padding = 10;
 
     const mouseover = function(event) {
-        console.log("mouseover");
         d3.select(`svg#feature-name-svg-${featureId}`)
             .classed(state.highlightedFeatureClass, true);
             
     };
 
     const mouseout = (event) => {
-        console.log("mouseout");
         d3.select(`svg#feature-name-svg-${featureId}`)
             .classed(state.highlightedFeatureClass, false);
 
     };
 
     const featureClicked = function(event) {
-        console.log("feature clicked");
         if (!state.selectedFeatures[featureName]) {
             d3.select(`svg#feature-name-svg-${featureId}`)
                 .classed(state.selectedFeatureClass, true);

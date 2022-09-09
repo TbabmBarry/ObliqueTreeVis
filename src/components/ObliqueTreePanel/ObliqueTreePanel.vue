@@ -116,17 +116,15 @@ watch(() => state.exposedFeatureContributions, (val) => {
 });
 
 watch(() => props.selectedFeatures, (val) => {
-    console.log("selectedFeatures", val);
     // TODO: update oblique tree view using featureUpdate
-    // let res = [];
-    // Object.entries(val).forEach(([key, value]) => {
-    //     if (value) {
-    //         res.push(key);
-    //     }
-    // });
-    // if (res.length > 0) {
-    //     state.obliqueTreeVis.renderSelectedFeaturesUpdate(res);
-    // }
+    let res = [];
+    Object.entries(val).forEach(([key, value]) => {
+        if (value) {
+            res.push(key);
+        }
+    });
+    console.log(res);
+    state.obliqueTreeVis.renderSelectedFeaturesUpdate(res);
     
 },
 {
