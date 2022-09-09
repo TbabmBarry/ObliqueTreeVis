@@ -28,6 +28,7 @@ const state = reactive({
     boxplotMax: Number.NEGATIVE_INFINITY,
     contributionMin: -1,
     contributionMax: 1,
+    isSorted: false,
     width: 0,
     height: 0,
     padding: 40,
@@ -81,24 +82,15 @@ const initFeatureTable = () => {
         .enter()
         .append("th")
         .attr("class", "border rounded font-bold text-base border-slate-300")
-        .attr("id", (d) => `header-${d}`); // set the id attribute for each cell
-    
-    theadRow.selectAll("th")
-        .filter((d) => d === "name")
-        .text((d) => d);
-
-    theadRow.selectAll("th")
-        .filter((d) => d !== "name")
+        .attr("id", (d) => `header-${d}`) // set the id attribute for each cell
         .append((d) => drawLegend(d));
 
     // Render the table body
     renderTableBody(table, state.featureTable);
-
-    sortFeatureTable();
 }
 
-const sortFeatureTable = () => {
-    let tb, rows, switching;
+const sortFeatureTableByContribution = () => {
+    let tb, rows, switching, contributionA, contributionB;
     tb = document.getElementById("feature-table");
     rows = tb.rows;
     switching = true;
@@ -106,14 +98,39 @@ const sortFeatureTable = () => {
     while (switching) {
         switching = false;
         for (let i = 1; i < (rows.length - 1); i++) {
-            let contributionA = d3.mean(d3.select(rows[i].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
-            let contributionB = d3.mean(d3.select(rows[i+1].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
+            contributionA = d3.mean(d3.select(rows[i].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
+            contributionB = d3.mean(d3.select(rows[i+1].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
             if (contributionA < contributionB) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
             }
         }
     }
+    d3.select("path.legend-triangle")
+        .attr("opacity", 0.5);
+    state.isSorted = true;
+}
+
+const sortFeatureTableByName = () => {
+    let tb, rows, switching, a, b;
+    tb = document.getElementById("feature-table");
+    rows = tb.rows;
+    switching = true;
+    // Set the sorting direction to descending:
+    while (switching) {
+        switching = false;
+        for (let i = 1; i < (rows.length - 1); i++) {
+            a = d3.select(rows[i].getElementsByTagName("td")[0]).select("g").data()[0].value;
+            b = d3.select(rows[i+1].getElementsByTagName("td")[0]).select("g").data()[0].value;
+            if (a > b) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+    d3.select("path.legend-triangle")
+        .attr("opacity", 1);
+    state.isSorted = false;
 }
 
 const renderTableBody = (targetSelection, tableData) => {
@@ -160,8 +177,8 @@ const renderTableBody = (targetSelection, tableData) => {
 
 const drawLegend = (type) => {
     const legend = document.createElement("div");
-    legend.setAttribute("class", `legend-${type} flex justify-center m-auto`);
-    const w = state.width * 0.4, h = state.width * 0.1, padding = 10;
+    legend.setAttribute("class", `legend-${type} m-auto`);
+    const w = (type === "name") ? state.width * 0.15 : state.width * 0.4, h = state.width * 0.1, padding = 10;
     const legendSvg = d3.select(legend)
         .append("svg")
         .attr("width", w)
@@ -170,21 +187,43 @@ const drawLegend = (type) => {
 
     const legendG = legendSvg.append("g");
 
-    const x = d3.scaleLinear()
-        .domain(type === "contribution" ? [state.contributionMin, state.contributionMax] : [state.boxplotMin, state.boxplotMax])
-        .range([padding, w - padding]);
-    
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
     legendG.append("text")
         .attr("class", "legend-text font-bold")
         .attr("x", padding)
         .attr("y", padding)
         .attr("dominant-baseline", "middle")
-        .text(type === "contribution" ? "Contribution" : "Boxplot");
+        .text(capitalizeFirstLetter(type));
 
-    legendG.append("g")
-        .attr("class", "legend-axis")
-        .attr("transform", `translate(0, ${h})`)
-        .call(d3.axisTop(x).ticks(5));
+    if (type !== "name") {
+        const x = d3.scaleLinear()
+            .domain(type === "contribution" ? [state.contributionMin, state.contributionMax] : [state.boxplotMin, state.boxplotMax])
+            .range([padding, w - padding]);
+
+        legendG.append("g")
+            .attr("class", "legend-axis")
+            .attr("transform", `translate(0, ${h})`)
+            .call(d3.axisTop(x).ticks(5));
+    }
+    const triangle = d3.symbol().type(d3.symbolTriangle).size(50); // triangle symbol
+        
+    const sortClick = (event, node) => {
+        if (!state.isSorted) {
+            sortFeatureTableByContribution();
+        } else {
+            sortFeatureTableByName();
+        }
+    }
+    // Draw a triangle for contribution legend
+    legendG.append("path")
+        .filter((d) => type === "contribution")
+        .attr("class", "legend-triangle cursor-pointer")
+        .attr("d", triangle)
+        .attr("transform", `translate(${w - padding}, ${padding}) rotate(180)`)
+        .on("click", sortClick);
 
     return legend;
 }
