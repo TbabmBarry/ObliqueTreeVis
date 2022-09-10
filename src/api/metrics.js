@@ -19,6 +19,16 @@ export function getDatasetChangeSelects(data) {
       })
 }
 
+export function getUnscaledDatasetChangeSelects(data) {
+    return request({
+        url: "/api/unscaled_dataset_selected",
+        method: "post",
+        data: data
+    },{
+        message:false,
+        loading:false,
+    })
+}
 
 export function getAvailDatasetsList(data) {
     return request({

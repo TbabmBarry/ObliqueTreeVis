@@ -1137,7 +1137,6 @@ class Odt {
         }
         helper(data);
         this.constants.localFeatureContribution = tmpLocalFeatureContribution;
-        console.log(tmpFeatureContributionArr);
         featureTable.map((feature, idx) => {
             feature.contribution = tmpFeatureContributionArr[idx].map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr.sort(d3.ascending), 0.5): 0);
         });

@@ -6,6 +6,8 @@
 <script setup>
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
+import { getUnscaledDatasetChangeSelects } from "@/api/metrics";
+
 
 let d3 = inject("d3");
 
@@ -24,6 +26,9 @@ const props = defineProps({
 
 const state = reactive({
     rootElement: {},
+    unscaledTrainingSet: [],
+    featureArr: [],
+    labelSet: [],
     featureTable: [],
     colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
     boxplotMin: Number.POSITIVE_INFINITY,
@@ -42,8 +47,23 @@ const state = reactive({
 });
 
 onMounted(() => {
+    initFeatureView("penguins");
     state.rootElement = document.querySelector(".feature-table");
 });
+
+async function initFeatureView (dataset_name) {
+    let req = {
+        dataset_name: dataset_name
+    };
+    [state.unscaledTrainingSet, state.labelSet, state.featureArr] = await getUnscaledDatasetChangeSelects(req)
+        .then(function (bundle) {
+            let { trainingSet, labelSet } = bundle.data;
+            let featureArr = trainingSet.shift();
+            return [trainingSet, labelSet, featureArr];
+        }).catch((error) => {
+            console.log("ERROR: ", error);
+        });
+    };
 
 const initFeatureTable = () => {
     // remove all existing elements
