@@ -1,4 +1,4 @@
-# obliquetreevis: Oblique Decision Tree Visualization
+# ObliqueTreeVis: Oblique Decision Tree Visualization
 
 ## Description
 
