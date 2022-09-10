@@ -536,10 +536,16 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .attr("fill", (d, i) => state.colorScale[i]);
 
         // Color scale
-        const myColor = d3.scaleSequential()
-            .interpolator(d3.interpolateInferno)
-            .domain([state.boxplotMin, state.boxplotMax]);
-
+        const colors = [
+            ["#e0f3db", "#66c2a5"],
+            ["#fee6ce", "#fc8d62"],
+            ["#efedf5", "#8da0cb"]
+        ];
+        const myColor = colors.map((color) => d3.scaleSequential()
+                    .interpolator(d3.interpolateHcl)
+                    .domain([state.boxplotMin, state.boxplotMax])
+                    .range([color[0], color[1]]));
+        console.log(myColor);
         const boxplotX = d3.scaleLinear()
             .domain([state.boxplotMin, state.boxplotMax])
             .range([padding, w - padding]);
@@ -557,7 +563,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
                     .attr("cx", (d) => boxplotX(d))
                     .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
                     .attr("r", 2)
-                    .style("fill", (d) => myColor(d))
+                    .style("fill", (d) => myColor[i](d))
                     .attr("stroke", "black")
         });
     });
@@ -569,6 +575,7 @@ watch(() => props.featureTable, (newVal, oldVal) => {
 });
 
 watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
+    if (_.isEqual(newVal, oldVal)) return;
     // Reset feature name, feature contribution bar chart, and boxplot
     d3.selectAll(`svg.feature-name-svg`)
         .classed(state.highlightedFeatureClass, false);

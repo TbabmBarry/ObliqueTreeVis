@@ -115,10 +115,10 @@ watch(() => state.exposedFeatureContributions, (val) => {
     emit("emitExposedFeatureContributions", val);
 });
 
-watch(() => props.selectedFeatures, (val) => {
+watch(() => props.selectedFeatures, (newVal, oldVal) => {
     // TODO: update oblique tree view using featureUpdate
     let res = [];
-    Object.entries(val).forEach(([key, value]) => {
+    Object.entries(newVal).forEach(([key, value]) => {
         if (value) {
             res.push(key);
         }
