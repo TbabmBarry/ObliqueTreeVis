@@ -59,6 +59,13 @@ async function initFeatureView (dataset_name) {
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
             let featureArr = trainingSet.shift();
+            trainingSet = trainingSet.map((row) => {
+                let obj = {};
+                featureArr.forEach((feature, index) => {
+                    obj[feature] = parseFloat(row[index]);
+                });
+                return obj;
+            });
             return [trainingSet, labelSet, featureArr];
         }).catch((error) => {
             console.log("ERROR: ", error);
@@ -93,10 +100,19 @@ const initFeatureTable = () => {
         // state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
         // state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
         // Find the min and max of the feature boxplot
-        feature.boxplot.forEach((ele) => {
-            state.boxplotMin > ele.min ? state.boxplotMin = ele.min : state.boxplotMin;
-            state.boxplotMax < ele.max ? state.boxplotMax = ele.max : state.boxplotMax;
+        let UnscaledDatasets = Array.from(new Set(state.labelSet)).map((label) => {
+            return state.labelSet.filter((row) => row === label).map((row, index) => {
+                return state.unscaledTrainingSet[index][feature.name];
+            });
         })
+        feature.boxplot = UnscaledDatasets.map((unscaledDataset) => ({
+            min: d3.min(unscaledDataset),
+            max: d3.max(unscaledDataset),
+            q1: d3.quantile(unscaledDataset.sort(d3.ascending), 0.25),
+            median: d3.quantile(unscaledDataset.sort(d3.ascending), 0.5),
+            q3: d3.quantile(unscaledDataset.sort(d3.ascending), 0.75),
+            dataset: unscaledDataset
+        }) )
         state.selectedFeatures[feature.name] = false;
     })
     // return a selection of cell elements in the header row
@@ -227,9 +243,9 @@ const drawLegend = (type) => {
         .attr("dominant-baseline", "middle")
         .text(capitalizeFirstLetter(type));
 
-    if (type !== "name") {
+    if (type === "contribution") {
         const x = d3.scaleLinear()
-            .domain(type === "contribution" ? [state.contributionMin, state.contributionMax] : [state.boxplotMin, state.boxplotMax])
+            .domain([state.contributionMin, state.contributionMax])
             .range([padding, w - padding]);
 
         legendG.append("g")
@@ -237,23 +253,24 @@ const drawLegend = (type) => {
             .attr("id", `legend-axis-${type}`)
             .attr("transform", `translate(0, ${h})`)
             .call(d3.axisTop(x).ticks(5));
-    }
-    const triangle = d3.symbol().type(d3.symbolTriangle).size(50); // triangle symbol
         
-    const sortClick = (event, node) => {
-        if (!state.isSorted) {
-            sortFeatureTableByContribution();
-        } else {
-            sortFeatureTableByName();
+        const triangle = d3.symbol().type(d3.symbolTriangle).size(50); // triangle symbol
+        
+        const sortClick = (event, node) => {
+            if (!state.isSorted) {
+                sortFeatureTableByContribution();
+            } else {
+                sortFeatureTableByName();
+            }
         }
+        // Draw a triangle for contribution legend
+        legendG.append("path")
+            .attr("class", "legend-triangle cursor-pointer")
+            .attr("d", triangle)
+            .attr("transform", `translate(${w - padding}, ${padding}) rotate(180)`)
+            .on("click", sortClick);
     }
-    // Draw a triangle for contribution legend
-    legendG.append("path")
-        .filter((d) => type === "contribution")
-        .attr("class", "legend-triangle cursor-pointer")
-        .attr("d", triangle)
-        .attr("transform", `translate(${w - padding}, ${padding}) rotate(180)`)
-        .on("click", sortClick);
+    
 
     return legend;
 }
@@ -425,9 +442,9 @@ const drawBoxplot = (boxplotData, featureId) => {
     boxplot.setAttribute("class", "boxplot flex justify-center m-auto");
     const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
 
-    const x = d3.scaleLinear()
-        .domain([state.boxplotMin, state.boxplotMax])
-        .range([padding, w - padding]);
+    const x = boxplotData.map(bpData => d3.scaleLinear()
+        .domain([bpData.min, bpData.max])
+        .range([padding, w - padding]));
 
     const y = d3.scaleBand()
         .domain(Array.from({length: boxplotData.length}, (v, i) => i))
@@ -454,8 +471,8 @@ const drawBoxplot = (boxplotData, featureId) => {
         .data(boxplotData)
         .enter()
         .append("line")
-            .attr("x1", (d) => x(d.min))
-            .attr("x2", (d) => x(d.max))
+            .attr("x1", (d, i) => x[i](d.min))
+            .attr("x2", (d, i) => x[i](d.max))
             .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
             .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
             .attr("stroke", "black")
@@ -466,10 +483,10 @@ const drawBoxplot = (boxplotData, featureId) => {
         .data(boxplotData)
         .enter()
         .append("rect")
-            .attr("x", (d) => x(d.q1))
+            .attr("x", (d, i) => x[i](d.q1))
             .attr("y", (d, i) => y(i))
             .attr("height", y.bandwidth())
-            .attr("width", (d) => x(d.q3)-x(d.q1))
+            .attr("width", (d, i) => x[i](d.q3)-x[i](d.q1))
             .attr("stroke", "black")
             .style("fill", (d, i) => state.colorScale[i])
             .style("opacity", 0.5)
@@ -479,8 +496,8 @@ const drawBoxplot = (boxplotData, featureId) => {
         .data(boxplotData)
         .enter()
         .append("line")
-            .attr("x1", (d) => x(d.median))
-            .attr("x2", (d) => x(d.median))
+            .attr("x1", (d, i) => x[i](d.median))
+            .attr("x2", (d, i) => x[i](d.median))
             .attr("y1", (d, i) => y(i))
             .attr("y2", (d, i) => y(i) + y.bandwidth())
             .attr("stroke", "black")
@@ -491,8 +508,8 @@ const drawBoxplot = (boxplotData, featureId) => {
         .data(boxplotData)
         .enter()
         .append("line")
-            .attr("x1", (d) => x(d.min))
-            .attr("x2", (d) => x(d.min))
+            .attr("x1", (d, i) => x[i](d.min))
+            .attr("x2", (d, i) => x[i](d.min))
             .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
             .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
             .attr("stroke", "black")
@@ -502,8 +519,8 @@ const drawBoxplot = (boxplotData, featureId) => {
         .data(boxplotData)
         .enter()
         .append("line")
-            .attr("x1", (d) => x(d.max))
-            .attr("x2", (d) => x(d.max))
+            .attr("x1", (d, i) => x[i](d.max))
+            .attr("x2", (d, i) => x[i](d.max))
             .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
             .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
             .attr("stroke", "black")
