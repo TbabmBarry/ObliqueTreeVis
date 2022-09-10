@@ -500,7 +500,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     // Clear the previous exposed bar charts
     d3.selectAll("g.exposed-barchart-g").remove();
     exposedFeatureContributions.forEach((exposedFeatureContribution) => {
-        // console.log(d3.selectAll(`td#feature-name-${exposedFeatureContribution.featureId}`).node());
+        // Highlight selected feature names
         d3.selectAll(`svg#feature-name-svg-${exposedFeatureContribution.featureId}`)
             .classed(state.highlightedFeatureClass, true);
 
@@ -545,16 +545,14 @@ watch(() => props.featureTable, (newVal, oldVal) => {
 });
 
 watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
+    // Reset feature name and feature contribution bar chart
+    d3.selectAll(`svg.feature-name-svg`)
+        .classed(state.highlightedFeatureClass, false);
+
+    d3.selectAll(`rect.feature-bar`)
+        .style("opacity", 1);
+    // Draw exposed feature contributions
     drawExposedFeatureContributions(newVal);
-
-    // TODO: reset style when no selection in projection view
-    if (newVal.length  === 0) {
-        d3.selectAll(`svg.feature-name-svg`)
-            .classed(state.highlightedFeatureClass, false);
-
-        d3.selectAll(`rect.feature-bar`)
-            .style("opacity", 1);
-    }
 });
 
 watch(() => state.selectedFeatures, (newVal, oldVal) => {
