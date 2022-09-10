@@ -117,7 +117,6 @@ class Odt {
         const { opts, data, parts, height, width, scale, constants: { nodeRectWidth, treeMargins, leafNodeRectHeight } } = this;
 
         // Assign feature name array to featureArr
-        if (opts.dataset_name == "penguins") this.constants.featureArr = Array.from({length: 8}, (_, i) => `f_${i+1}`);
         if (opts.dataset_name == "iris") this.constants.featureArr = Array.from({length: 4}, (_, i) => `f_${i+1}`);
         this.computeGlobalFeatureContribution();
         const zoomed = ({ transform }) => {
@@ -983,6 +982,7 @@ class Odt {
         this.data = data;
         this.trainX = trainingData.trainingSet;
         this.trainY = trainingData.labelSet;
+        this.constants.featureArr = trainingData.featureArr;
     }
 
     /**

@@ -70,6 +70,8 @@ const initializeObliqueTree = async (dataset_name) => {
     state.rootNode = await getDatasetChangeSelects(req)
         .then(function (bundle) {
             const { trainingSet, labelSet } = bundle.data;
+            // Remove the first row of the training set, which is the header
+            trainingSet.shift();
             const builder = {
                 trainingSet,
                 labelSet,
@@ -86,9 +88,15 @@ const initializeObliqueTree = async (dataset_name) => {
     state.trainingData = await getDatasetChangeSelects(req)
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
-            trainingSet = dataset_name === "penguins" ? trainingSet.map(([f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]) => ({ f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8 }))
-                : trainingSet.map(([f_1, f_2, f_3, f_4]) => ({ f_1, f_2, f_3, f_4 }));
-            return { trainingSet, labelSet };
+            let featureArr = trainingSet.shift();
+            trainingSet = trainingSet.map((row) => {
+                let obj = {};
+                featureArr.forEach((feature, index) => {
+                    obj[feature] = parseFloat(row[index]);
+                });
+                return obj;
+            });
+            return { trainingSet, labelSet, featureArr };
         });
     let opts = {
         dataset_name: props.selectedDataset
