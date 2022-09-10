@@ -1108,7 +1108,7 @@ class Odt {
         });
         const featureTable = featureArr.map(featureName => ({
             name: featureName,
-            contribution: Array.from({length: 3}, () => []),
+            contribution: Array.from({length:3}, () => null),
             boxplot: Object.keys(featureData[featureName]).map((val) => ({
                 min: d3.min(featureData[featureName][val]),
                 max: d3.max(featureData[featureName][val]),
@@ -1119,6 +1119,7 @@ class Odt {
             }))
         }));
         const tmpLocalFeatureContribution = {};
+        let tmpFeatureContributionArr = featureArr.map(() => Array.from({length:3}, () => []));
         const helper = (curr) => {
             if (!curr) return;
 
@@ -1126,20 +1127,19 @@ class Odt {
                 curr.children.map(child => helper(child));
             } else {
                 tmpLocalFeatureContribution[curr.name] = curr.featureContribution;
-
                 curr.featureContribution.map((contributionArr, idx) => {
                     contributionArr.map((contribution, idx2) => {
                         contribution !== 0 && 
-                        (featureTable[idx].contribution[idx2] = featureTable[idx].contribution[idx2].concat(Array(curr.subTrainingSet.length).fill(contribution)));
+                        (tmpFeatureContributionArr[idx][idx2] = tmpFeatureContributionArr[idx][idx2].concat(Array(curr.subTrainingSet.length).fill(contribution)));
                     })
                 })
         }
         }
         helper(data);
-
         this.constants.localFeatureContribution = tmpLocalFeatureContribution;
-        featureTable.map((feature) => {
-            feature.contribution = feature.contribution.map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr, 0.5): 0);
+        console.log(tmpFeatureContributionArr);
+        featureTable.map((feature, idx) => {
+            feature.contribution = tmpFeatureContributionArr[idx].map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr.sort(d3.ascending), 0.5): 0);
         });
         this.featureTable = featureTable;
         return featureTable;

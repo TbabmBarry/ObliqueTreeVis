@@ -34,6 +34,7 @@ const state = reactive({
     nodeTreePath: {
         iris: ["root", "r", "rr"],
         penguins: ["root", "l", "lr", "lrl"]
+        // penguins: ["root", "r", "rl"]
     },
     decisionNodes: {
         iris: [
@@ -47,6 +48,11 @@ const state = reactive({
             [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
             [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
         ]
+        // penguins: [
+        //     [0, 0, -0.00240097, 0, 0.01920779, 0, 0, 0, 0.490999],
+        //     [-0.01092356, 0, 0, 0, 0.05665245, 0, 0, 0, 0.446272],
+        //     [0, 0, 0, 0, 0, 0, 1, 0, -0.500000]
+        // ]
     },
     obliqueTreeVis: null,
     exposedFeatureContributions: []
