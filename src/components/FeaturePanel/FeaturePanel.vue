@@ -34,6 +34,7 @@ const state = reactive({
     width: 0,
     height: 0,
     padding: 40,
+    exposedFeatures: [],
     highlightedFeatures: {},
     selectedFeatures: {},
     highlightedFeatureClass: "rounded-md outline-dashed outline-3 outline-offset-2 outline-slate-500 shadow-lg shadow-slate-500/50",
@@ -191,7 +192,9 @@ const drawLegend = (type) => {
         .attr("height", h)
         .attr("class", "legend-svg");
 
-    const legendG = legendSvg.append("g");
+    const legendG = legendSvg.append("g")
+        .attr("class", "legend-g")
+        .attr("id", `legend-g-${type}`);
 
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -211,6 +214,7 @@ const drawLegend = (type) => {
 
         legendG.append("g")
             .attr("class", "legend-axis")
+            .attr("id", `legend-axis-${type}`)
             .attr("transform", `translate(0, ${h})`)
             .call(d3.axisTop(x).ticks(5));
     }
@@ -322,11 +326,47 @@ const drawBarchart = (featureContributionData, featureId) => {
     if (!featureContributionData.every(isZero)) {
         
 
-        // // Render y axis
-        // cell.append("g")
-        //     .attr("class", "y-axis")
-        //     .attr("transform", `translate(${x(0)}, 0)`)
-        //     .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
+        const mouseover = function(event, d) {
+            if (state.exposedFeatures.includes(featureId)) {
+                d3.select(this)
+                    .style("stroke", "black")
+            }
+            d3.select(this)
+                .style("stroke-width", "2px");
+            // Highlight the corresponding feature contribution on the X-axis
+            d3.select("g#legend-g-contribution")
+                .append("line")
+                .attr("class", "highlighted-legend-line")
+                .attr("x1", x(d))
+                .attr("x2", x(d))
+                .attr("y1", 4*padding)
+                .attr("y2", h)
+                .style("stroke", "black")
+                .style("stroke-width", "2px")
+                
+                d3.select("g#legend-g-contribution")
+                .append("text")
+                    .attr("class", "highlighted-legend-text")
+                    .attr("x", x(d))
+                    .attr("y", 4*padding)
+                    .text(d.toFixed(2))
+                    .style("font-size", "16px");
+
+        };
+
+        const mouseout = function(event, d) {
+            if (state.exposedFeatures.includes(featureId)) {
+                d3.select(this)
+                    .style("stroke", "none")
+            }
+            d3.select(this)
+                .style("stroke-width", "1px");
+            // Clear the highlighted legend line
+            d3.select("line.highlighted-legend-line")
+                .remove();
+            d3.select("text.highlighted-legend-text")
+                .remove();
+        };
 
         // Render bar chart
         cell.selectAll("bars")
@@ -343,7 +383,9 @@ const drawBarchart = (featureContributionData, featureId) => {
             .attr("height", y.bandwidth())
             .style("fill", (d, i) => state.colorScale[i])
             .style("stroke", "#000")
-            .style("stroke-width", "2px");
+            .style("stroke-width", "1px")
+            .on("mouseover", mouseover)
+            .on("mouseout", mouseout);
     } else {
         cell.append("text")
             .attr("x", w / 2)
@@ -447,54 +489,6 @@ const drawBoxplot = (boxplotData, featureId) => {
             .attr("stroke", "black")
             .style("width", 120);
 
-    // create a tooltip
-//   let tooltip = d3.select(".feature-table")
-//         .append("div")
-//         .style("opacity", 0)
-//         .attr("class", "tooltip")
-//         .style("font-size", "16px")
-//   // Three function that change the tooltip when user hover / move / leave a cell
-//   const mouseover = function(event, d) {
-//         tooltip
-//             .transition()
-//             .duration(200)
-//             .style("opacity", 1)
-//         tooltip
-//             .html("<span style='color:grey'>Feature Value: </span>" + d)
-//             .style("left", (d3.pointer(event)[0]+30) + "px")
-//             .style("top", (d3.pointer(event)[1]+30) + "px")
-//   }
-//   const mousemove = function(event, d) {
-//         tooltip
-//             .style("left", (d3.pointer(event)[0]+30) + "px")
-//             .style("top", (d3.pointer(event)[1]+30) + "px")
-//   }
-//   const mouseleave = function(d) {
-//         tooltip
-//             .transition()
-//             .duration(200)
-//             .style("opacity", 0)
-//   }
-
-//   // Add individual points with jitter
-//   const jitterWidth = 6;
-//   const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
-//   const datasets = boxplotData.map((d, i) => d.dataset);
-//   datasets.forEach((dataset, i) => {
-//     cell.selectAll(`.boxplot-points-${i}`)
-//         .data(dataset)
-//         .enter()
-//         .append("circle")
-//         .attr("cx", (d) => x(d))
-//         .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
-//         .attr("r", 2)
-//         .style("fill", (d) => myColor(d))
-//         .attr("stroke", "black")
-//         .on("mouseover", mouseover)
-//         .on("mousemove", mousemove)
-//         .on("mouseleave", mouseleave);
-//   });
-
     return boxplot;
 }
 
@@ -528,6 +522,41 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .range([padding, h - padding])
             .padding(0.4);
 
+        const mouseover = function(event, d) {
+            d3.select(this)
+                .style("stroke-width", "2px");
+            // Highlight the corresponding feature contribution on the X-axis
+            d3.select("g#legend-g-contribution")
+                .append("line")
+                .attr("class", "highlighted-legend-line")
+                .attr("x1", x(d))
+                .attr("x2", x(d))
+                .attr("y1", 4*padding)
+                .attr("y2", h)
+                .style("stroke", "black")
+                .style("stroke-width", "2px")
+                
+                d3.select("g#legend-g-contribution")
+                .append("text")
+                    .attr("class", "highlighted-legend-text")
+                    .attr("x", x(d))
+                    .attr("y", 4*padding)
+                    .text(d.toFixed(2))
+                    .style("font-size", "16px");
+
+        };
+
+        const mouseout = function(event, d) {
+            d3.select(this)
+                .style("stroke-width", "1px");
+            // Clear the highlighted legend line
+            d3.select("line.highlighted-legend-line")
+                .remove();
+            d3.select("text.highlighted-legend-text")
+                .remove();
+        };
+
+
         // Render exposed bar chart
         exposedBarChartCell.selectAll("exposed-bars")
             .data(exposedFeatureContribution.contribution)
@@ -540,7 +569,9 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .attr("height", y.bandwidth()/2)
             .style("fill", (d, i) => state.colorScale[i])
             .style("stroke", "black")
-            .style("stroke-width", "2px");
+            .style("stroke-width", "1px")
+            .on("mouseover", mouseover)
+            .on("mouseout", mouseout);
 
         // Color scale
         const colors = [
@@ -583,6 +614,7 @@ watch(() => props.featureTable, (newVal, oldVal) => {
 
 watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     if (_.isEqual(newVal, oldVal)) return;
+    state.exposedFeatures = newVal.map((d) => d.featureId);
     // Reset feature name, feature contribution bar chart, and boxplot
     d3.selectAll(`svg.feature-name-svg`)
         .classed(state.highlightedFeatureClass, false);
