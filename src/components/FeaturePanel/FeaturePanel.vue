@@ -545,7 +545,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
                     .interpolator(d3.interpolateHcl)
                     .domain([state.boxplotMin, state.boxplotMax])
                     .range([color[0], color[1]]));
-        console.log(myColor);
+                    
         const boxplotX = d3.scaleLinear()
             .domain([state.boxplotMin, state.boxplotMax])
             .range([padding, w - padding]);
