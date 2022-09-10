@@ -317,7 +317,7 @@ const drawBarchart = (featureContributionData, featureId) => {
     // Create y scale
     const y = d3.scaleBand()
         .domain(featureContributionData.map((d, i) => i))
-        .range([h - padding, padding])
+        .range([padding, h - padding])
         .padding(0.4);
     if (!featureContributionData.every(isZero)) {
         
@@ -365,7 +365,7 @@ const drawBoxplot = (boxplotData, featureId) => {
 
     const y = d3.scaleBand()
         .domain(Array.from({length: boxplotData.length}, (v, i) => i))
-        .range([h - padding, padding])
+        .range([padding, h - padding])
         .padding(0.4);
     
     const boxplotSvg = d3.select(boxplot).append("svg")
@@ -520,7 +520,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
         // Create y scale
         const y = d3.scaleBand()
             .domain(exposedFeatureContribution.contribution.map((d, i) => i))
-            .range([h - padding, padding])
+            .range([padding, h - padding])
             .padding(0.4);
 
         // Render exposed bar chart
