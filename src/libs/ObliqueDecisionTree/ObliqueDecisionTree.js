@@ -58,6 +58,7 @@ class Odt {
             trainY: null,
             opts: null,
             selectedPoints: [],
+            selectedFeatureNames: [],
             exposedFlowLinks: [],
             uniqueDecisionPaths: [],
             exposedFeatureContributions: [],
@@ -1063,6 +1064,8 @@ class Odt {
      * @param { * } selectedFeatures
      */
     renderSelectedFeaturesUpdate(selectedFeaturesArr) {
+        // Clear selected features
+        this.selectedFeatureNames = [];
         if (selectedFeaturesArr.length === 0) {
             d3.selectAll("path.coefficients-donut-chart")
                 .style("opacity", 1)
@@ -1070,12 +1073,14 @@ class Odt {
             d3.selectAll("g.node")
                 .style("opacity", 1);
         } else {
+
             // Weak display of non-target feature decision nodes
             d3.selectAll("path.coefficients-donut-chart")
                 .style("opacity", 0.2);
             d3.selectAll("g.node")
                 .style("opacity", 0.4);
             selectedFeaturesArr.forEach((featureName) => {
+                this.selectedFeatureNames.push(featureName);
                 // Highlight target feature decision nodes and donut chart
                 d3.selectAll(`path#donut-chart-${featureName}`)
                     .style("opacity", 1)

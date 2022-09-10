@@ -235,8 +235,12 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
     const mouseout = function (event, node) {
         tooltip.style("opacity", 0);
         donutChartGroup.select("text.donut-chart-tooltip-text").remove();
-        d3.select(this)
-            .style("stroke", "none");
+        if (that.selectedFeatureNames.includes(node.data.name)) {
+            return;
+        } else {
+            d3.select(this)
+                .style("stroke", "none");
+        }
     }
 
     // Build the donut chart
