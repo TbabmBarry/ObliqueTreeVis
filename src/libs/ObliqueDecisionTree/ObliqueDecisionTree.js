@@ -846,7 +846,7 @@ class Odt {
      * @returns {any} 
      */ 
     renderSelectionEffect(selectedDataPoints) {
-        const { nodes } = this;
+        const { nodes, trainX, trainY, constants: { featureArr } } = this;
         this.selectedPoints = selectedDataPoints.map(selectedDataPoint => selectedDataPoint.id);
         const decisionPaths = selectedDataPoints.map((selectedDataPoint) => ({
             label: selectedDataPoint.label,
@@ -912,28 +912,38 @@ class Odt {
                     exposedFeatureContributions.push({
                         featureId: i,
                         fcArr: val,
-                        count: decisionPath.idArr.length
+                        idArr: decisionPath.idArr,
                     });
                 }
             })
         });
+        let currLabelArr, currDataset, tmpDataset;
         const uniqueExposedFeatureContributions = exposedFeatureContributions.reduce((acc, curr) => {
-            const found = acc.find(e => e.featureId === curr.featureId);
+            let found = acc.find(e => e.featureId === curr.featureId);
+            currLabelArr = curr.idArr.map(id => trainY[id]);
+            currDataset = curr.idArr.map(id => trainX[id][featureArr[curr.featureId]]);
+            tmpDataset = Array.from({length: curr.fcArr.length}, () => []);
+            currLabelArr.forEach((label, i) => {
+                tmpDataset[label].push(currDataset[i]);
+            });
             if (found) {
                 curr.fcArr.map((fc, i) => {
-                    found.contribution[i] = found.contribution[i].concat(Array(curr.count).fill(fc));
+                    found.contribution[i] = found.contribution[i].concat(Array(curr.idArr.length).fill(fc));
+                    found.datasets[i] = found.datasets[i].concat(tmpDataset[i]);
                 })
             } else {
                 acc.push({
                     featureId: curr.featureId,
-                    contribution: curr.fcArr.map(fc => Array(curr.count).fill(fc))
+                    contribution: curr.fcArr.map(fc => Array(curr.idArr.length).fill(fc)),
+                    datasets: tmpDataset
                 });
             }
             return acc;
         }, []);
         this.exposedFeatureContributions = uniqueExposedFeatureContributions.map((ele) => ({
             featureId: ele.featureId,
-            contribution: ele.contribution.map((arr) => d3.quantile(arr.sort(d3.ascending), 0.5))
+            contribution: ele.contribution.map((arr) => d3.quantile(arr.sort(d3.ascending), 0.5)),
+            datasets: ele.datasets
         }));
         return this.exposedFeatureContributions;
     }

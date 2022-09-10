@@ -178,7 +178,7 @@ const renderTableBody = (targetSelection, tableData) => {
         .filter((d) => d.key === "boxplot")
         .attr("id", "feature-boxplot")
         .attr("width", "44%")
-        .append((d) => drawBoxplot(d.value));
+        .append((d) => drawBoxplot(d.value, d.index));
 }
 
 const drawLegend = (type) => {
@@ -353,11 +353,11 @@ const drawBarchart = (featureContributionData, featureId) => {
 }
 
 
-const drawBoxplot = (boxplotData) => {
+const drawBoxplot = (boxplotData, featureId) => {
     // Create SVG element
-    let boxplot = document.createElement("div");
+    const boxplot = document.createElement("div");
     boxplot.setAttribute("class", "boxplot flex justify-center m-auto");
-    let w = state.width * 0.4, h = state.width * 0.2, padding = 10;
+    const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
 
     const x = d3.scaleLinear()
         .domain([state.boxplotMin, state.boxplotMax])
@@ -367,18 +367,16 @@ const drawBoxplot = (boxplotData) => {
         .domain(Array.from({length: boxplotData.length}, (v, i) => i))
         .range([h - padding, padding])
         .padding(0.4);
-    // Color scale
-    const myColor = d3.scaleSequential()
-        .interpolator(d3.interpolateInferno)
-        .domain([state.boxplotMin, state.boxplotMax]);
     
-    
-    let boxplotSvg = d3.select(boxplot).append("svg")
+    const boxplotSvg = d3.select(boxplot).append("svg")
         .attr("width", w)
         .attr("height", h)
         .attr("class", "boxplot-svg")
+        .attr("id",`boxplot-svg-${featureId}`);
 
-    let cell = boxplotSvg.append("g");
+    const cell = boxplotSvg.append("g")
+        .attr("class", `boxplot-g`)
+        .attr("id", `boxplot-g-${featureId}`);
 
     // Show the x scale
     // cell.append("g")
@@ -511,13 +509,14 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
         // TODO: add effects on feature name and feature contribution bar chart
         const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
         const barchartSvg = d3.selectAll(`svg#barchart-svg-${exposedFeatureContribution.featureId}`);
-        const exposedCell = barchartSvg.append("g")
+        const exposedBarChartCell = barchartSvg.append("g")
             .attr("class", "exposed-barchart-g");
     
         // Create x scale
         const x = d3.scaleLinear()
             .domain([state.contributionMin, state.contributionMax])
             .range([padding, w - padding]);
+            
         // Create y scale
         const y = d3.scaleBand()
             .domain(exposedFeatureContribution.contribution.map((d, i) => i))
@@ -525,7 +524,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .padding(0.4);
 
         // Render exposed bar chart
-        exposedCell.selectAll("exposed-bars")
+        exposedBarChartCell.selectAll("exposed-bars")
             .data(exposedFeatureContribution.contribution)
             .enter()
             .append("rect")
@@ -535,7 +534,32 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .attr("width", (d) => Math.abs(x(d) - x(0)))
             .attr("height", y.bandwidth()/2)
             .attr("fill", (d, i) => state.colorScale[i]);
-        
+
+        // Color scale
+        const myColor = d3.scaleSequential()
+            .interpolator(d3.interpolateInferno)
+            .domain([state.boxplotMin, state.boxplotMax]);
+
+        const boxplotX = d3.scaleLinear()
+            .domain([state.boxplotMin, state.boxplotMax])
+            .range([padding, w - padding]);
+
+        // Add individual points with jitter
+        const jitterWidth = 6;
+        const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
+        exposedFeatureContribution.datasets.forEach((dataset, i) => {
+            d3.select(`g#boxplot-g-${exposedFeatureContribution.featureId}`)
+                .selectAll(`.exposed-boxplot-points-${i}`)
+                .data(dataset)
+                .enter()
+                .append("circle")
+                    .attr("class", "exposed-boxplot-point")
+                    .attr("cx", (d) => boxplotX(d))
+                    .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
+                    .attr("r", 2)
+                    .style("fill", (d) => myColor(d))
+                    .attr("stroke", "black")
+        });
     });
 }
 
@@ -545,12 +569,14 @@ watch(() => props.featureTable, (newVal, oldVal) => {
 });
 
 watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
-    // Reset feature name and feature contribution bar chart
+    // Reset feature name, feature contribution bar chart, and boxplot
     d3.selectAll(`svg.feature-name-svg`)
         .classed(state.highlightedFeatureClass, false);
 
     d3.selectAll(`rect.feature-bar`)
         .style("opacity", 1);
+
+    d3.selectAll("circle.exposed-boxplot-point").remove();
     // Draw exposed feature contributions
     drawExposedFeatureContributions(newVal);
 });
