@@ -747,15 +747,12 @@ class Odt {
                             .attr("class", "path-summary feature-contribution-rect")
                             .attr("x", (d) => x(Math.min(0, d.value)) - x(0))
                             .attr('rx', 2)
+                            .attr('ry', 2)
                             .attr("y", (d) => 3*nodeRectRatio
                                  +yBand(d.label)+idx*(1/2)*(nodeRectWidth-2*nodeRectRatio))
                             .attr("width", (d) => Math.abs(x(d.value) - x(0)))
                             .attr("height", yBand.bandwidth())
-                            .style("fill", (d) => {
-                                const texture = textures.lines().thicker().stroke(colorScale[d.label]);
-                                d3.select(this).call(texture);
-                                return d.value > 0 ? colorScale[d.label] : texture.url();
-                            })
+                            .style("fill", (d) => colorScale[d.label])
                             .style("stroke", "#000")
                             .style("stroke-width", "2px");
 

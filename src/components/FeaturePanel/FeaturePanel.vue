@@ -337,9 +337,13 @@ const drawBarchart = (featureContributionData, featureId) => {
             .attr("id", `feature-bar-${featureId}`)
             .attr("x", (d) => x(Math.min(0, d)))
             .attr("y", (d, i) => y(i))
+            .attr('rx', 2)
+            .attr('ry', 2)
             .attr("width", (d) => Math.abs(x(d) - x(0)))
             .attr("height", y.bandwidth())
-            .attr("fill", (d, i) => state.colorScale[i]);
+            .style("fill", (d, i) => state.colorScale[i])
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
     } else {
         cell.append("text")
             .attr("x", w / 2)
@@ -502,9 +506,10 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
         d3.selectAll(`svg#feature-name-svg-${exposedFeatureContribution.featureId}`)
             .classed(state.highlightedFeatureClass, true);
 
-        // Change opacity of the feature bar
+        // Change opacity of the feature bar and temporarily remove stroke
         d3.selectAll(`rect#feature-bar-${exposedFeatureContribution.featureId}`)
-            .style("opacity", 0.6);
+            .style("opacity", 0.6)
+            .style("stroke", "none");
 
         // TODO: add effects on feature name and feature contribution bar chart
         const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
@@ -533,7 +538,9 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .attr("y", (d, i) => y(i) + y.bandwidth()/4)
             .attr("width", (d) => Math.abs(x(d) - x(0)))
             .attr("height", y.bandwidth()/2)
-            .attr("fill", (d, i) => state.colorScale[i]);
+            .style("fill", (d, i) => state.colorScale[i])
+            .style("stroke", "black")
+            .style("stroke-width", "2px");
 
         // Color scale
         const colors = [
@@ -581,7 +588,8 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
         .classed(state.highlightedFeatureClass, false);
 
     d3.selectAll(`rect.feature-bar`)
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .style("stroke", "black");
 
     d3.selectAll("circle.exposed-boxplot-point").remove();
     // Draw exposed feature contributions
