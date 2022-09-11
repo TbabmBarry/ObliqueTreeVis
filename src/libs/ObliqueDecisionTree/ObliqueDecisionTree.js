@@ -82,7 +82,7 @@ class Odt {
                 scatterPlotPadding: 20,
                 histogramScatterPlotPadding: 10,
                 nodeRectStrokeWidth: 3,
-                leafNodeRectStrokeWidth: 8,
+                leafNodeRectStrokeWidth: 3,
                 colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
@@ -531,8 +531,9 @@ class Odt {
             .style("stroke", "#000000")
             .style("stroke-width", (d) => d.data.type === "leaf" ? leafNodeRectStrokeWidth : nodeRectStrokeWidth);
         
-        this.renderPathSummaryView(node);
+        // this.renderPathSummaryView(node);
         this.renderSummaryView(node);
+        this.renderPathSummaryViewNew(node);
     }
 
     /**
@@ -544,9 +545,9 @@ class Odt {
         let _this = this;
         // Draw class distribution
         node.each(function(nodeData, index) {
-            // Draw class distribution
-            _this.drawClassDistribution(d3.select(this), nodeData, _this);
             if (nodeData.data.type === "decision") {
+                // Draw class distribution
+                _this.drawClassDistribution(d3.select(this), nodeData, _this);
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
                 }
@@ -594,6 +595,94 @@ class Odt {
                 _this.drawOneFeatureHistogram(node, nodeData, currFeatureIdx, _this);
             }
         })
+    }
+
+
+    renderPathSummaryViewNew(node) {
+        const { parts, screenHeight, screenWidth, 
+            constants: { nodeRectWidth, nodeRectRatio, nodeRectStrokeWidth, leafNodeRectStrokeWidth, 
+                transitionDuration, colorScale } } = this;
+        let _this = this;
+        node.each(function (nodeData, index) {
+            if (nodeData.data.type === "leaf") {
+                const foreignObject = d3.select(this)
+                    .append("svg:foreignObject")
+                    .attr("class", "path-summary foreign-object")
+                    .attr("width", nodeRectWidth)
+                    .attr("height", nodeRectWidth)
+                    .attr("x", -0.5 * nodeRectWidth)
+                    .attr("y", 0);
+                    
+                const leafNodeTable = foreignObject.append("xhtml:body")
+                    .append("table")
+                    .attr("class", "path-summary table-auto w-full rounded border-separate border border-slate-400")
+                    .attr("id", `path-summary table-${nodeData.data.name}`);
+
+                const leafNodeTableHead = leafNodeTable.append("thead")
+                    .attr("class", "path-summary-table-head")
+                    .attr("id", `path-summary table-head-${nodeData.data.name}`);
+                const leafNodeTableHeadRow = leafNodeTableHead.append("tr")
+                    .attr("class", "path-summary table-head-row");
+                
+                leafNodeTableHeadRow.selectAll("th")
+                    .data(["Name", "Contribution"])
+                    .join("th")
+                    .attr("class", "path-summary table-head-cell border rounded font-bold text-base border-slate-300")
+                    .text(d => d);
+
+                const leafNodeTableBody = leafNodeTable.append("tbody")
+                    .attr("class", "path-summary table-body");
+                
+                // Get valid feature contribution data for this node
+                const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
+                console.log(fcArr, fcRange);
+                
+                // Append table body rows
+                const leafNodeTableBodyRow = leafNodeTableBody.selectAll("tr")
+                    .data(fcArr)
+                    .join("tr")
+                    .attr("class", "path-summary table-body-row");
+
+                leafNodeTableBodyRow.selectAll("td")
+                    .data((d,i) => Object.entries(d).map(([key, value]) => ({
+                        key: key,
+                        value: value,
+                        index: i
+                    })))
+                    .enter()
+                    .append("td")
+                    .attr("class", "border rounded text-center border-slate-300");
+
+                // Append table body cells
+                leafNodeTableBodyRow.selectAll("td")
+                    .filter((d) => d.key === "featureName")
+                    .attr("id", (d) => `path-summary table-body-cell-${nodeData.data.name}-${d.index}`)
+                    .attr("width", "30%")
+                    .append((d,i) => {
+                        const featureNameDiv = document.createElement("div");
+                        featureNameDiv.setAttribute("class", "path-summary table-body-cell-feature-name flex justify-center m-auto");
+                        const w = 0.3*nodeRectWidth, h = 0.2*nodeRectWidth, padding = 10;
+                        const featureNameSvg = d3.select(featureNameDiv)
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h)
+                            .attr("id", `path-summary table-body-cell-feature-name-svg-${nodeData.data.name}-${d.index}`);
+                        let heightPadding = (h-d.value.split("_").length*padding)/2;
+                        d.value.split("_").forEach((word, idx) => {
+                            featureNameSvg.append("text")
+                                .attr("x", w/2)
+                                .attr("y", heightPadding+idx*padding)
+                                .attr("dominant-baseline", "middle")
+                                .style("text-anchor", "middle")
+                                .text(word);
+                        })
+                        return featureNameDiv;
+                    });
+
+                // TODO: Add clip path to create a customized scroll bar
+            }
+        })
+        
     }
 
     /**

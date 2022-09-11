@@ -98,24 +98,6 @@ const initFeatureTable = () => {
         .attr("class", "header-row");
     
     state.featureTable.forEach((feature) => {
-        // Find the min and max of the feature contribution
-        // state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
-        // state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
-        // Find the min and max of the feature boxplot
-        // let unscaledDatasets = Array.from(new Set(state.labelSet)).map((label) => {
-        //     return state.labelSet.filter((row) => row === label).map((row, index) => {
-        //         return state.unscaledTrainingSet[index][feature.name];
-        //     });
-        // })
-        // feature.boxplot = unscaledDatasets.map((unscaledDataset) => ({
-        //     min: d3.min(unscaledDataset),
-        //     max: d3.max(unscaledDataset),
-        //     q1: d3.quantile(unscaledDataset.sort(d3.ascending), 0.25),
-        //     median: d3.quantile(unscaledDataset.sort(d3.ascending), 0.5),
-        //     q3: d3.quantile(unscaledDataset.sort(d3.ascending), 0.75),
-        //     dataset: unscaledDataset
-        // }))
-        
         feature.histogram = {
             dataset: state.unscaledTrainingSet.map((row, idx) => ({
                     value: row[feature.name],
