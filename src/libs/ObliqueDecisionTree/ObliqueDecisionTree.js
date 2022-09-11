@@ -671,12 +671,35 @@ class Odt {
                 
                 // Get valid feature contribution data for this node
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
-                
+                // console.log(fcArr, fcRange);
+                // Add feature contribution table head
                 leafNodeTableHeadRow.selectAll("th")
                     .data(["Name", "Contribution"])
                     .join("th")
                     .attr("class", "path-summary table-head-cell border rounded font-bold text-base border-slate-300")
-                    .text(d => d);
+                    .append((d) => {
+                        const headerDiv = document.createElement("div");
+                        headerDiv.setAttribute("class", "path-summary table-head-cell-header m-auto");
+                        let w, h = 0.1*nodeRectWidth, padding = 10;
+                        if (d === "Name") w = 0.25 * nodeRectWidth;
+                        if (d === "Contribution") w = 0.7 * nodeRectWidth;
+                        const headerSvg = d3.select(headerDiv)
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h)
+                            .attr("class", "path-summary table-head-cell-header-svg");
+                        const headerG = headerSvg.append("g")
+                            .attr("class", "path-summary table-head-cell-header-g")
+                            .attr("id", `path-summary table-head-cell-header-g-${d}`);
+                        headerG.append("text")
+                            .attr("class", "path-summary table-head-cell-header-text")
+                            .attr("x", padding)
+                            .attr("y", h-padding)
+                            .attr("dominant-baseline", "middle")
+                            .style("font-weight", "bold")
+                            .text(d);
+                        return headerDiv;
+                    })
 
                 // Append table body rows
                 const leafNodeTableBodyRow = leafNodeTableBody.selectAll("tr")
@@ -701,7 +724,7 @@ class Odt {
                     .attr("width", "30%")
                     .append((d,i) => {
                         const featureNameDiv = document.createElement("div");
-                        featureNameDiv.setAttribute("class", "path-summary table-body-cell-feature-name flex justify-center m-auto");
+                        featureNameDiv.setAttribute("class", "path-summary table-body-cell-feature-name flex justify-center m-auto")
                         const w = 0.3*nodeRectWidth, h = 0.3*nodeRectWidth, padding = 10;
                         const featureNameSvg = d3.select(featureNameDiv)
                             .append("svg")
@@ -719,6 +742,50 @@ class Odt {
                         })
                         return featureNameDiv;
                     });
+
+                leafNodeTableBodyRow.selectAll("td")
+                    .filter((d) => d.key === "featureContribution")
+                    .attr("width", "70%")
+                    .attr("id", (d) => `path-summary table-body-cell-${nodeData.data.name}-${d.index}`)
+                    .append(function(d,i) {
+                        const barchart = document.createElement("div");
+                        barchart.setAttribute("class", "path-summary table-body-cell-feature-contribution flex justify-center m-auto");
+                        const w = 0.7*nodeRectWidth, h = 0.35*nodeRectWidth, padding = 10;
+                        const barchartSvg = d3.select(barchart)
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h)
+                            .attr("class", "path-summary table-body-cell-feature-contribution-svg")
+                            .attr("id", `path-summary table-body-cell-feature-contribution-svg-${nodeData.data.name}-${d.index}`);
+                        const cell = barchartSvg.append("g")
+                            .attr("class", "path-summary table-body-cell-feature-contribution-cell");
+                        
+                        const x = d3.scaleLinear()
+                            .domain(fcRange)
+                            .range([2*padding, w-2*padding])
+                        const y = d3.scaleBand()
+                            .domain(d.value.map((val,idx)=>idx))
+                            .range([2*padding, h-2*padding])
+                            .padding(0.4);
+                        
+                        cell.selectAll("bars")
+                            .data(d.value)
+                            .enter()
+                            .append("rect")
+                            .attr("class", "path-summary table-body-cell-feature-contribution-bar")
+                            .attr("id", `path-summary table-body-cell-feature-contribution-bar-${nodeData.data.name}-${d.index}`)
+                            .attr("x", (dd) => x(Math.min(0, dd.value)))
+                            .attr("y", (dd) => y(dd.label))
+                            .attr('rx', 2)
+                            .attr('ry', 2)
+                            .attr("width", (dd) => Math.abs(x(dd.value) - x(0)))
+                            .attr("height", y.bandwidth())
+                            .style("fill", (dd) => colorScale[dd.label])
+                            .style("stroke", "#000")
+                            .style("stroke-width", "1px");
+
+                        return barchart;
+                    })
 
                 // TODO: Add clip path to create a customized scroll bar
                 d3.select(this)
@@ -752,7 +819,7 @@ class Odt {
                     .attr("height", leafNodeBBox.height)
                 
                 // Insert an invisible rect that will be used to capture scroll events
-                d3.select(this).insert("rect", "g")
+                d3.select(this).append("rect")
                     .attr("class", "scroll-capture-rect")
                     .attr("x", leafNodeBBox.x)
                     .attr("y", leafNodeBBox.y)
