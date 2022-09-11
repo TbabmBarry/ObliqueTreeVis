@@ -276,7 +276,7 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
         .data(pieData)
         .join('text')
             .text(d => d.data.name)
-            .attr("class", "donut-chart-label")
+            .attr("class", "donut-chart-label cursor-default")
             .attr("id", (d, i) => `donut-chart-label-${d.data.name}`)
             .attr('transform', (d) => {
                 const pos = bigArc.centroid(d);
@@ -288,6 +288,7 @@ export function drawCoefficientDonutChart(targetSelection, nodeData, that) {
                 const midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
                 return (midangle < Math.PI ? 'start' : 'end')
             })
+            .style("font-size", "16px");
 }
 
 /**
@@ -313,7 +314,7 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
 
     const splitData = nodeData.data.leftCount.map((val, idx) => [val, nodeData.data.rightCount[idx]]);
     const splitDistribution = targetSelection.append("g")
-            .attr("class", "summary split-distribution")
+            .attr("class", "summary split-distribution cursor-default")
             .attr("transform", `translate(${nodeRectRatio},${nodeRectRatio})`);
 
     // Append left and right split distribution into splitDistribution svg group

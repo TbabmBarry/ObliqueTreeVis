@@ -266,7 +266,7 @@ const drawLegend = (type) => {
     }
 
     legendG.append("text")
-        .attr("class", "legend-text font-bold")
+        .attr("class", "legend-text font-bold cursor-default")
         .attr("x", padding)
         .attr("y", padding)
         .attr("dominant-baseline", "middle")
@@ -361,15 +361,8 @@ const drawFeatureName = (featureName, featureId) => {
             .attr("y", heightPadding + i * 20)
             .attr("dominant-baseline", "middle")
             .text(word)
-            .style("text-anchor", "middle");
+            .style("text-anchor", "middle")
     });
-    // featureNameG.append("text")
-    //     .attr("class", "feature-name-text")
-    //     .attr("x", padding)
-    //     .attr("y", h/2)
-    //     .attr("dominant-baseline", "middle")
-    //     .text(featureName)
-    //     .style("text-anchor", "start")
 
     return featureNameDiv;
 
@@ -462,12 +455,33 @@ const drawBarchart = (featureContributionData, featureId) => {
             .on("mouseover", mouseover)
             .on("mouseout", mouseout);
     } else {
-        cell.append("text")
-            .attr("x", w / 2)
-            .attr("y", h / 2 + padding / 2)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "16px")
-            .text("No data");
+        cell.append("line")
+            .attr("class", "feature-bar-no-data")
+            .attr("x1", 0)
+            .attr("x2", w)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("line")
+            .attr("class", "feature-bar-no-data")
+            .attr("x1", w)
+            .attr("x2", 0)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("rect")
+            .attr("class", "feature-bar-no-data")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .attr("width", w)
+            .attr("height", h)
+            .style("fill", "none")
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
     }
     
     return barchart;
