@@ -7,6 +7,8 @@
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
 import { getUnscaledDatasetChangeSelects } from "@/api/metrics";
+import { histogram } from 'd3-array';
+import { curveBasis } from 'd3-shape';
 
 
 let d3 = inject("d3");
@@ -498,7 +500,7 @@ const drawFeatureStackedHistgram = (histogramData, featureId) => {
         const featureHistogram = d3.bin()
             .value((d) => d.value)
             .domain(x.domain())
-            .thresholds(x.ticks(30));
+            .thresholds(x.ticks(20));
 
         const xAxis = d3.axisBottom(x)
             .tickSizeOuter(0);
@@ -586,7 +588,6 @@ const drawFeatureStackedHistgram = (histogramData, featureId) => {
             .attr("id", `feature-histogram-y-axis-${featureId}`)
             .attr("transform", `translate(${2*padding}, 0)`)
             .call(d3.axisLeft(y).ticks(5));
-        
     }
     
 
@@ -701,7 +702,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .style("stroke", "none");
 
         // TODO: add effects on feature name and feature contribution bar chart
-        const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
+        const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
         const barchartSvg = d3.selectAll(`svg#barchart-svg-${exposedFeatureContribution.featureId}`);
         const exposedBarChartCell = barchartSvg.append("g")
             .attr("class", "exposed-barchart-g");
@@ -802,6 +803,69 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     });
 }
 
+const drawExposedHistograms = (exposedHistograms) => {
+    // Clear the previous exposed histograms
+    d3.selectAll("g.exposed-histogram-g").remove();
+    exposedHistograms.forEach((exposedHistogram) => {
+        const histogramData = exposedHistogram.datasets.map((id) => ({
+            label: state.labelSet[id],
+            value: state.unscaledTrainingSet[id][state.featureArr[exposedHistogram.featureId]]
+        }));
+        const isNumeric = state.featureTable[exposedHistogram.featureId].histogram.isNumeric;
+        const w = state.width * 0.45, h = state.width * 0.2, padding = 10;
+        const histogramSvg = d3.selectAll(`svg#feature-stacked-histogram-svg-${exposedHistogram.featureId}`);
+        if (isNumeric) {
+            d3.selectAll(`rect#feature-stacked-histogram-bar-${exposedHistogram.featureId}`)
+                .style("opacity", 0.6);
+
+            const x = d3.scaleLinear()
+                .domain(d3.extent(state.featureTable[exposedHistogram.featureId].histogram.dataset, (d)=>d.value))
+                .range([2*padding, w - 2*padding]);
+
+            const featureHistogram = d3.bin()
+                .value((d) => d.value)
+                .domain(x.domain())
+                .thresholds(x.ticks(20));
+
+            const localBins = featureHistogram(histogramData),
+                globalBins = featureHistogram(state.featureTable[exposedHistogram.featureId].histogram.dataset);
+            const localStacks = stackDataGenerator(localBins);
+            const globalStacks = stackDataGenerator(globalBins);
+            globalStacks.forEach((globalStack, idx) => {
+                globalStack.forEach((globalEntry, idx2) => {
+                    if (idx > 0) {
+                        let currDiff = localStacks[idx][idx2][1] - localStacks[idx][idx2][0];
+                        localStacks[idx][idx2][0] = globalEntry[0];
+                        localStacks[idx][idx2][1] = localStacks[idx][idx2][0] + currDiff;
+                    }
+                })
+            });
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(globalBins, (d) => d.length)])
+                .range([h - 2*padding, 2*padding]);
+            const exposedHistogramCell = histogramSvg.append("g")
+                .attr("class", "exposed-histogram-g")
+                .attr("id", `exposed-histogram-g-${exposedHistogram.featureId}`);
+            exposedHistogramCell.append("g")
+                .selectAll("exposed-stacked-histogram")
+                .data(localStacks)
+                .join("g")
+                .attr("fill", (d, i) => state.colorScale[i])
+                .selectAll("rect")
+                .data((d) => d)
+                .join("rect")
+                .attr("class", "exposed-feature-stacked-histogram-bar")
+                .attr("id", (d) => `exposed-feature-stacked-histogram-bar-${exposedHistogram.featureId}`)
+                .attr("x", (d) => x(d.data.x0))
+                .attr("y", (d) => Math.min(y(d[1]), y(d[0])))
+                .attr("height", (d) => Math.abs(y(d[0]) - y(d[1])))
+                .attr("width", d => Math.max(1, x(d.data.x1) - x(d.data.x0) - 1));
+        }
+
+    });
+
+}
+
 const stackDataGenerator = (bins) => {
     const keys = [0, 1, 2];
     const stackData = [];
@@ -818,7 +882,6 @@ const stackDataGenerator = (bins) => {
         });
         stackData.push(pushableObj);
     };
-
     const realStack = d3.stack()
         .keys(keys)
         .value((d, key) => d[key].length);
@@ -841,9 +904,15 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
         .style("opacity", 1)
         .style("stroke", "black");
 
+    d3.selectAll(`rect.feature-stacked-histogram-bar`)
+            .style("opacity", 1);
+
     d3.selectAll("circle.exposed-boxplot-point").remove();
     // Draw exposed feature contributions
     drawExposedFeatureContributions(newVal);
+
+    // Draw exposed histograms
+    drawExposedHistograms(newVal);
 });
 
 watch(() => state.selectedFeatures, (newVal, oldVal) => {

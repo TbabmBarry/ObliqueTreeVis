@@ -914,25 +914,18 @@ class Odt {
                 }
             })
         });
-        let currLabelArr, currDataset, tmpDataset;
         const uniqueExposedFeatureContributions = exposedFeatureContributions.reduce((acc, curr) => {
             let found = acc.find(e => e.featureId === curr.featureId);
-            currLabelArr = curr.idArr.map(id => trainY[id]);
-            currDataset = curr.idArr.map(id => trainX[id][featureArr[curr.featureId]]);
-            tmpDataset = Array.from({length: curr.fcArr.length}, () => []);
-            currLabelArr.forEach((label, i) => {
-                tmpDataset[label].push(currDataset[i]);
-            });
             if (found) {
                 curr.fcArr.map((fc, i) => {
                     found.contribution[i] = found.contribution[i].concat(Array(curr.idArr.length).fill(fc));
-                    found.datasets[i] = found.datasets[i].concat(tmpDataset[i]);
                 })
+                found.datasets = found.datasets.concat(curr.idArr);
             } else {
                 acc.push({
                     featureId: curr.featureId,
                     contribution: curr.fcArr.map(fc => Array(curr.idArr.length).fill(fc)),
-                    datasets: tmpDataset
+                    datasets: curr.idArr
                 });
             }
             return acc;
