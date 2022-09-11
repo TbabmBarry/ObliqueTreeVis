@@ -220,6 +220,7 @@ const renderTableBody = (targetSelection, tableData) => {
         .attr("id", "feature-contribution")
         .attr("width", "35%")
         .append((d) => drawBarchart(d.value, d.index));
+        // .append((d) => drawBoxplot(d.value, d.index));
 
     // tbdoyRow.selectAll("td")
     //     .filter((d) => d.key === "boxplot")
@@ -613,11 +614,12 @@ const drawBoxplot = (boxplotData, featureId) => {
     // Create SVG element
     const boxplot = document.createElement("div");
     boxplot.setAttribute("class", "boxplot flex justify-center m-auto");
-    const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
-
-    const x = boxplotData.map(bpData => d3.scaleLinear()
-        .domain([bpData.min, bpData.max])
-        .range([padding, w - padding]));
+    const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
+    const isEmpty = (curr) => curr.length === 0;
+    // Create x scale
+    const x = d3.scaleLinear()
+        .domain([state.contributionMin, state.contributionMax])
+        .range([padding, w - padding]);
 
     const y = d3.scaleBand()
         .domain(Array.from({length: boxplotData.length}, (v, i) => i))
@@ -633,72 +635,103 @@ const drawBoxplot = (boxplotData, featureId) => {
     const cell = boxplotSvg.append("g")
         .attr("class", `boxplot-g`)
         .attr("id", `boxplot-g-${featureId}`);
+    if (!boxplotData.every(isEmpty)) {
+        // Compute quartiles, median, inter quantile range min and max --> these info are then used to draw the box.
+        const boxplotDataArr = boxplotData.map((d) => ({
+            min: d.length ? d3.min(d) : 0,
+            max: d.length ? d3.max(d) : 0,
+            median: d.length ? d3.quantile(d.sort(d3.ascending), 0.5) : 0,
+            q1: d.length ? d3.quantile(d.sort(d3.ascending), 0.25) : 0,
+            q3: d.length ? d3.quantile(d.sort(d3.ascending), 0.75) : 0,
+        }));
+        // Show the main vertical line
+        cell.selectAll("vertLines")
+            .data(boxplotDataArr)
+            .enter()
+            .append("line")
+                .attr("x1", (d, i) => x(d.min))
+                .attr("x2", (d, i) => x(d.max))
+                .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
+                .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
+                .attr("stroke", "black")
+                .style("width", 60)
+        
+        // Draw rectangle for the main box
+        cell.selectAll("boxes")
+            .data(boxplotDataArr)
+            .enter()
+            .append("rect")
+                .attr("x", (d, i) => x(d.q1))
+                .attr("y", (d, i) => y(i))
+                .attr("height", y.bandwidth())
+                .attr("width", (d, i) => x(d.q3)-x(d.q1))
+                .attr("stroke", "black")
+                .style("fill", (d, i) => state.colorScale[i])
+                .style("opacity", 0.5)
+        
+        // Show the median
+        cell.selectAll("medianLines")
+            .data(boxplotDataArr)
+            .enter()
+            .append("line")
+                .attr("x1", (d, i) => x(d.median))
+                .attr("x2", (d, i) => x(d.median))
+                .attr("y1", (d, i) => y(i))
+                .attr("y2", (d, i) => y(i) + y.bandwidth())
+                .attr("stroke", "black")
+                .style("width", 120);
+        
+        // Show the min and max
+        cell.selectAll("minLines")
+            .data(boxplotDataArr)
+            .enter()
+            .append("line")
+                .attr("x1", (d, i) => x(d.min))
+                .attr("x2", (d, i) => x(d.min))
+                .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
+                .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
+                .attr("stroke", "black")
+                .style("width", 120);
 
-    // Show the x scale
-    // cell.append("g")
-    //     .attr("transform", `translate(0, ${h-padding})`)
-    //     .call(d3.axisBottom(x));
-
-    // Show the main vertical line
-    cell.selectAll("vertLines")
-        .data(boxplotData)
-        .enter()
-        .append("line")
-            .attr("x1", (d, i) => x[i](d.min))
-            .attr("x2", (d, i) => x[i](d.max))
-            .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
-            .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
-            .attr("stroke", "black")
-            .style("width", 60)
-    
-    // Draw rectangle for the main box
-    cell.selectAll("boxes")
-        .data(boxplotData)
-        .enter()
-        .append("rect")
-            .attr("x", (d, i) => x[i](d.q1))
-            .attr("y", (d, i) => y(i))
-            .attr("height", y.bandwidth())
-            .attr("width", (d, i) => x[i](d.q3)-x[i](d.q1))
-            .attr("stroke", "black")
-            .style("fill", (d, i) => state.colorScale[i])
-            .style("opacity", 0.5)
-    
-    // Show the median
-    cell.selectAll("medianLines")
-        .data(boxplotData)
-        .enter()
-        .append("line")
-            .attr("x1", (d, i) => x[i](d.median))
-            .attr("x2", (d, i) => x[i](d.median))
-            .attr("y1", (d, i) => y(i))
-            .attr("y2", (d, i) => y(i) + y.bandwidth())
-            .attr("stroke", "black")
-            .style("width", 120);
-    
-    // Show the min and max
-    cell.selectAll("minLines")
-        .data(boxplotData)
-        .enter()
-        .append("line")
-            .attr("x1", (d, i) => x[i](d.min))
-            .attr("x2", (d, i) => x[i](d.min))
-            .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
-            .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
-            .attr("stroke", "black")
-            .style("width", 120);
-
-    cell.selectAll("maxLines")
-        .data(boxplotData)
-        .enter()
-        .append("line")
-            .attr("x1", (d, i) => x[i](d.max))
-            .attr("x2", (d, i) => x[i](d.max))
-            .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
-            .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
-            .attr("stroke", "black")
-            .style("width", 120);
-
+        cell.selectAll("maxLines")
+            .data(boxplotDataArr)
+            .enter()
+            .append("line")
+                .attr("x1", (d, i) => x(d.max))
+                .attr("x2", (d, i) => x(d.max))
+                .attr("y1", (d, i) => y(i) + y.bandwidth()*(1/4))
+                .attr("y2", (d, i) => y(i) + y.bandwidth()*(3/4))
+                .attr("stroke", "black")
+                .style("width", 120);
+    } else {
+        cell.append("line")
+            .attr("class", "boxplot-no-data")
+            .attr("x1", 0)
+            .attr("x2", w)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("line")
+            .attr("class", "boxplot-no-data")
+            .attr("x1", w)
+            .attr("x2", 0)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("rect")
+            .attr("class", "boxplot-no-data")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .attr("width", w)
+            .attr("height", h)
+            .style("fill", "none")
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+    }
     return boxplot;
 }
 

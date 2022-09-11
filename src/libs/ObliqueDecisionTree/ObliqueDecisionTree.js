@@ -1101,7 +1101,7 @@ class Odt {
         });
         const featureTable = featureArr.map(featureName => ({
             name: featureName,
-            contribution: Array.from({length:3}, () => null),
+            // contribution: Array.from({length:3}, () => null),
             // boxplot: Object.keys(featureData[featureName]).map((val) => ({
             //     min: d3.min(featureData[featureName][val]),
             //     max: d3.max(featureData[featureName][val]),
@@ -1132,6 +1132,7 @@ class Odt {
         this.constants.localFeatureContribution = tmpLocalFeatureContribution;
         featureTable.map((feature, idx) => {
             feature.contribution = tmpFeatureContributionArr[idx].map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr.sort(d3.ascending), 0.5): 0);
+            // feature.contribution = tmpFeatureContributionArr[idx];
         });
         this.featureTable = featureTable;
         return featureTable;
