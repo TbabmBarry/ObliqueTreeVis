@@ -859,7 +859,8 @@ const drawExposedHistograms = (exposedHistograms) => {
                 .attr("x", (d) => x(d.data.x0))
                 .attr("y", (d) => Math.min(y(d[1]), y(d[0])))
                 .attr("height", (d) => Math.abs(y(d[0]) - y(d[1])))
-                .attr("width", d => Math.max(1, x(d.data.x1) - x(d.data.x0) - 1));
+                .attr("width", d => Math.max(1, x(d.data.x1) - x(d.data.x0) - 1))
+                .style("stroke", "black");
         }
 
     });
