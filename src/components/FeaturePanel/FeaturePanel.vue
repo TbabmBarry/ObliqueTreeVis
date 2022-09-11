@@ -100,19 +100,24 @@ const initFeatureTable = () => {
         // state.contributionMin > d3.min(feature.contribution) ? state.contributionMin = d3.min(feature.contribution) : state.contributionMin;
         // state.contributionMax < d3.max(feature.contribution) ? state.contributionMax = d3.max(feature.contribution) : state.contributionMax;
         // Find the min and max of the feature boxplot
-        let UnscaledDatasets = Array.from(new Set(state.labelSet)).map((label) => {
+        let unscaledDatasets = Array.from(new Set(state.labelSet)).map((label) => {
             return state.labelSet.filter((row) => row === label).map((row, index) => {
                 return state.unscaledTrainingSet[index][feature.name];
             });
         })
-        feature.boxplot = UnscaledDatasets.map((unscaledDataset) => ({
+        feature.boxplot = unscaledDatasets.map((unscaledDataset) => ({
             min: d3.min(unscaledDataset),
             max: d3.max(unscaledDataset),
             q1: d3.quantile(unscaledDataset.sort(d3.ascending), 0.25),
             median: d3.quantile(unscaledDataset.sort(d3.ascending), 0.5),
             q3: d3.quantile(unscaledDataset.sort(d3.ascending), 0.75),
             dataset: unscaledDataset
-        }) )
+        }))
+        feature.histogram = state.unscaledTrainingSet.map((row, idx) => ({
+            value: row[feature.name],
+            label: state.labelSet[idx]
+        }));
+        delete feature.boxplot;
         state.selectedFeatures[feature.name] = false;
     })
     // return a selection of cell elements in the header row
@@ -211,11 +216,17 @@ const renderTableBody = (targetSelection, tableData) => {
         .attr("width", "44%")
         .append((d) => drawBarchart(d.value, d.index));
 
+    // tbdoyRow.selectAll("td")
+    //     .filter((d) => d.key === "boxplot")
+    //     .attr("id", "feature-boxplot")
+    //     .attr("width", "44%")
+    //     .append((d) => drawBoxplot(d.value, d.index));
+
     tbdoyRow.selectAll("td")
-        .filter((d) => d.key === "boxplot")
-        .attr("id", "feature-boxplot")
+        .filter((d) => d.key === "histogram")
+        .attr("id", "feature-histogram")
         .attr("width", "44%")
-        .append((d) => drawBoxplot(d.value, d.index));
+        .append((d) => drawFeatureStackedHistgram(d.value, d.index));
 }
 
 const drawLegend = (type) => {
@@ -324,12 +335,23 @@ const drawFeatureName = (featureName, featureId) => {
         .attr("class", "feature-name-g")
         .attr("id", `feature-name-g-${featureId}`);
     // Create text element
-    featureNameG.append("text")
-        .attr("class", "feature-name-text")
-        .attr("x", w/2-padding)
-        .attr("y", h/2)
-        .attr("dominant-baseline", "middle")
-        .text(featureName);
+    let heightPadding = (h-featureName.split("_").length*padding)/2;
+    featureName.split("_").forEach((word, i) => {
+        featureNameG.append("text")
+            .attr("class", "feature-name-text")
+            .attr("x", w/2)
+            .attr("y", heightPadding + i * 20)
+            .attr("dominant-baseline", "middle")
+            .text(word)
+            .style("text-anchor", "middle");
+    });
+    // featureNameG.append("text")
+    //     .attr("class", "feature-name-text")
+    //     .attr("x", padding)
+    //     .attr("y", h/2)
+    //     .attr("dominant-baseline", "middle")
+    //     .text(featureName)
+    //     .style("text-anchor", "start")
 
     return featureNameDiv;
 
@@ -361,7 +383,6 @@ const drawBarchart = (featureContributionData, featureId) => {
         .range([padding, h - padding])
         .padding(0.4);
     if (!featureContributionData.every(isZero)) {
-        
 
         const mouseover = function(event, d) {
             if (state.exposedFeatures.includes(featureId)) {
@@ -433,6 +454,73 @@ const drawBarchart = (featureContributionData, featureId) => {
     }
     
     return barchart;
+}
+
+const drawFeatureStackedHistgram = (histogramData, featureId) => {
+    // Create div element
+    const featureStackedHistogram = document.createElement("div");
+    featureStackedHistogram.setAttribute("class", "feature-stacked-histogram flex justify-center m-auto");
+    const w = state.width * 0.4, h = state.width * 0.2, padding = 10;
+    // Create svg element
+    const featureStackedHistogramSvg = d3.select(featureStackedHistogram)
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "feature-stacked-histogram-svg")
+        .attr("id", `feature-stacked-histogram-svg-${featureId}`)
+    // Create group element
+    const cell = featureStackedHistogramSvg.append("g")
+        .attr("class", "feature-stacked-histogram-g")
+        .attr("id", `feature-stacked-histogram-g-${featureId}`);
+
+    // Create x scale
+    const x = d3.scaleLinear()
+        .domain(d3.extent(histogramData, (d) => d.value))
+        .range([2*padding, w-2*padding]);
+
+    const featureHistogram = d3.bin()
+        .value((d) => d.value)
+        .domain(x.domain())
+        .thresholds(x.ticks(20));
+
+    const xAxis = d3.axisBottom(x)
+        .tickSizeOuter(0);
+    
+    const bins = featureHistogram(histogramData);
+    const stacks = stackDataGenerator(bins);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(bins, d=>d.length)])
+        .range([h-2*padding, 2*padding]);
+
+    cell.append("g").selectAll("stacked-histogram")
+        .data(stacks)
+        .join("g")
+        .attr("fill", (d, i) => state.colorScale[i])
+        .selectAll("rect")
+        .data(d => d)
+        .join("rect")
+        .attr("class", "feature-stacked-histogram-bar")
+        .attr("id", `feature-stacked-histogram-bar-${featureId}`)
+        .attr("x", d => x(d.data.x0)+1)
+        .attr("y", d => Math.min(y(d[1]), y(d[0])))
+        .attr("height", d => Math.abs(y(d[0]) - y(d[1])))
+        .attr("width", d => Math.max(0, x(d.data.x1) - x(d.data.x0)-1));
+
+    // Draw x-axis for the stacked histogram
+    cell.append("g")
+        .attr("class", "feature-stacked-histogram-x-axis")
+        .attr("id", `feature-stacked-histogram-x-axis-${featureId}`)
+        .attr("transform", `translate(0, ${h-2*padding})`)
+        .call(xAxis);
+    // Draw y-axis for the stacked histogram
+    cell.append("g")
+        .attr("class", "feature-stacked-histogram-y-axis")
+        .attr("id", `feature-stacked-histogram-y-axis-${featureId}`)
+        .attr("transform", `translate(${2*padding}, 0)`)
+        .call(d3.axisLeft(y).ticks(5));
+
+    return featureStackedHistogram;
 }
 
 
@@ -642,6 +730,29 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
                     .attr("stroke", "black")
         });
     });
+}
+
+const stackDataGenerator = (bins) => {
+    const keys = [0, 1, 2];
+    const stackData = [];
+    for (const bin of bins) {
+        let pushableObj = {};
+        pushableObj.x0 = bin.x0;
+        pushableObj.x1 = bin.x1;
+        bin.forEach(d => {
+            if (!pushableObj[d.label]) pushableObj[d.label] = [d.value];
+            else pushableObj[d.label].push(d.value);
+        });
+        keys.forEach((key) => {
+            if (!pushableObj[key]) pushableObj[key] = [];
+        });
+        stackData.push(pushableObj);
+    };
+
+    const realStack = d3.stack()
+        .keys(keys)
+        .value((d, key) => d[key].length);
+    return realStack(stackData);
 }
 
 watch(() => props.featureTable, (newVal, oldVal) => {
