@@ -72,13 +72,16 @@ const props = defineProps({
 
 const state = reactive({
     value1: ref('penguins'),
-    options1: ref([{
-        value: 'iris',
-        label: 'Iris Data',
-    }, {
-        value: 'penguins',
-        label: 'Penguins Data',
-    }]),
+    options1: ref([
+        // {
+        // value: 'iris',
+        // label: 'Iris Data',
+        // }, 
+        {
+            value: 'penguins',
+            label: 'Penguins Data',
+        }
+    ]),
     rootElement: {},
     width: 0,
     height: 0,
