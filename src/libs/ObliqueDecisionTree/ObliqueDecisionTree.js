@@ -656,7 +656,7 @@ class Odt {
                     
                 const leafNodeTable = foreignObject.append("xhtml:body")
                     .append("table")
-                    .attr("class", "path-summary inline-block table-auto w-full rounded border-separate border border-slate-400")
+                    .attr("class", "path-summary table-auto border-separate border border-slate-400")
                     .attr("id", `path-summary table-${nodeData.data.name}`);
 
                 const leafNodeTableHead = leafNodeTable.append("thead")
@@ -665,13 +665,11 @@ class Odt {
                 const leafNodeTableHeadRow = leafNodeTableHead.append("tr")
                     .attr("class", "path-summary table-head-row");
                 
-
                 const leafNodeTableBody = leafNodeTable.append("tbody")
                     .attr("class", "path-summary table-body");
                 
                 // Get valid feature contribution data for this node
                 const { fcArr, fcRange } = getEffectiveFeatureContribution(nodeData, _this);
-                // console.log(fcArr, fcRange);
                 // Add feature contribution table head
                 leafNodeTableHeadRow.selectAll("th")
                     .data(["Name", "Contribution"])
@@ -787,10 +785,6 @@ class Odt {
                         return barchart;
                     })
 
-                // TODO: Add clip path to create a customized scroll bar
-                d3.select(this)
-                    .on("click", clicked);
-
                 // Set up clop-path attribute for leaf node
                 d3.select(this).attr("clip-path", "url(#scrollbox-clip-path)");
                 // Get node rect bbox
@@ -889,7 +883,8 @@ class Odt {
                     });
                 // Add drag behaviour to scrollbar
                 scrollBar.call(dragBehaviour);
-
+                d3.select(this)
+                    .on("click", clicked);
                 d3.select(this).append("rect")
                     .attr("class", "hidden-rect")
                     .attr("x", leafNodeBBox.x)
