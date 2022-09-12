@@ -753,6 +753,11 @@ const drawRectPlot = (contributionArrs, featureId) => {
         .range([0, y.bandwidth()]);
     
     const mouseover = function(event, d) {
+        if (!d3.select(this).node().className.baseVal.includes("selected"))
+        {
+            d3.select(this)
+                .style("stroke", "black");
+        }
         d3.select(this)
             .style("stroke-width", "2px");
         // Highlight the corresponding feature contribution on the X-axis
@@ -776,8 +781,13 @@ const drawRectPlot = (contributionArrs, featureId) => {
     };
 
     const mouseout = function(event, d) {
+        if (!d3.select(this).node().className.baseVal.includes("selected"))
+        {
+            d3.select(this)
+                .style("stroke", "none");
+        }
         d3.select(this)
-            .style("stroke-width", "1px");
+            .style("stroke-width", "1px")
         // Clear the highlighted legend line
         d3.select("line.highlighted-legend-line")
             .remove();
@@ -846,109 +856,109 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
             .classed(state.highlightedFeatureClass, true);
 
         // Change opacity of the feature bar and temporarily remove stroke
-        d3.selectAll(`rect#feature-bar-${exposedFeatureContribution.featureId}`)
-            .style("opacity", 0.6)
-            .style("stroke", "none");
+        // d3.selectAll(`rect#feature-bar-${exposedFeatureContribution.featureId}`)
+        //     .style("opacity", 0.6)
+        //     .style("stroke", "none");
 
         // TODO: add effects on feature name and feature contribution bar chart
-        const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
-        const barchartSvg = d3.selectAll(`svg#barchart-svg-${exposedFeatureContribution.featureId}`);
-        const exposedBarChartCell = barchartSvg.append("g")
-            .attr("class", "exposed-barchart-g");
+        // const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
+        // const barchartSvg = d3.selectAll(`svg#barchart-svg-${exposedFeatureContribution.featureId}`);
+        // const exposedBarChartCell = barchartSvg.append("g")
+        //     .attr("class", "exposed-barchart-g");
     
-        // Create x scale
-        const x = d3.scaleLinear()
-            .domain([state.contributionMin, state.contributionMax])
-            .range([padding, w - padding]);
+        // // Create x scale
+        // const x = d3.scaleLinear()
+        //     .domain([state.contributionMin, state.contributionMax])
+        //     .range([padding, w - padding]);
             
-        // Create y scale
-        const y = d3.scaleBand()
-            .domain(exposedFeatureContribution.contribution.map((d, i) => i))
-            .range([padding, h - padding])
-            .padding(0.4);
+        // // Create y scale
+        // const y = d3.scaleBand()
+        //     .domain(exposedFeatureContribution.contribution.map((d, i) => i))
+        //     .range([padding, h - padding])
+        //     .padding(0.4);
 
-        const mouseover = function(event, d) {
-            d3.select(this)
-                .style("stroke-width", "2px");
-            // Highlight the corresponding feature contribution on the X-axis
-            d3.select("g#legend-g-contribution")
-                .append("line")
-                .attr("class", "highlighted-legend-line")
-                .attr("x1", x(d))
-                .attr("x2", x(d))
-                .attr("y1", 4*padding)
-                .attr("y2", h)
-                .style("stroke", "black")
-                .style("stroke-width", "2px")
+        // const mouseover = function(event, d) {
+        //     d3.select(this)
+        //         .style("stroke-width", "2px");
+        //     // Highlight the corresponding feature contribution on the X-axis
+        //     d3.select("g#legend-g-contribution")
+        //         .append("line")
+        //         .attr("class", "highlighted-legend-line")
+        //         .attr("x1", x(d))
+        //         .attr("x2", x(d))
+        //         .attr("y1", 4*padding)
+        //         .attr("y2", h)
+        //         .style("stroke", "black")
+        //         .style("stroke-width", "2px")
                 
-                d3.select("g#legend-g-contribution")
-                .append("text")
-                    .attr("class", "highlighted-legend-text")
-                    .attr("x", x(d))
-                    .attr("y", 4*padding)
-                    .text(d.toFixed(2))
-                    .style("font-size", "16px");
+        //         d3.select("g#legend-g-contribution")
+        //         .append("text")
+        //             .attr("class", "highlighted-legend-text")
+        //             .attr("x", x(d))
+        //             .attr("y", 4*padding)
+        //             .text(d.toFixed(2))
+        //             .style("font-size", "16px");
 
-        };
+        // };
 
-        const mouseout = function(event, d) {
-            d3.select(this)
-                .style("stroke-width", "1px");
-            // Clear the highlighted legend line
-            d3.select("line.highlighted-legend-line")
-                .remove();
-            d3.select("text.highlighted-legend-text")
-                .remove();
-        };
+        // const mouseout = function(event, d) {
+        //     d3.select(this)
+        //         .style("stroke-width", "1px");
+        //     // Clear the highlighted legend line
+        //     d3.select("line.highlighted-legend-line")
+        //         .remove();
+        //     d3.select("text.highlighted-legend-text")
+        //         .remove();
+        // };
 
 
-        // Render exposed bar chart
-        exposedBarChartCell.selectAll("exposed-bars")
-            .data(exposedFeatureContribution.contribution)
-            .enter()
-            .append("rect")
-            .attr("class", "exposed-feature-bar")
-            .attr("x", (d) => x(Math.min(0, d)))
-            .attr("y", (d, i) => y(i) + y.bandwidth()/4)
-            .attr("width", (d) => Math.abs(x(d) - x(0)))
-            .attr("height", y.bandwidth()/2)
-            .style("fill", (d, i) => state.colorScale[i])
-            .style("stroke", "black")
-            .style("stroke-width", "1px")
-            .on("mouseover", mouseover)
-            .on("mouseout", mouseout);
+        // // Render exposed bar chart
+        // exposedBarChartCell.selectAll("exposed-bars")
+        //     .data(exposedFeatureContribution.contribution)
+        //     .enter()
+        //     .append("rect")
+        //     .attr("class", "exposed-feature-bar")
+        //     .attr("x", (d) => x(Math.min(0, d)))
+        //     .attr("y", (d, i) => y(i) + y.bandwidth()/4)
+        //     .attr("width", (d) => Math.abs(x(d) - x(0)))
+        //     .attr("height", y.bandwidth()/2)
+        //     .style("fill", (d, i) => state.colorScale[i])
+        //     .style("stroke", "black")
+        //     .style("stroke-width", "1px")
+        //     .on("mouseover", mouseover)
+        //     .on("mouseout", mouseout);
 
-        // Color scale
-        const colors = [
-            ["#e0f3db", "#66c2a5"],
-            ["#fee6ce", "#fc8d62"],
-            ["#efedf5", "#8da0cb"]
-        ];
-        const myColor = colors.map((color) => d3.scaleSequential()
-                    .interpolator(d3.interpolateHcl)
-                    .domain([state.boxplotMin, state.boxplotMax])
-                    .range([color[0], color[1]]));
+        // // Color scale
+        // const colors = [
+        //     ["#e0f3db", "#66c2a5"],
+        //     ["#fee6ce", "#fc8d62"],
+        //     ["#efedf5", "#8da0cb"]
+        // ];
+        // const myColor = colors.map((color) => d3.scaleSequential()
+        //             .interpolator(d3.interpolateHcl)
+        //             .domain([state.boxplotMin, state.boxplotMax])
+        //             .range([color[0], color[1]]));
                     
-        const boxplotX = d3.scaleLinear()
-            .domain([state.boxplotMin, state.boxplotMax])
-            .range([padding, w - padding]);
+        // const boxplotX = d3.scaleLinear()
+        //     .domain([state.boxplotMin, state.boxplotMax])
+        //     .range([padding, w - padding]);
 
-        // Add individual points with jitter
-        const jitterWidth = 6;
-        const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
-        exposedFeatureContribution.datasets.forEach((dataset, i) => {
-            d3.select(`g#boxplot-g-${exposedFeatureContribution.featureId}`)
-                .selectAll(`.exposed-boxplot-points-${i}`)
-                .data(dataset)
-                .enter()
-                .append("circle")
-                    .attr("class", "exposed-boxplot-point")
-                    .attr("cx", (d) => boxplotX(d))
-                    .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
-                    .attr("r", 2)
-                    .style("fill", (d) => myColor[i](d))
-                    .attr("stroke", "black")
-        });
+        // // Add individual points with jitter
+        // const jitterWidth = 6;
+        // const randomJitterWidth = () => (Math.random()-0.5)*jitterWidth;
+        // exposedFeatureContribution.datasets.forEach((dataset, i) => {
+        //     d3.select(`g#boxplot-g-${exposedFeatureContribution.featureId}`)
+        //         .selectAll(`.exposed-boxplot-points-${i}`)
+        //         .data(dataset)
+        //         .enter()
+        //         .append("circle")
+        //             .attr("class", "exposed-boxplot-point")
+        //             .attr("cx", (d) => boxplotX(d))
+        //             .attr("cy", (d) => y(i) + (y.bandwidth() / 2) + randomJitterWidth())
+        //             .attr("r", 2)
+        //             .style("fill", (d) => myColor[i](d))
+        //             .attr("stroke", "black")
+        // });
     });
 }
 
@@ -1068,16 +1078,19 @@ const drawExposedHistograms = (exposedHistograms) => {
 }
 
 const drawExposedFeatureRects = (exposedFeatureContributions) => {
-
+    d3.selectAll("rect.contribution-rect")
+            .style("opacity", 0.6)
+            .style("stroke", "none");
     exposedFeatureContributions.forEach((exposedFeatureContribution) => {
-        d3.selectAll("rect.contribution-rect")
-            .style("opacity", 0.6);
+        d3.selectAll(`svg#feature-name-svg-${exposedFeatureContribution.featureId}`)
+            .classed(state.highlightedFeatureClass, true);
         
         exposedFeatureContribution.contribution.forEach((val, idx) => {
             d3.selectAll(`rect#contribution-rect-${exposedFeatureContribution.featureId}-${idx}-${parseInt(val.toFixed(2)*100)}`)
+                .classed("selected", true)
                 .style("opacity", 1)
                 .style("stroke", "black")
-                .style("stroke-width", "2px");
+                .style("stroke-width", "1px");
         });
     })
 }
@@ -1127,6 +1140,7 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
         .style("opacity", 1);
 
     d3.selectAll("rect.contribution-rect")
+        .classed("selected", false)
         .style("opacity", 1)
         .style("stroke", "black");
 
