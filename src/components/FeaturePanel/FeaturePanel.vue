@@ -7,9 +7,6 @@
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
 import { getUnscaledDatasetChangeSelects } from "@/api/metrics";
-import { histogram } from 'd3-array';
-import { curveBasis } from 'd3-shape';
-
 
 let d3 = inject("d3");
 
@@ -104,7 +101,6 @@ const initFeatureTable = () => {
                     label: state.labelSet[idx],
                 })),
             isNumeric: new Set(state.unscaledTrainingSet.map(row=>row[feature.name])).size > 2};
-        // delete feature.boxplot;
         state.selectedFeatures[feature.name] = false;
     })
     // return a selection of cell elements in the header row
@@ -201,8 +197,10 @@ const renderTableBody = (targetSelection, tableData) => {
         .filter((d) => d.key === "contribution")
         .attr("id", "feature-contribution")
         .attr("width", "35%")
-        .append((d) => drawBarchart(d.value, d.index));
+        .append((d) => drawRectPlot(d.value, d.index));
+        // .append((d) => drawBarchart(d.value, d.index));
         // .append((d) => drawBoxplot(d.value, d.index));
+        
 
     // tbdoyRow.selectAll("td")
     //     .filter((d) => d.key === "boxplot")
@@ -717,6 +715,136 @@ const drawBoxplot = (boxplotData, featureId) => {
     return boxplot;
 }
 
+const drawRectPlot = (contributionArrs, featureId) => {
+    const rectplot = document.createElement("div");
+    rectplot.setAttribute("class", "rectplot-div");
+    const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
+    const isEmpty = (curr) => curr.length === 0;
+    // Create x scale
+    const x = d3.scaleLinear()
+        .domain([state.contributionMin, state.contributionMax])
+        .range([padding, w - padding]);
+
+    const y = d3.scaleBand()
+        .domain(Array.from({length: contributionArrs.length}, (v, i) => i))
+        .range([padding, h - padding])
+        .padding(0.4);
+    const contributionRange = [0, Number.NEGATIVE_INFINITY];
+    let tmpRange;
+
+    const rectplotSvg = d3.select(rectplot).append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "rectplot-svg")
+        .attr("id",`rectplot-svg-${featureId}`);
+
+    const cell = rectplotSvg.append("g")
+        .attr("class", `rectplot-g`)
+        .attr("id", `rectplot-g-${featureId}`);
+    // Compute data for the rectplot
+    const occurrenceMap = (arr) => arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+    
+    const rectplotData = contributionArrs.map((contributionArr, idx) => ({
+        label: idx,
+        data: Array.from(occurrenceMap(contributionArr).entries()).map((entry) => ({x: entry[0], r: entry[1], z: idx}))
+    }));
+    rectplotData.forEach((ele) => {
+        tmpRange = d3.extent(ele.data.map((d) => d.r));
+        if (tmpRange[1] > contributionRange[1]) {
+            contributionRange[1] = tmpRange[1];
+        }
+    });
+    const rectScale = d3.scaleLinear()
+        .domain(contributionRange)
+        .range([0, y.bandwidth()]);
+    
+    const mouseover = function(event, d) {
+        d3.select(this)
+            .style("stroke-width", "2px");
+        // Highlight the corresponding feature contribution on the X-axis
+        d3.select("g#legend-g-contribution")
+            .append("line")
+            .attr("class", "highlighted-legend-line")
+            .attr("x1", x(d.x))
+            .attr("x2", x(d.x))
+            .attr("y1", 4*padding)
+            .attr("y2", h)
+            .style("stroke", "black")
+            .style("stroke-width", "2px")
+            
+            d3.select("g#legend-g-contribution")
+            .append("text")
+                .attr("class", "highlighted-legend-text")
+                .attr("x", x(d.x))
+                .attr("y", 4*padding)
+                .text((d.x).toFixed(2))
+                .style("font-size", "16px");
+    };
+
+    const mouseout = function(event, d) {
+        d3.select(this)
+            .style("stroke-width", "1px");
+        // Clear the highlighted legend line
+        d3.select("line.highlighted-legend-line")
+            .remove();
+        d3.select("text.highlighted-legend-text")
+            .remove();
+    };
+
+
+    if (!contributionArrs.every(isEmpty)) {
+        // Draw the rectplot
+        cell.append("g").selectAll("contribution-rects")
+            .data(rectplotData)
+            .join("g")
+            .attr("fill", (d) => state.colorScale[d.label])
+            .selectAll("rect")
+            .data((d) => d.data)
+            .join("rect")
+                .attr("class", "contribution-rect")
+                .attr("id", (d) => `contribution-rect-${featureId}-${d.z}-${parseInt(d.x.toFixed(2)*100)}`)
+                .attr("x", (d) => x(d.x))
+                .attr("y", (d) => y(d.z) + y.bandwidth()/2 - rectScale(d.r)/2)
+                .attr("width", (d) => Math.max(rectScale(d.r), 2))
+                .attr("height", (d) => Math.max(rectScale(d.r), 2))
+                .style("stroke", "#000")
+                .style("stroke-width", "1px")
+                .on("mouseover", mouseover)
+                .on("mouseout", mouseout)
+                
+
+    } else {
+        cell.append("line")
+            .attr("class", "feature-rect-no-data")
+            .attr("x1", 0)
+            .attr("x2", w)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("line")
+            .attr("class", "feature-rect-no-data")
+            .attr("x1", w)
+            .attr("x2", 0)
+            .attr("y1", 0)
+            .attr("y2", h)
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+        cell.append("rect")
+            .attr("class", "feature-rect-no-data")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .attr("width", w)
+            .attr("height", h)
+            .style("fill", "none")
+            .style("stroke", "#64748b")
+            .style("stroke-width", "2px");
+    }
+    return rectplot;
+}
+
 const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     // Clear the previous exposed bar charts
     d3.selectAll("g.exposed-barchart-g").remove();
@@ -947,6 +1075,21 @@ const drawExposedHistograms = (exposedHistograms) => {
 
 }
 
+const drawExposedFeatureRects = (exposedFeatureContributions) => {
+
+    exposedFeatureContributions.forEach((exposedFeatureContribution) => {
+        d3.selectAll("rect.contribution-rect")
+            .style("opacity", 0.6);
+        
+        exposedFeatureContribution.contribution.forEach((val, idx) => {
+            d3.selectAll(`rect#contribution-rect-${exposedFeatureContribution.featureId}-${idx}-${parseInt(val.toFixed(2)*100)}`)
+                .style("opacity", 1)
+                .style("stroke", "black")
+                .style("stroke-width", "2px");
+        });
+    })
+}
+
 const stackDataGenerator = (bins) => {
     const keys = [0, 1, 2];
     const stackData = [];
@@ -991,12 +1134,19 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     d3.selectAll("rect.feature-histogram-bar")
         .style("opacity", 1);
 
+    d3.selectAll("rect.contribution-rect")
+        .style("opacity", 1)
+        .style("stroke", "black");
+
     d3.selectAll("circle.exposed-boxplot-point").remove();
     // Draw exposed feature contributions
     drawExposedFeatureContributions(newVal);
 
     // Draw exposed histograms
     drawExposedHistograms(newVal);
+
+    // Draw exposed feature rects
+    drawExposedFeatureRects(newVal);
 });
 
 watch(() => state.selectedFeatures, (newVal, oldVal) => {

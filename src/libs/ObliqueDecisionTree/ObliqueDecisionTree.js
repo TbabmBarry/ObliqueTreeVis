@@ -1404,15 +1404,6 @@ class Odt {
         });
         const featureTable = featureArr.map(featureName => ({
             name: featureName,
-            // contribution: Array.from({length:3}, () => null),
-            // boxplot: Object.keys(featureData[featureName]).map((val) => ({
-            //     min: d3.min(featureData[featureName][val]),
-            //     max: d3.max(featureData[featureName][val]),
-            //     q1: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.25),
-            //     median: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.5),
-            //     q3: d3.quantile(featureData[featureName][val].sort(d3.ascending), 0.75),
-            //     dataset: featureData[featureName][val].slice()
-            // }))
         }));
         const tmpLocalFeatureContribution = {};
         let tmpFeatureContributionArr = featureArr.map(() => Array.from({length:3}, () => []));
@@ -1434,8 +1425,8 @@ class Odt {
         helper(data);
         this.constants.localFeatureContribution = tmpLocalFeatureContribution;
         featureTable.map((feature, idx) => {
-            feature.contribution = tmpFeatureContributionArr[idx].map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr.sort(d3.ascending), 0.5): 0);
-            // feature.contribution = tmpFeatureContributionArr[idx];
+            // feature.contribution = tmpFeatureContributionArr[idx].map((contributionArr) => contributionArr.length ? d3.quantile(contributionArr.sort(d3.ascending), 0.5): 0);
+            feature.contribution = tmpFeatureContributionArr[idx];
         });
         this.featureTable = featureTable;
         return featureTable;
