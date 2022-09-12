@@ -462,6 +462,26 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
     const stackLeft = stackDataGenerator(binsLeft),
         stackRight = stackDataGenerator(binsRight);
 
+    // Get split point value
+    const splitPoint = nodeData.data.split[nodeData.data.split.length-1];
+    const triangle = d3.symbol().type(d3.symbolTriangle).size(50); // triangle symbol
+    // Append split point line/triangle for strip chart
+    // targetSelection.append("line")
+    //     .attr("class", "detailed histogram split-line")
+    //     .attr("x1", xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding)
+    //     .attr("y1", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-4*scatterPlotPadding)
+    //     .attr("x2", xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding)
+    //     .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding)
+    //     .style("stroke", "#000")
+    //     .style("stroke-width", "3px");
+
+    targetSelection.append("path")
+        .attr("class", "detailed histogram split-point-triangle")
+        .attr("d", triangle)
+        .attr("transform", `translate(${xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-3*scatterPlotPadding})`)
+        .style("fill", "#000");
+
     // Set up y-axis value encodings for histograms
     const yHistogram = d3.scaleLinear()
         .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])

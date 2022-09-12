@@ -125,12 +125,16 @@ const sortFeatureTableByContribution = () => {
     tb = document.getElementById("feature-table");
     rows = tb.rows;
     switching = true;
+    const helper = (row) => {
+        let contributionArr = d3.select(row.getElementsByTagName("td")[1]).select("g").data()[0].value.reduce((a, b) => a.concat(b), []).map(d => Math.abs(d));
+        return contributionArr.length > 0 ? d3.mean(contributionArr) : 0;
+    }
     // Set the sorting direction to descending:
     while (switching) {
         switching = false;
         for (let i = 1; i < (rows.length - 1); i++) {
-            contributionA = d3.mean(d3.select(rows[i].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
-            contributionB = d3.mean(d3.select(rows[i+1].getElementsByTagName("td")[1]).select("g").data()[0].value.map((ele) => Math.abs(ele)));
+            contributionA = helper(rows[i]);
+            contributionB = helper(rows[i + 1]);
             if (contributionA < contributionB) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
@@ -151,8 +155,8 @@ const sortFeatureTableByName = () => {
     while (switching) {
         switching = false;
         for (let i = 1; i < (rows.length - 1); i++) {
-            a = d3.select(rows[i].getElementsByTagName("td")[0]).select("g").data()[0].value;
-            b = d3.select(rows[i+1].getElementsByTagName("td")[0]).select("g").data()[0].value;
+            a = d3.select(rows[i].getElementsByTagName("td")[0]).select("g").data()[0].index;
+            b = d3.select(rows[i+1].getElementsByTagName("td")[0]).select("g").data()[0].index;
             if (a > b) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
@@ -198,15 +202,6 @@ const renderTableBody = (targetSelection, tableData) => {
         .attr("id", "feature-contribution")
         .attr("width", "35%")
         .append((d) => drawRectPlot(d.value, d.index));
-        // .append((d) => drawBarchart(d.value, d.index));
-        // .append((d) => drawBoxplot(d.value, d.index));
-        
-
-    // tbdoyRow.selectAll("td")
-    //     .filter((d) => d.key === "boxplot")
-    //     .attr("id", "feature-boxplot")
-    //     .attr("width", "44%")
-    //     .append((d) => drawBoxplot(d.value, d.index));
 
     tbdoyRow.selectAll("td")
         .filter((d) => d.key === "histogram")
@@ -585,7 +580,6 @@ const drawFeatureStackedHistgram = (histogramData, featureId) => {
             .call(d3.axisLeft(y).ticks(5));
     }
     
-
     return featureStackedHistogram;
 }
 
@@ -791,7 +785,6 @@ const drawRectPlot = (contributionArrs, featureId) => {
             .remove();
     };
 
-
     if (!contributionArrs.every(isEmpty)) {
         // Draw the rectplot
         cell.append("g").selectAll("contribution-rects")
@@ -812,7 +805,6 @@ const drawRectPlot = (contributionArrs, featureId) => {
                 .on("mouseover", mouseover)
                 .on("mouseout", mouseout)
                 
-
     } else {
         cell.append("line")
             .attr("class", "feature-rect-no-data")

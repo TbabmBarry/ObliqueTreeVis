@@ -1396,7 +1396,6 @@ class Odt {
         const { data, trainX, trainY, constants: { featureArr } } = this;
         const featureData = {};
         featureArr.forEach((featureName) => {
-            // featureData[featureName] = trainX.map((ele) => ele[featureName]);
             featureData[featureName] = Object.assign(...Array.from(new Set(trainY)).map((val) => ({[val]: []})));
             trainY.forEach((val, idx) => {
                 featureData[featureName][val].push(trainX[idx][featureName]);
