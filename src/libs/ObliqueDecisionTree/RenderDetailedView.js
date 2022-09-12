@@ -525,7 +525,15 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .attr("class", "detailed histogram x-axis")
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
             ${0.5*(detailedViewNodeRectWidth+nodeRectWidth)-4*scatterPlotPadding})`)
-        .call(xAxis);
+        .call(xAxis)
+        .call(g => g.append("text")
+            .attr("x", 0.5*(detailedViewNodeRectWidth+nodeRectWidth+2*scatterPlotPadding))
+            .attr("y", 2*scatterPlotPadding)
+            .attr("fill", "currentColor")
+            .attr("text-anchor", "end")
+            .style("font-size", "12px")
+            .text(`${featureArr[currFeatureIdx[0]]} →`)
+        );
 
     // Draw y-axis for histogram
     targetSelection.append("g")
@@ -535,7 +543,16 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .call(d3.axisLeft(yHistogram).ticks(5).tickFormat((e) => {
             if(Math.floor(e) != e) return;
             return e;
-        }));
+        }))
+        .call(g => g.append("text")
+            .attr("x", 2*scatterPlotPadding)
+            .attr("y", 1.5*scatterPlotPadding)
+            .attr("fill", "currentColor")
+            .attr("text-anchor", "end")
+            .style("font-size", "12px")
+            .attr("transform", "rotate(90)")
+            .text(`← Count`)
+        );
 }
 
 /**
