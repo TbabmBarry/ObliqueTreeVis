@@ -10,8 +10,19 @@
             </a>
         </div>
         <div class="leading-normal grid grid-cols-2 gap my-2">
-            <span class="col-span-1 titles align-bottom">Type: </span>
-            <span class="col-span-1 info text-sm align-bottom text-center">Bivariate Decision Tree</span>
+            <div class="col-span-1 titles">
+                Type: 
+            </div>
+            <div class="col-span-1 text-center">
+                <a-select
+                    ref="select"
+                    v-model:value="value2"
+                    style="width:180px"
+                    size="small"
+                    :options="options2"
+                    @change="handleModelChange"
+                ></a-select>
+            </div>
         </div>
         <hr style="height:1px" />
         <div class="grid grid-cols-2 gap my-2">
@@ -25,8 +36,7 @@
                     style="width:120px"
                     size="small"
                     :options="options1"
-                    @focus="focus"
-                    @change="handleChange"
+                    @change="handleDatasetChange"
                 ></a-select>
             </div>
         </div>
@@ -55,13 +65,12 @@
 </template>
 <script setup>
 import _ from 'lodash';
-import textures from 'textures';
 import { reactive, ref, toRefs, inject, watch, onMounted } from "vue";
 import { getDatasetChangeSelects } from "@/api/metrics.js";
 
 let d3 = inject("d3");
 
-const emit = defineEmits(["emitSelectedDatasetChanged"]);
+const emit = defineEmits(["emitSelectedDatasetChanged", "emitSelectedModelChanged"]);
 
 const props = defineProps({
     selectedPoints: {
@@ -80,6 +89,17 @@ const state = reactive({
         {
             value: 'penguins',
             label: 'Penguins Data',
+        }
+    ]),
+    value2: ref('bivariate'),
+    options2: ref([
+        {
+            value: 'bivariate',
+            label: 'Bivariate Decision Tree',
+        },
+        {
+            value: 'univariate',
+            label: 'Decision Tree',
         }
     ]),
     rootElement: {},
@@ -106,9 +126,13 @@ const focus = () => {
     // console.log("focus");
 };
 
-const handleChange = (value) => {
+const handleDatasetChange = (value) => {
     initiateClassOverview();
     emit("emitSelectedDatasetChanged", value);
+};
+
+const handleModelChange = (value) => {
+    emit("emitSelectedModelChanged", value);
 };
 
 const occurrence = (arr) => {
@@ -304,7 +328,7 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 
 }, { immediate: false });
 
-let { value1, options1, dataAmount } = toRefs(state);
+let { value1, options1, value2, options2, dataAmount } = toRefs(state);
 </script>
 <style scoped>
 </style>

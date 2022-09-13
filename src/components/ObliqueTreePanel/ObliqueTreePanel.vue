@@ -22,6 +22,10 @@ const props = defineProps({
         type: String,
         default: "penguins"
     },
+    selectedModel: {
+        type: String,
+        default: "bivariate"
+    },
     selectedFeatures: {
         type: Object,
         default: () => {}
@@ -33,8 +37,10 @@ const state = reactive({
     trainingData: {},
     nodeTreePath: {
         iris: ["root", "r", "rr"],
-        penguins: ["root", "l", "lr", "lrl"]
-        // penguins: ["root", "r", "rl"]
+        penguins: {
+            bivariate: ["root", "l", "lr", "lrl"],
+            univariate: ["root","l","ll","lll","llll","r","rr","lr","llr"]
+        }
     },
     decisionNodes: {
         iris: [
@@ -42,27 +48,37 @@ const state = reactive({
             [ 0, 0.00638759, 0, -0.17323776, 0.291713],
             [ 0, 0, 1, 0, -5.000000]
         ],
-        penguins: [
-            [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
-            [-3.413128, 0, 0, 0, 1.000000, 0, 0, 0, 0.388552],
-            [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
-            [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
-        ]
-        // penguins: [
-        //     [0, 0, -0.00240097, 0, 0.01920779, 0, 0, 0, 0.490999],
-        //     [-0.01092356, 0, 0, 0, 0.05665245, 0, 0, 0, 0.446272],
-        //     [0, 0, 0, 0, 0, 0, 1, 0, -0.500000]
-        // ]
+        penguins: {
+            bivariate: [
+                [0, -0.699623, 0, 1.000000, 0, 0, 0, 0, -0.464679],
+                [-3.413128, 0, 0, 0, 1.000000, 0, 0, 0, 0.388552],
+                [-1.185092, 0, 0, 0, 1.000000, 0, 0, 0, 0.296273],
+                [0, 1.000000, 0, 0, 0, 0, 0, 0, -0.145013]
+            ],
+            univariate: [
+                [0,0,1,0,0,0,0,0,-0.395],
+                [1,0,0,0,0,0,0,0,0.118],
+                [0,0,1,0,0,0,0,0,0.301],
+                [0,1,0,0,0,0,0,0,0.262],
+                [1,0,0,0,0,0,0,0,0.859],
+                [0,1,0,0,0,0,0,0,-0.247],
+                [0,1,0,0,0,0,0,0,-1.06],
+                [0,0,0,0,0,0,1,0,-0.271],
+                [0,0,1,0,0,0,0,0,0.819]
+            ]
+        }
     },
     obliqueTreeVis: null,
     exposedFeatureContributions: []
 })
 
-onMounted(async () => {
-    initializeObliqueTree("penguins");
+onMounted(() => {
+    initializeObliqueTree();
 })
 
-const initializeObliqueTree = async (dataset_name) => {
+const initializeObliqueTree = async () => {
+    let dataset_name = props.selectedDataset;
+    let model_name = props.selectedModel;
     d3.select("#vis").selectAll("*").remove();
     let req = {
         dataset_name: dataset_name
@@ -75,8 +91,8 @@ const initializeObliqueTree = async (dataset_name) => {
             const builder = {
                 trainingSet,
                 labelSet,
-                nodeTreePath: state.nodeTreePath[dataset_name],
-                decisionNodes: state.decisionNodes[dataset_name]
+                nodeTreePath: state.nodeTreePath[dataset_name][model_name],
+                decisionNodes: state.decisionNodes[dataset_name][model_name],
             };
             // Re-classify
             const exporter = new BivariateDecisionTree(builder);
@@ -99,7 +115,7 @@ const initializeObliqueTree = async (dataset_name) => {
             return { trainingSet, labelSet, featureArr };
         });
     let opts = {
-        dataset_name: props.selectedDataset
+        dataset_name: dataset_name
     };
     state.obliqueTreeVis = new Odt(["#vis"]);
     state.obliqueTreeVis.init();
@@ -122,7 +138,13 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 });
 
 watch(() => props.selectedDataset, (val) => {
-    initializeObliqueTree(val);
+    console.log("selectedDataset changed to: ", val);
+    initializeObliqueTree();
+});
+
+watch(() => props.selectedModel, (val) => {
+    console.log("selectedModel changed to: ", val);
+    initializeObliqueTree();
 });
 
 watch(() => state.exposedFeatureContributions, (val) => {

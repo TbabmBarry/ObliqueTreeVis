@@ -159,7 +159,7 @@ export default class BivariateDecisionTree {
                 sum += point.map((val, i) => val*currNode.split[i]).reduce((a, b) => a+b);
                 
                 // When current point is classified into left hand side
-                if (sum < 0 && currNode.type !== "leaf") {
+                if (sum <= 0 && currNode.type !== "leaf") {
                     // Count the number of training point by true labels classified into lhs
                     currNode.leftCount[this.labelSet[idx]]++;
                     // Store each training point classified into lhs passing the current node
@@ -174,7 +174,7 @@ export default class BivariateDecisionTree {
                         break;
                     }
                 // When current point is classified into right hand side
-                } else if (sum >= 0 && currNode.type !== "leaf") {
+                } else if (sum > 0 && currNode.type !== "leaf") {
                     // Count the number of training point by true labels classified into rhs
                     currNode.rightCount[this.labelSet[idx]]++;
 
