@@ -780,7 +780,7 @@ const drawRectPlot = (contributionArrs, featureId) => {
     };
 
     const mouseout = function(event, d) {
-        if (!d3.select(this).node().className.baseVal.includes("selected"))
+        if ((state.exposedFeatures.length > 0) && !d3.select(this).node().className.baseVal.includes("selected"))
         {
             d3.select(this)
                 .style("stroke", "none");
