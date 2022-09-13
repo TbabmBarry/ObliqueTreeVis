@@ -138,12 +138,10 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 });
 
 watch(() => props.selectedDataset, (val) => {
-    console.log("selectedDataset changed to: ", val);
     initializeObliqueTree();
 });
 
 watch(() => props.selectedModel, (val) => {
-    console.log("selectedModel changed to: ", val);
     initializeObliqueTree();
 });
 
