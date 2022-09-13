@@ -765,14 +765,14 @@ class Odt {
                             .domain(d.value.map((val,idx)=>idx))
                             .range([2*padding, h-2*padding])
                             .padding(0.4);
-                        
+                        // Add bars
                         cell.selectAll("bars")
                             .data(d.value)
                             .enter()
                             .append("rect")
                             .attr("class", "path-summary table-body-cell-feature-contribution-bar")
                             .attr("id", `path-summary table-body-cell-feature-contribution-bar-${nodeData.data.name}-${d.index}`)
-                            .attr("x", (dd) => x(Math.min(0, dd.value)))
+                            .attr("x", (dd) => x(Math.min(0, dd.value))-padding)
                             .attr("y", (dd) => y(dd.label))
                             .attr('rx', 2)
                             .attr('ry', 2)
@@ -781,6 +781,11 @@ class Odt {
                             .style("fill", (dd) => colorScale[dd.label])
                             .style("stroke", "#000")
                             .style("stroke-width", "1px");
+                        // Add x-axis
+                        cell.append("g")
+                            .attr("class", "path-summary table-body-cell-feature-contribution-x-axis")
+                            .attr("transform", `translate(${-padding}, ${h-2*padding})`)
+                            .call(d3.axisBottom(x).ticks(4));
 
                         return barchart;
                     })
