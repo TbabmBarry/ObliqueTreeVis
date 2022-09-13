@@ -254,7 +254,7 @@ const drawLegend = (type) => {
             .range([padding, w - padding]);
 
         legendG.append("g")
-            .attr("class", "legend-axis")
+            .attr("class", "legend-axis cursor-default")
             .attr("id", `legend-axis-${type}`)
             .attr("transform", `translate(0, ${h})`)
             .call(d3.axisTop(x).ticks(5));
@@ -275,7 +275,6 @@ const drawLegend = (type) => {
             .attr("transform", `translate(${w - padding}, ${padding}) rotate(180)`)
             .on("click", sortClick);
     }
-    
 
     return legend;
 }
@@ -516,13 +515,13 @@ const drawFeatureStackedHistgram = (histogramData, featureId) => {
 
         // Draw x-axis for the stacked histogram
         cell.append("g")
-            .attr("class", "feature-stacked-histogram-x-axis")
+            .attr("class", "feature-stacked-histogram-x-axis cursor-default")
             .attr("id", `feature-stacked-histogram-x-axis-${featureId}`)
             .attr("transform", `translate(0, ${h-2*padding})`)
             .call(xAxis);
         // Draw y-axis for the stacked histogram
         cell.append("g")
-            .attr("class", "feature-stacked-histogram-y-axis")
+            .attr("class", "feature-stacked-histogram-y-axis cursor-default")
             .attr("id", `feature-stacked-histogram-y-axis-${featureId}`)
             .attr("transform", `translate(${2*padding}, 0)`)
             .call(d3.axisLeft(y).ticks(5));

@@ -18,11 +18,12 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
     
     // Allow X and Y axis generators to be called
     targetSelection.append("g")
-        .attr("class", "detailed x-axis")
+        .attr("class", "detailed x-axis cursor-default")
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-2*scatterPlotPadding})`)
         .call(d3.axisBottom(x[currFeatureIdx[0]]))
         .call(g => g.append("text")
+            .attr("class", "axis-label cursor-default")
             .attr("x", detailedViewNodeRectWidth-histogramHeight-histogramScatterPlotPadding)
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
@@ -31,11 +32,12 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .text(`${featureArr[currFeatureIdx[0]]} →`)
         );
     targetSelection.append("g")
-        .attr("class", "detailed y-axis")
+        .attr("class", "detailed y-axis cursor-default")
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+2*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+histogramHeight+scatterPlotPadding+histogramScatterPlotPadding})`)
         .call(d3.axisLeft(y[currFeatureIdx[1]]))
         .call(g => g.append("text")
+            .attr("class", "axis-label cursor-default")
             .attr("x", 2*scatterPlotPadding)
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
@@ -808,7 +810,7 @@ export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that
 
     // Append left and right split distribution text into splitDistribution svg group
     detailedSplitDistribution.append("text")
-        .attr("class", "detailed detail-split-text")
+        .attr("class", "detailed detail-split-text cursor-default")
         .text( (d) => d[1])
         .attr("text-anchor", "start")
         .attr("font-size", "10px")
@@ -819,7 +821,7 @@ export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that
         })
 
     detailedSplitDistribution.append("text")
-        .attr("class", "detailed detail-split-text")
+        .attr("class", "detailed detail-split-text cursor-default")
         .text( (d) => d[0])
         .attr("text-anchor", "end")
         .attr("font-size", "10px")
@@ -831,13 +833,13 @@ export function drawSplitHistogramInDetailedView(targetSelection, nodeData, that
 
     // Append centered axis
     detailedSplitDistribution.append("g")
-        .attr("class", "detailed detail-center-axis")
+        .attr("class", "detailed detail-center-axis cursor-default")
         .attr("transform", `translate(${-scatterPlotPadding},
             ${0})`)
         .call(d3.axisLeft(yBand).tickFormat(""));
 
     detailedSplitDistribution.append("g")
-        .attr("class", "detailed detail-center-axis")
+        .attr("class", "detailed detail-center-axis cursor-default")
         .attr("transform", `translate(${-scatterPlotPadding},
             ${0})`)
         .call(d3.axisRight(yBand).tickFormat(""));

@@ -90,7 +90,7 @@ export function drawCoefficientDistribution(targetSelection, nodeData, nodeRectW
 
     // Append x-axis for coefficients
     targetSelection.append("g")
-        .attr("class", "summary coefficients x-axis")
+        .attr("class", "summary coefficients x-axis cursor-default")
         .attr("transform", `translate(${-0.25*(nodeRectWidth-2*nodeRectRatio)}, ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
         .call(d3.axisBottom(xCoefficient))
         .selectAll("text");

@@ -784,7 +784,7 @@ class Odt {
                             .style("stroke-width", "1px");
                         // Add x-axis
                         cell.append("g")
-                            .attr("class", "path-summary table-body-cell-feature-contribution-x-axis")
+                            .attr("class", "path-summary table-body-cell-feature-contribution-x-axis cursor-default")
                             .attr("transform", `translate(${-padding}, ${h-2*padding})`)
                             .call(d3.axisBottom(x).ticks(4));
 
