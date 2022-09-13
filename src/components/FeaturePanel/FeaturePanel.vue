@@ -1077,6 +1077,9 @@ const drawExposedHistograms = (exposedHistograms) => {
 }
 
 const drawExposedFeatureRects = (exposedFeatureContributions) => {
+    if (exposedFeatureContributions.length === 0) {
+        return;
+    }
     d3.selectAll("rect.contribution-rect")
             .style("opacity", 0.6)
             .style("stroke", "none");

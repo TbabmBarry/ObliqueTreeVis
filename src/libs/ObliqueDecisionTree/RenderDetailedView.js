@@ -518,11 +518,12 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
 
     // Draw x-axis for histogram
     targetSelection.append("g")
-        .attr("class", "detailed histogram x-axis")
+        .attr("class", "detailed histogram x-axis cursor-default")
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
             ${0.5*(detailedViewNodeRectWidth+nodeRectWidth)-4*scatterPlotPadding})`)
         .call(xAxis)
         .call(g => g.append("text")
+            .attr("class", "detailed histogram x-axis-label cursor-default")
             .attr("x", 0.5*(detailedViewNodeRectWidth+nodeRectWidth+2*scatterPlotPadding))
             .attr("y", 2*scatterPlotPadding)
             .attr("fill", "currentColor")
@@ -533,7 +534,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
 
     // Draw y-axis for histogram
     targetSelection.append("g")
-        .attr("class", "detailed histogram y-axis")
+        .attr("class", "detailed histogram y-axis cursor-default")
         .attr("transform", `translate(${-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
         .call(d3.axisLeft(yHistogram).ticks(5).tickFormat((e) => {
@@ -541,6 +542,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
             return e;
         }))
         .call(g => g.append("text")
+            .attr("class", "detailed histogram y-axis-label cursor-default")
             .attr("x", 2*scatterPlotPadding)
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
