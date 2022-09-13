@@ -654,7 +654,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
     
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.left")
-        .data(stack2Right)
+        .data(stack2Left)
         .join("g")
             .attr("fill", (d,i) => colorScale[i])    
         .selectAll("rect.histogram.y-histogram.left")
@@ -670,7 +670,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
     
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.right")
-        .data(stack2Left)
+        .data(stack2Right)
         .join("g")
             .attr("fill", (d,i) => colorScale[i])
         .selectAll("rect.histogram.y-histogram.right")

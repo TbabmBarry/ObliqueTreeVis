@@ -732,6 +732,7 @@ class Odt {
                         let heightPadding = (h-d.value.split("_").length*padding)/2;
                         d.value.split("_").forEach((word, idx) => {
                             featureNameSvg.append("text")
+                                .attr("class", "path-summary table-body-cell-feature-name-text cursor-default")
                                 .attr("x", w/2)
                                 .attr("y", heightPadding+idx*padding)
                                 .attr("dominant-baseline", "middle")
