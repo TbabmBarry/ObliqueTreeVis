@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen">
-        <div class="w-full h-screen" id="vis"></div>
+        <div class="w-full h-full" id="vis"></div>
     </div>
 </template>
 <script setup>

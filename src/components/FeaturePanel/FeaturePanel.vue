@@ -1,6 +1,7 @@
 <template>
-    <div class="w-full h-screen">
-        <div class="feature-table w-full"></div>
+    <div class="w-full h-screen flex flex-col">
+        <div class="w-full h-10 p-2 rounded header border-solid border-2 border-slate-400 shadow-xl mb-2">Feature View</div>
+        <div class="feature-table w-full h-full"></div>
     </div>
 </template>
 <script setup>
