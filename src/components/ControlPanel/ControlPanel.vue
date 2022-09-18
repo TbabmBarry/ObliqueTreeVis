@@ -17,7 +17,7 @@
                 <a-select
                     ref="select"
                     v-model:value="value2"
-                    style="width:180px"
+                    style="width: 100%"
                     size="small"
                     :options="options2"
                     @change="handleModelChange"
@@ -33,7 +33,7 @@
                 <a-select
                     ref="select"
                     v-model:value="value1"
-                    style="width:120px"
+                    style="width: 100%"
                     size="small"
                     :options="options1"
                     @change="handleDatasetChange"
@@ -163,26 +163,38 @@ async function initiateClassOverview () {
     renderClassDistribution();
 }
 
-const mouseover = function(d) {
-    state.tooltip.style("opacity", 1);
-    d3.select(this)
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .style("opacity", 1);
-}
+// const mouseover = function(d) {
+//     state.tooltip.style("opacity", 1);
+//     d3.select(this)
+//         .style("stroke", "black")
+//         .style("stroke-width", 2)
+//         .style("opacity", 1);
+// }
 
-const mousemove = function(event, d) {
-    state.tooltip.html("Count: " + d.count)
-        .style("left", (d3.pointer(event)[0]/2) + "px")
-        .style("top", (d3.pointer(event)[1]/16) + "px");
-}
+// const mousemove = function(event, d) {
+//     state.tooltip.html("Count: " + d.count)
+//         .style("left", (d3.pointer(event)[0]/2) + "px")
+//         .style("top", (d3.pointer(event)[1]/16) + "px");
+// }
 
-const mouseout = function(d) {
-    state.tooltip.style("opacity", 0);
-    d3.select(this)
-        .style("stroke", "none")
-        .style("opacity", 0.8);
-}
+// const mouseout = function(d) {
+//     state.tooltip.style("opacity", 0);
+//     d3.select(this)
+//         .style("stroke", "none")
+//         .style("opacity", 0.8);
+// }
+
+// state.tooltip = d3.select(state.rootElement)
+//     .append("div")
+//     .attr("class", "tooltip-class-overview")
+//     .style("opacity", 0)
+//     .style("width", "80px")
+//     .style("height", "30px")
+//     .style("background-color", "white")
+//     .style("border", "solid")
+//     .style("border-width", "2px")
+//     .style("border-radius", "5px")
+//     .style("padding", "2px");
 
 function renderClassDistribution () {
     d3.select("#class-overview").selectAll("*").remove();
@@ -198,18 +210,6 @@ function renderClassDistribution () {
         .attr('width', width)
         .attr('height', height);
 
-    // state.tooltip = d3.select(state.rootElement)
-    //     .append("div")
-    //     .attr("class", "tooltip-class-overview")
-    //     .style("opacity", 0)
-    //     .style("width", "80px")
-    //     .style("height", "30px")
-    //     .style("background-color", "white")
-    //     .style("border", "solid")
-    //     .style("border-width", "2px")
-    //     .style("border-radius", "5px")
-    //     .style("padding", "2px");
-    
     const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
 
@@ -220,7 +220,7 @@ function renderClassDistribution () {
     
     state.xScale = d3.scaleLinear()
         .domain([0, d3.max(state.classCounts, d => d.count)])
-        .range([state.padding, width*0.8]);
+        .range([state.padding, width*0.7]);
 
     const selectedClassDistribution = state.baseSvg.append("g")
         .attr("class", "selected-class-overview");
@@ -230,26 +230,28 @@ function renderClassDistribution () {
         .attr("class", "x-axis-bottom")
         .attr("transform", `translate(${width*0.2-state.padding}, ${state.height-state.padding})`)
         .call(d3.axisBottom(d3.scaleLinear()
-            .range([state.padding, width*0.8])).tickValues([]));
+            .range([state.padding, width*0.7])).tickValues([]).tickSize(2));
 
     // Append the y axis title on the top left
     classDistribution.append("text")
         .attr("text-anchor", "end")
         .attr("x", width)
         .attr("y", state.padding)
+        .style("font-size", (state.padding+width*0.1)*0.25)
         .text("All");
     
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
         .attr("x", width)
-        .attr("y", height)
+        .attr("y", height-state.padding/2)
+        .style("font-size", (state.padding+width*0.1)*0.25)
         .text("Subsets");
 
     classDistribution.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(${width*0.2-state.padding}, ${state.padding})`)
-        .call(d3.axisTop(state.xScale))
+        .call(d3.axisTop(state.xScale).tickSize(2))
         .selectAll("text")
         .style("font-size", width*0.03)
         .style("text-anchor", "end");
@@ -279,20 +281,21 @@ function renderSelectedClassDistribution () {
 
     const xScaleRight = d3.scaleLinear()
         .domain([0, d3.max(state.selectedClassCounts, d => d.count)])
-        .range([state.padding, state.width*0.8]);
+        .range([state.padding, state.width*0.7]);
     
     // Create the y axis on the right
     selectedClassDistribution.append("g")
     .attr("class", "x-axis-bottom")
         .attr("transform", `translate(${state.width*0.2-state.padding}, ${state.height-state.padding})`)
         .style("font-size", state.width*0.03)
-        .call(d3.axisBottom(xScaleRight).ticks(5));
+        .call(d3.axisBottom(xScaleRight).ticks(5).tickSize(2));
 
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
         .attr("x", state.width)
-        .attr("y", state.height)
+        .attr("y", state.height-state.padding/2)
+        .style("font-size", (state.padding+state.width*0.1)*0.25)
         .text("Subsets");
 
     selectedClassDistribution.selectAll(".selected-class-bar")
@@ -333,7 +336,7 @@ watch(() => props.selectedPoints, (newValue, oldValue) => {
 
 }, { immediate: false });
 
-let { value1, options1, value2, options2, dataAmount } = toRefs(state);
+let { value1, options1, value2, options2, dataAmount, width } = toRefs(state);
 </script>
 <style scoped>
 </style>
