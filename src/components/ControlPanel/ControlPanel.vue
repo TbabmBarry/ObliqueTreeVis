@@ -211,42 +211,50 @@ function renderClassDistribution () {
     const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
 
-    state.xScale = d3.scaleBand()
+    // state.xScale = d3.scaleBand()
+    //     .domain(state.classCounts.map(d => d.label))
+    //     .range([state.padding, width - state.padding])
+    //     .padding(0.2);
+    
+    // state.yScale = d3.scaleLinear()
+    //     .domain([0, d3.max(state.classCounts, d => d.count)])
+    //     .range([height - state.padding, state.padding]);
+    state.yScale = d3.scaleBand()
         .domain(state.classCounts.map(d => d.label))
-        .range([state.padding, width - state.padding])
+        .range([height - state.padding, state.padding])
         .padding(0.2);
     
-    state.yScale = d3.scaleLinear()
+    state.xScale = d3.scaleLinear()
         .domain([0, d3.max(state.classCounts, d => d.count)])
-        .range([height - state.padding, state.padding]);
+        .range([state.padding, width - state.padding]);
 
     const selectedClassDistribution = state.baseSvg.append("g")
         .attr("class", "selected-class-overview");
 
     // Create an empty y axis on the right
     selectedClassDistribution.append("g")
-        .attr("class", "y-axis-right")
-        .attr("transform", `translate(${width - state.padding}, 0)`)
-        .call(d3.axisRight(d3.scaleLinear()
-            .range([height - state.padding, state.padding])).tickValues([]));
+        .attr("class", "x-axis-bottom")
+        .attr("transform", `translate(0, ${state.height-state.padding})`)
+        .call(d3.axisBottom(d3.scaleLinear()
+            .range([state.padding, width - state.padding])).tickValues([]));
 
     // Append the y axis title on the top left
     classDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", state.padding)
+        .attr("x", width-state.padding/2)
         .attr("y", state.padding-10)
         .text("All");
     
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", width - state.padding/2)
-        .attr("y", state.padding-10)
+        .attr("x", width-state.padding/2)
+        .attr("y", height-10)
         .text("Subsets");
 
     classDistribution.append("g")
         .attr("class", "x-axis")
-        .attr("transform", `translate(0, ${height - state.padding})`)
+        .attr("transform", `translate(0, ${state.padding})`)
         .call(d3.axisBottom(state.xScale))
         .selectAll("text")
         .style("text-anchor", "end");
@@ -261,10 +269,10 @@ function renderClassDistribution () {
         .enter()
         .append("rect")
         .attr("class", "class-bar")
-        .attr("x", d => state.xScale(d.label))
-        .attr("y", d => state.yScale(d.count))
-        .attr("width", state.xScale.bandwidth()/2)
-        .attr("height", d => height - state.padding - state.yScale(d.count))
+        .attr("x", d => state.xScale(0))
+        .attr("y", d => state.yScale(d.label))
+        .attr("width", d => state.xScale(d.count)-state.padding)
+        .attr("height", state.yScale.bandwidth()/2)
         .attr("fill", d => state.colorScale[d.label]);
 }
 
@@ -273,21 +281,21 @@ function renderSelectedClassDistribution () {
     const selectedClassDistribution = state.baseSvg.append("g")
         .attr("class", "selected-class-overview");
 
-    const yScaleRight = d3.scaleLinear()
+    const xScaleRight = d3.scaleLinear()
         .domain([0, d3.max(state.selectedClassCounts, d => d.count)])
-        .range([state.height - state.padding, state.padding]);
+        .range([state.padding, state.width-state.padding]);
     
     // Create the y axis on the right
     selectedClassDistribution.append("g")
-    .attr("class", "y-axis-right")
-        .attr("transform", `translate(${state.width - state.padding}, 0)`)
-        .call(d3.axisRight(yScaleRight).ticks(5));
+    .attr("class", "x-axis-bottom")
+        .attr("transform", `translate(0, ${state.height-state.padding})`)
+        .call(d3.axisBottom(xScaleRight).ticks(5));
 
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", state.width - state.padding/2)
-        .attr("y", state.padding-10)
+        .attr("x", state.width-state.padding/2)
+        .attr("y", state.height-10)
         .text("Subsets");
 
     selectedClassDistribution.selectAll(".selected-class-bar")
@@ -295,10 +303,10 @@ function renderSelectedClassDistribution () {
         .enter()
         .append("rect")
         .attr("class", "selected-class-bar")
-        .attr("x", d => state.xScale(d.label)+state.xScale.bandwidth()/2)
-        .attr("y", d => yScaleRight(d.count))
-        .attr("width", state.xScale.bandwidth()/2)
-        .attr("height", d => state.height - state.padding - yScaleRight(d.count))
+        .attr("y", d => state.yScale(d.label)+state.yScale.bandwidth()/2)
+        .attr("x", d => xScaleRight(0))
+        .attr("height", state.yScale.bandwidth()/2)
+        .attr("width", d => xScaleRight(d.count)-state.padding)
         .attr("fill", d => state.colorScale[d.label])
         // .on("mouseover", mouseover)
         // .on("mousemove", mousemove)
