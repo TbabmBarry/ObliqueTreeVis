@@ -389,7 +389,7 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
             })
             .attr("height", yBand.bandwidth())
             .attr("x", - nodeRectRatio)
-            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("y", (d, i) => yBand(i)+0.4*(nodeRectWidth-2*nodeRectRatio))
             .attr("fill", (d, i) => colorScale[i])
             .style("stroke", "#000")
             .style("stroke-width", "2px");
@@ -404,7 +404,7 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
             })
             .attr("height", yBand.bandwidth())
             .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d[0]))
-            .attr("y", (d, i) => yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("y", (d, i) => yBand(i)+0.4*(nodeRectWidth-2*nodeRectRatio))
             .attr("fill", (d, i) => colorScale[i])
             .style("stroke", "#000")
             .style("stroke-width", "2px");
@@ -421,7 +421,7 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
             .attr("fill", "black")
             .attr("transform", (d, i) => {
                 return `translate(${-nodeRectRatio+xRight(d[1])+5},
-                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.4*(nodeRectWidth-2*nodeRectRatio)})`;
             })
 
     splitDistribution.selectAll("text.negative")
@@ -435,20 +435,20 @@ export function drawSplitHistogram(targetSelection, nodeData, that) {
             .attr("fill", "black")
             .attr("transform", (d, i) => {
                 return `translate(${-0.5*nodeRectWidth+xLeft(d[0])-5},
-                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.5*(nodeRectWidth-2*nodeRectRatio)})`;
+                    ${5+0.5*yBand.bandwidth()+yBand(i)+0.4*(nodeRectWidth-2*nodeRectRatio)})`;
             })
 
     // Append centered axis
     splitDistribution.append("g")
         .attr("class", "summary center-axis")
         .attr("transform", `translate(${-nodeRectRatio},
-            ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
+            ${0.4*(nodeRectWidth-2*nodeRectRatio)})`)
         .call(d3.axisLeft(yBand).tickFormat(""));
 
     splitDistribution.append("g")
         .attr("class", "summary center-axis")
         .attr("transform", `translate(${-nodeRectRatio},
-            ${0.5*(nodeRectWidth-2*nodeRectRatio)})`)
+            ${0.4*(nodeRectWidth-2*nodeRectRatio)})`)
         .call(d3.axisRight(yBand).tickFormat(""));
 }
 
