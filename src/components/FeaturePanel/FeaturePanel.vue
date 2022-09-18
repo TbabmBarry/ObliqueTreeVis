@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-screen flex flex-col">
-        <div class="w-full h-10 p-2 rounded header border-solid border-2 border-slate-400">Feature View</div>
-        <div class="feature-table w-full h-full"></div>
+        <div class="w-full px-2 text-xl text-justify text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Feature View</div>
+        <div class="feature-table w-full h-full overflow-auto"></div>
     </div>
 </template>
 <script setup>
