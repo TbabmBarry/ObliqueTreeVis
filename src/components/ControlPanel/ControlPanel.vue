@@ -1,6 +1,6 @@
 <template>
     <div class="m-2 flex flex-col">
-        <div class="titles my-2">
+        <div class="titles">
             <a 
                 target="_blank" 
                 rel="noopener noreferrer" 
@@ -105,12 +105,13 @@ const state = reactive({
     rootElement: {},
     width: 0,
     height: 0,
-    padding: 40,
+    padding: 0,
     labelSet: [],
     dataAmount: 0,
     xScale: {},
     yScale: {},
     classCounts: {},
+    classNames: ['Adelie','Gentoo','Chinstrap'],
     selectedClassCounts: {},
     baseSvg: {},
     tooltip: {},
@@ -186,6 +187,7 @@ const mouseout = function(d) {
 function renderClassDistribution () {
     d3.select("#class-overview").selectAll("*").remove();
     const { width, height } = _.pick(state.rootElement.getBoundingClientRect(), ['width', 'height']);
+    state.padding = 0.05 * width;
     state.width = width;
     state.height = height;
     // Create the base svg binding it to rootElement
@@ -196,17 +198,17 @@ function renderClassDistribution () {
         .attr('width', width)
         .attr('height', height);
 
-    state.tooltip = d3.select(state.rootElement)
-        .append("div")
-        .attr("class", "tooltip-class-overview")
-        .style("opacity", 0)
-        .style("width", "80px")
-        .style("height", "30px")
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "2px")
-        .style("border-radius", "5px")
-        .style("padding", "2px");
+    // state.tooltip = d3.select(state.rootElement)
+    //     .append("div")
+    //     .attr("class", "tooltip-class-overview")
+    //     .style("opacity", 0)
+    //     .style("width", "80px")
+    //     .style("height", "30px")
+    //     .style("background-color", "white")
+    //     .style("border", "solid")
+    //     .style("border-width", "2px")
+    //     .style("border-radius", "5px")
+    //     .style("padding", "2px");
     
     const classDistribution = state.baseSvg.append("g")
         .attr("class", "class-distribution-overview");
@@ -218,7 +220,7 @@ function renderClassDistribution () {
     
     state.xScale = d3.scaleLinear()
         .domain([0, d3.max(state.classCounts, d => d.count)])
-        .range([state.padding, width/2]);
+        .range([state.padding, width*0.8]);
 
     const selectedClassDistribution = state.baseSvg.append("g")
         .attr("class", "selected-class-overview");
@@ -226,42 +228,44 @@ function renderClassDistribution () {
     // Create an empty y axis on the right
     selectedClassDistribution.append("g")
         .attr("class", "x-axis-bottom")
-        .attr("transform", `translate(${width/2-state.padding}, ${state.height-state.padding})`)
+        .attr("transform", `translate(${width*0.2-state.padding}, ${state.height-state.padding})`)
         .call(d3.axisBottom(d3.scaleLinear()
-            .range([state.padding, width/2 + state.padding])).tickValues([]));
+            .range([state.padding, width*0.8])).tickValues([]));
 
     // Append the y axis title on the top left
     classDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", width-state.padding/2)
-        .attr("y", state.padding-10)
+        .attr("x", width)
+        .attr("y", state.padding)
         .text("All");
     
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", width-state.padding/2)
-        .attr("y", height-10)
+        .attr("x", width)
+        .attr("y", height)
         .text("Subsets");
 
     classDistribution.append("g")
         .attr("class", "x-axis")
-        .attr("transform", `translate(${width/2-state.padding}, ${state.padding})`)
-        .call(d3.axisBottom(state.xScale))
+        .attr("transform", `translate(${width*0.2-state.padding}, ${state.padding})`)
+        .call(d3.axisTop(state.xScale))
         .selectAll("text")
+        .style("font-size", width*0.03)
         .style("text-anchor", "end");
 
     classDistribution.append("g")
         .attr("class", "y-axis")
-        .attr("transform", `translate(${width/2}, 0)`)
-        .call(d3.axisLeft(state.yScale).ticks(5));
+        .attr("transform", `translate(${width*0.2}, 0)`)
+        .style("font-size", width*0.04)
+        .call(d3.axisLeft(state.yScale).tickFormat((d) => state.classNames[d]));
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
         .enter()
         .append("rect")
         .attr("class", "class-bar")
-        .attr("x", d => state.xScale(0)+width/2-state.padding)
+        .attr("x", d => state.xScale(0)+width*0.2-state.padding)
         .attr("y", d => state.yScale(d.label))
         .attr("width", d => state.xScale(d.count)-state.padding)
         .attr("height", state.yScale.bandwidth()/2)
@@ -275,19 +279,20 @@ function renderSelectedClassDistribution () {
 
     const xScaleRight = d3.scaleLinear()
         .domain([0, d3.max(state.selectedClassCounts, d => d.count)])
-        .range([state.padding, state.width/2]);
+        .range([state.padding, state.width*0.8]);
     
     // Create the y axis on the right
     selectedClassDistribution.append("g")
     .attr("class", "x-axis-bottom")
-        .attr("transform", `translate(${state.width/2-state.padding}, ${state.height-state.padding})`)
+        .attr("transform", `translate(${state.width*0.2-state.padding}, ${state.height-state.padding})`)
+        .style("font-size", state.width*0.03)
         .call(d3.axisBottom(xScaleRight).ticks(5));
 
     // Append the y axis title on the top right
     selectedClassDistribution.append("text")
         .attr("text-anchor", "end")
-        .attr("x", state.width-state.padding/2)
-        .attr("y", state.height-10)
+        .attr("x", state.width)
+        .attr("y", state.height)
         .text("Subsets");
 
     selectedClassDistribution.selectAll(".selected-class-bar")
@@ -296,7 +301,7 @@ function renderSelectedClassDistribution () {
         .append("rect")
         .attr("class", "selected-class-bar")
         .attr("y", d => state.yScale(d.label)+state.yScale.bandwidth()/2)
-        .attr("x", d => xScaleRight(0)+state.width/2-state.padding)
+        .attr("x", d => xScaleRight(0)+state.width*0.2-state.padding)
         .attr("height", state.yScale.bandwidth()/2)
         .attr("width", d => xScaleRight(d.count)-state.padding)
         .attr("fill", d => state.colorScale[d.label])
