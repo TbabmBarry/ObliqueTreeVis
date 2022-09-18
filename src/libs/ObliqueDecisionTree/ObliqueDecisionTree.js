@@ -161,7 +161,7 @@ class Odt {
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         // Assign y-axis position difference plus half of the node rect width to detail view node rect width
-        this.constants.detailedViewNodeRectWidth = Math.abs(nodes.y - nodes.children[0].y) + 0.5 * nodeRectWidth;
+        this.constants.detailedViewNodeRectWidth = Math.abs(nodes.y - nodes.children[0].y) + 0.2 * nodeRectWidth;
         this.nodes = nodes;
         // Modify element for each node recursively
         // traverseTree(nodes);
@@ -1278,7 +1278,7 @@ class Odt {
      * @param {data} data
      */
     setDataAndOpts(opts, data, trainingData) {
-        this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
+        this.constants.nodeRectWidth = this.height*(1/(1.5*maxDepth(data)));
         this.constants.leafNodeRectHeight = this.height*(1/(2*maxDepth(data)));
         this.opts = opts;
         this.data = data;
