@@ -547,13 +547,13 @@ class Odt {
         node.each(function(nodeData, index) {
             if (nodeData.data.type === "decision") {
                 // Draw class distribution
-                _this.drawClassDistribution(d3.select(this), nodeData, _this);
+                // _this.drawClassDistribution(d3.select(this), nodeData, _this);
                 if (nodeData.data.featureIdx.length === 2) {
                     // Draw feature coefficients distribution
                 }
                 // Draw feature coefficients distribution
-                // _this.drawCoefficientBar(d3.select(this), nodeData, _this);
-                _this.drawCoefficientDonutChart(d3.select(this), nodeData, _this);
+                _this.drawCoefficientBar(d3.select(this), nodeData, _this);
+                // _this.drawCoefficientDonutChart(d3.select(this), nodeData, _this);
                 // Draw split point distribution
                 _this.drawSplitHistogram(d3.select(this), nodeData, _this);
             }
@@ -1366,7 +1366,7 @@ class Odt {
         // Clear selected features
         this.selectedFeatureNames = [];
         if (selectedFeaturesArr.length === 0) {
-            d3.selectAll("path.coefficients-donut-chart")
+            d3.selectAll("rect.coefficients-bar")
                 .style("opacity", 1)
                 .style("stroke", "none");
             d3.selectAll("g.node")
@@ -1374,19 +1374,19 @@ class Odt {
         } else {
 
             // Weak display of non-target feature decision nodes
-            d3.selectAll("path.coefficients-donut-chart")
+            d3.selectAll("rect.coefficients-bar")
                 .style("opacity", 0.2);
             d3.selectAll("g.node")
                 .style("opacity", 0.4);
             selectedFeaturesArr.forEach((featureName) => {
                 this.selectedFeatureNames.push(featureName);
                 // Highlight target feature decision nodes and donut chart
-                d3.selectAll(`path#donut-chart-${featureName}`)
+                d3.selectAll(`rect#coefficients-bar-${featureName}`)
                     .style("opacity", 1)
                     .style("stroke", "black")
                     .style("stroke-width", 2);
 
-                d3.selectAll(`path#donut-chart-${featureName}`).nodes().forEach((node) => {
+                d3.selectAll(`rect#coefficients-bar-${featureName}`).nodes().forEach((node) => {
                     d3.select(node.parentNode.parentNode)
                         .style("opacity", 1);
                 })

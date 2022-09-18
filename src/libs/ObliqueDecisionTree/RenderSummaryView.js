@@ -118,31 +118,90 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
         coefficientsData.push({
             start: currStart,
             end: currEnd,
-            label: coefficientsNames[idx],
+            weight: ele,
+            name: coefficientsNames[idx],
+            label: (ele === d3.max(coefficientWeights)) ? "big" : "small",
         });
     });
+
+    const color = d3.scaleOrdinal()
+        .domain(["small", "big"])
+        .range(["#BBC2C2", "#777777"]);
+        
     const xBar = d3.scaleLinear()
         .domain([0, 1])
         .range([0, nodeRectWidth-4*nodeRectRatio]);
+
     // Create a svg group to bind each individual coefficient bar
     let coefficientDistribution = targetSelection.append("g")
         .attr("class", "summary coefficient-distribution")
-        .attr("transform", `translate(${2*nodeRectRatio}, ${2*nodeRectRatio})`);
+        .attr("transform", `translate(${2*nodeRectRatio}, ${nodeRectRatio})`);
+
+    const tooltip = coefficientDistribution.append("rect")
+        .attr("class", "summary coefficient-distribution-tooltip")
+        .attr("rx", "3px")
+        .attr("ry", "3px")
+        .style("opacity", 0)
+        .style("width", "100px")
+        .style("height", "30px")
+        .style("fill", "white")
+        .style("stroke", "black")
+        .style("stroke-width", "2px");
+
+    const mouseover = function (event, node) {
+        d3.select(this)
+            .style("stroke", "black")
+            .style("stroke-width", "2px");
+
+        tooltip.style("opacity", 1);
+        coefficientDistribution.append("text")
+            .attr("class", "summary coefficient-distribution-tooltip-text font-bold")
+            .attr("transform", "translate(9, 0)")
+            .text(`Weight: ${node.weight.toFixed(2)}`)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "14px")
+            .style("fill", "black");
+    }
+
+    const mousemove = function (event, node) {
+        tooltip
+            .attr("x", (d3.pointer(event)[0])+40)
+            .attr("y", (d3.pointer(event)[1]+25));
+            coefficientDistribution.select("text.coefficient-distribution-tooltip-text")
+            .attr("x", (d3.pointer(event)[0])+80)
+            .attr("y", (d3.pointer(event)[1]+45));
+    }
+
+    const mouseout = function (event, node) {
+        tooltip.style("opacity", 0);
+        coefficientDistribution.select("text.coefficient-distribution-tooltip-text").remove();
+        if (that.selectedFeatureNames.includes(node.name)) {
+            return;
+        } else {
+            d3.select(this)
+                .style("stroke", "none");
+        }
+    }
+
     // Append each class rect into coefficientDistribution svg group
-    coefficientDistribution.selectAll("rect")
+    coefficientDistribution.selectAll("coefficients-bar")
         .data(coefficientsData)
         .enter()
         .append("rect")
             .attr("class", "summary coefficients-bar")
+            .attr("id", d => `coefficients-bar-${d.name}`)
             .attr("width", (d) => xBar(d.end)-xBar(d.start))
-            .attr("height", 0.5*nodeRectRatio)
-            .attr("rx", 0.25*nodeRectRatio)
-            .attr("ry", 0.25*nodeRectRatio)
+            .attr("height", nodeRectRatio)
+            .attr("rx", 0.5*nodeRectRatio)
+            .attr("ry", 0.5*nodeRectRatio)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start))
-            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.5*nodeRectRatio)
-            .style("fill", (d) => featureColorScale(d.label))
+            .attr("y", 0.5*nodeRectRatio)
+            .style("fill", (d) => color(d.label))
             .style("stroke", "#000")
-            .style("stroke-width", "2px");
+            .style("stroke-width", "2px")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
 
     // Append text above each bar
     coefficientDistribution.selectAll("text")
@@ -150,11 +209,12 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
         .enter()
         .append("text")
             .attr("class", "summary coefficients-bar-text")
+            .attr("id", d => `coefficients-bar-text-${d.name}`)
             .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
-            .attr("y", 0.25*(nodeRectWidth-2*nodeRectRatio)-0.75*nodeRectRatio)
+            .attr("y", 0.25*nodeRectRatio)
             .attr("text-anchor", "middle")
             .attr("fill", "black")
-            .text((d) => d.label);
+            .text((d) => d.name);
 }
 
 /**
