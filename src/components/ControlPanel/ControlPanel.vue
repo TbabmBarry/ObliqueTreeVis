@@ -10,10 +10,10 @@
             </a>
         </div>
         <div class="leading-normal grid grid-cols-2 gap my-2">
-            <div class="col-span-1 titles">
+            <div class="col-span-1 titles text-base">
                 Type: 
             </div>
-            <div class="col-span-1 text-center">
+            <div class="col-span-1 text-center text-base">
                 <a-select
                     ref="select"
                     v-model:value="value2"
@@ -26,7 +26,7 @@
         </div>
         <hr style="height:1px" />
         <div class="grid grid-cols-2 gap my-2">
-            <div class="col-span-1 titles">
+            <div class="col-span-1 titles text-base">
                 Datasets: 
             </div>
             <div class="col-span-1 text-center">
@@ -42,24 +42,24 @@
         </div>
         <hr style="height:1px" />
         <div class="grid grid-cols-2 gap my-2">
-            <div class="col-span-1 titles">
+            <div class="col-span-1 titles text-base">
                 Data Amount:
             </div>
-            <div class="col-span-1 text-center" id="data-amount">
+            <div class="col-span-1 text-center text-base" id="data-amount">
                 {{ dataAmount }}
             </div>
         </div>
         <hr style="height:1px" />
         <div class="grid grid-cols-2 gap my-2">
-            <div class="col-span-1 titles">
+            <div class="col-span-1 titles text-base">
                 Selected Instances:
             </div>
-            <div class="col-span-1 rounded shadow text-center">
+            <div class="col-span-1 w-1/2 m-auto rounded shadow text-center text-base">
                 {{ props.selectedPoints.length }}
             </div>
         </div>
         <hr style="height:1px" />
-        <div class="gap grow justify-center" id="class-overview">
+        <div class="gap grow content-center" id="class-overview">
         </div>
     </div>
 </template>
