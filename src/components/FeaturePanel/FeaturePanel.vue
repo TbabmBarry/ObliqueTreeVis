@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import { inject, reactive, toRefs, watch, onMounted } from "vue";
 import { getUnscaledDatasetChangeSelects } from "@/api/metrics";
+import { kernelDensityEstimator, kernelEpanechnikov } from '@/libs/ObliqueDecisionTree/Utils';
 
 let d3 = inject("d3");
 
@@ -208,7 +209,8 @@ const renderTableBody = (targetSelection, tableData) => {
         .filter((d) => d.key === "histogram")
         .attr("id", "feature-histogram")
         .attr("width", "45%")
-        .append((d) => drawFeatureStackedHistgram(d.value, d.index));
+        .append((d) => drawDensityPlot(d.value, d.index));
+        // .append((d) => drawFeatureStackedHistgram(d.value, d.index));
 }
 
 const drawLegend = (type) => {
@@ -470,6 +472,7 @@ const drawBarchart = (featureContributionData, featureId) => {
 }
 
 const drawFeatureStackedHistgram = (histogramData, featureId) => {
+    console.log(histogramData);
     const isNumeric = histogramData.isNumeric;
     // Create div element
     const featureStackedHistogram = document.createElement("div");
@@ -861,6 +864,273 @@ const drawRectPlot = (contributionArrs, featureId) => {
     return rectplot;
 }
 
+const drawDensityPlot = (histogramData, featureId) => {
+    const isNumeric = histogramData.isNumeric;
+    // Create div element
+    const densityPlot = document.createElement("div");
+    densityPlot.setAttribute("class", "feature-density-plot flex justify-center m-auto");
+    const w = state.width * 0.45, h = state.width * 0.2, padding = 0.07 * w;
+    // Create svg element
+    const densityPlotSvg = d3.select(densityPlot)
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("class", "feature-density-plot-svg")
+        .attr("id", `feature-density-plot-svg-${featureId}`)
+    // Create group element
+    const cell = densityPlotSvg.append("g")
+        .attr("class", "feature-density-plot-g")
+        .attr("id", `feature-density-plot-g-${featureId}`);
+
+    if (isNumeric) {
+        // Create x scale
+        const x = d3.scaleLinear()
+            .domain(d3.extent(histogramData.dataset, (d) => d.value))
+            .range([padding, w-2*padding]);
+
+        // Compute the optimal bandwidth
+        histogramData.dataset.sort((a, b) => d3.ascending(a.value, b.value));
+        let stdVal = d3.deviation(histogramData.dataset, (d) => d.value),
+            iqrVal = d3.quantile(histogramData.dataset, 0.75, (d) => d.value) - d3.quantile(histogramData.dataset, 0.25, (d) => d.value),
+            bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.dataset.length, -1/5);
+
+        // Compute kernel density estimation
+        const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), x.ticks(50));
+
+        const densityData = Array.from(new Set(histogramData.dataset.map((d) => d.label))).map((label) => {
+            return {
+                label: label,
+                data: kde(histogramData.dataset.filter((d) => d.label === label).map((d) => d.value))
+            }
+        });
+
+        const xAxis = d3.axisBottom(x).ticks(5).tickSize(3);
+        
+        // Compute the y extrema
+        let maxProb = 0;
+        densityData.forEach((d) => {
+            d.data.forEach((d) => {
+                if (d[1] > maxProb) {
+                    maxProb = d[1];
+                }
+            });
+        });
+        // console.log(densityData);
+        const y = d3.scaleLinear()
+            .domain([0, maxProb])
+            .range([h-2*padding, padding]);
+        
+        // Render the density plot
+        cell.append("g").selectAll("density-plots")
+            .data(densityData)
+            .join("g")
+            .attr("fill", (d) => state.colorScale[d.label])
+            .append("path")
+            .datum(d => d.data)
+            .attr("class", "feature-density-plot-path")
+            .attr("id", `feature-density-plot-path-${featureId}`)
+            .attr("opacity", ".8")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1)
+            .attr("stroke-linejoin", "round")
+            .attr("d", d3.area().curve(d3.curveBasis)
+                .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
+
+        // Draw x-axis for the stacked histogram
+        cell.append("g")
+            .attr("class", "feature-density-plot-x-axis cursor-default")
+            .attr("id", `feature-density-plot-x-axis-${featureId}`)
+            .attr("transform", `translate(${padding}, ${h-2*padding})`)
+            .call(xAxis);
+        // Draw y-axis for the stacked histogram
+        cell.append("g")
+            .attr("class", "feature-density-plot-y-axis cursor-default")
+            .attr("id", `feature-density-plot-y-axis-${featureId}`)
+            .attr("transform", `translate(${2*padding}, 0)`)
+            .call(d3.axisLeft(y).ticks(4).tickSize(2));
+    } else {
+        let valueArr = Array.from(new Set(histogramData.dataset.map((d) => d.value)));
+        let labelArr = Array.from(new Set(histogramData.dataset.map((d) => d.label)));
+        const barData = valueArr.map((d) => ({
+            value: d,
+            bars: labelArr.map((label) => ({
+                label: label,
+                count: histogramData.dataset.filter((data) => data.value === d && data.label === label).length
+            }))
+        }));
+
+        // Create x-scale
+        const x = d3.scaleBand()
+            .domain(valueArr.sort(d3.ascending))
+            .range([padding, w-2*padding])
+            .padding(0.3);
+        const xSubGroup = d3.scaleBand()
+            .domain(labelArr.sort(d3.ascending))
+            .range([0, x.bandwidth()])
+            .padding([0.15]);
+        // Create y-scale
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(barData, (d) => d3.max(d.bars, (d) => d.count))])
+            .range([h-2*padding, padding]);
+        cell.append("g")
+            .selectAll("feature-histograms")
+            .data(barData)
+            .join("g")
+            .attr("transform", (d) => `translate(${x(d.value)}, 0)`)
+            .selectAll("feature-histogram")
+            .data(d => d.bars)
+            .join("rect")
+            .attr("class", "feature-histogram-bar")
+            .attr("id", `feature-histogram-bar-${featureId}`)
+            .attr("x", (d) => xSubGroup(d.label)+padding)
+            .attr("y", (d) => y(d.count))
+            .attr("width", xSubGroup.bandwidth())
+            .attr("height", (d) => y(0) - y(d.count))
+            .attr("fill", (d) => state.colorScale[d.label]);
+
+        // Draw x-axis for the grouped feature histogram
+        cell.append("g")
+            .attr("class", "feature-histogram-x-axis")
+            .attr("id", `feature-histogram-x-axis-${featureId}`)
+            .attr("transform", `translate(${padding}, ${h-2*padding})`)
+            .call(d3.axisBottom(x).ticks(5).tickSize(3));
+        // Draw y-axis for the grouped feature histogram
+        cell.append("g")
+            .attr("class", "feature-histogram-y-axis")
+            .attr("id", `feature-histogram-y-axis-${featureId}`)
+            .attr("transform", `translate(${2*padding}, 0)`)
+            .call(d3.axisLeft(y).ticks(4).tickSize(2));
+    }
+    
+    return densityPlot;
+}
+
+const drawExposedDensityPlot = (exposedHistograms) => {
+    // Clear the previous exposed density plot
+    d3.selectAll("g.exposed-feature-density-plot-g").remove();
+
+    exposedHistograms.forEach((exposedHistogram) => {
+        const histogramData = exposedHistogram.datasets.map((id) => ({
+            label: state.labelSet[id],
+            value: state.unscaledTrainingSet[id][state.featureArr[exposedHistogram.featureId]]
+        }));
+        const isNumeric = state.featureTable[exposedHistogram.featureId].histogram.isNumeric;
+        const w = state.width * 0.45, h = state.width * 0.2, padding = 0.07 * w;
+        const densityPlotSvg = d3.selectAll(`svg#feature-density-plot-svg-${exposedHistogram.featureId}`);
+        const exposedDensityPlotCell = densityPlotSvg.append("g")
+            .attr("class", "exposed-feature-density-plot-g")
+            .attr("id", `exposed-feature-density-plot-g-${exposedHistogram.featureId}`);
+        
+        if (isNumeric) {
+            // Update the density plot opacity
+            d3.selectAll(`path.feature-density-plot-path`)
+                .style("opacity", ".3");
+            
+            // x-scale for the density plot
+            const x = d3.scaleLinear()
+                .domain(d3.extent(state.featureTable[exposedHistogram.featureId].histogram.dataset, (d)=>d.value))
+                .range([padding, w - 2*padding]);
+            
+            // Compute the optimal bandwidth
+            histogramData.sort((a, b) => d3.ascending(a.value, b.value));
+            let stdVal = d3.deviation(histogramData, (d) => d.value),
+                iqrVal = d3.quantile(histogramData, 0.75, (d) => d.value) - d3.quantile(histogramData, 0.25, (d) => d.value),
+                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.length, -1/5);
+
+            // Compute kernel density estimation
+            const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), x.ticks(50));
+
+            const exposedDensityData = Array.from(new Set(histogramData.map((d) => d.label))).map((label) => {
+                return {
+                    label: label,
+                    data: kde(histogramData.filter((d) => d.label === label).map((d) => d.value))
+                }
+            });
+
+            // Compute the y extrema
+            let maxProb = 0;
+            exposedDensityData.forEach((d) => {
+                d.data.forEach((d) => {
+                    if (d[1] > maxProb) {
+                        maxProb = d[1];
+                    }
+                });
+            });
+
+            // y-scale for the density plot
+            const y = d3.scaleLinear()
+                .domain([0, maxProb])
+                .range([h-2*padding, padding]);
+            
+            // Render the exposed density plot
+            exposedDensityPlotCell.append("g").selectAll("exposed-density-plots")
+                .data(exposedDensityData)
+                .join("g")
+                .attr("fill", (d) => state.colorScale[d.label])
+                .append("path")
+                .datum(d => d.data)
+                .attr("class", "exposed-feature-density-plot-path")
+                .attr("id", `exposed-feature-density-plot-path-${exposedHistogram.featureId}`)
+                .attr("opacity", ".8")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 2)
+                .attr("stroke-linejoin", "round")
+                .attr("d", d3.area().curve(d3.curveBasis)
+                    .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
+        } else {
+            d3.selectAll(`rect#feature-histogram-bar-${exposedHistogram.featureId}`)
+                .style("opacity", 0.6);
+            let valueArr = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.value)));
+            let labelArr = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label)));
+            const exposedBarData = valueArr.map((d) => ({
+                value: d,
+                bars: labelArr.map((label) => ({
+                    label: label,
+                    count: histogramData.filter((data) => data.value === d && data.label === label).length
+                }))
+            }));
+            const barData = valueArr.map((d) => ({
+                value: d,
+                bars: labelArr.map((label) => ({
+                    label: label,
+                    count: state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((data) => data.value === d && data.label === label).length
+                }))
+            }));
+            // Create x-scale
+            const x = d3.scaleBand()
+                .domain(valueArr.sort(d3.ascending))
+                .range([padding, w-2*padding])
+                .padding(0.3);
+            const xSubGroup = d3.scaleBand()
+                .domain(labelArr.sort(d3.ascending))
+                .range([0, x.bandwidth()])
+                .padding([0.15]);
+            // Create y-scale
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(barData, (d) => d3.max(d.bars, (d) => d.count))])
+                .range([h-2*padding, padding]);
+            exposedDensityPlotCell.append("g")
+                .selectAll("exposed-feature-histograms")
+                .data(exposedBarData)
+                .join("g")
+                .attr("transform", (d) => `translate(${x(d.value)}, 0)`)
+                .selectAll("exposed-feature-histogram")
+                .data((d) => d.bars)
+                .join("rect")
+                .attr("class", "exposed-histogram-bar")
+                .attr("id", (d) => `exposed-histogram-bar-${exposedHistogram.featureId}`)
+                .attr("x", (d) => xSubGroup(d.label)+xSubGroup.bandwidth()/4+padding)
+                .attr("y", (d) => y(d.count))
+                .attr("width", xSubGroup.bandwidth()/2)
+                .attr("height", (d) => y(0) - y(d.count))
+                .attr("fill", (d) => state.colorScale[d.label])
+                .style("stroke", "black");
+        }
+    })
+
+}
+
 const drawExposedFeatureContributions = (exposedFeatureContributions) => {
     // Clear the previous exposed bar charts
     d3.selectAll("g.exposed-barchart-g").remove();
@@ -1150,8 +1420,12 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
         .style("opacity", 1)
         .style("stroke", "black");
 
-    d3.selectAll(`rect.feature-stacked-histogram-bar`)
-            .style("opacity", 1);
+    // d3.selectAll(`rect.feature-stacked-histogram-bar`)
+    //         .style("opacity", 1);
+
+    // Update the density plot opacity
+    d3.selectAll("path.feature-density-plot-path")
+                .style("opacity", ".8");
 
     d3.selectAll("rect.feature-histogram-bar")
         .style("opacity", 1);
@@ -1166,7 +1440,8 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
     drawExposedFeatureContributions(newVal);
 
     // Draw exposed histograms
-    drawExposedHistograms(newVal);
+    // drawExposedHistograms(newVal);
+    drawExposedDensityPlot(newVal);
 
     // Draw exposed feature rects
     drawExposedFeatureRects(newVal);
