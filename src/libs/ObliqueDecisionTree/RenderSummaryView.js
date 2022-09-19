@@ -203,6 +203,25 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);
 
+    // Append polyline
+    coefficientDistribution.selectAll("coefficients-polylines")
+        .data(coefficientsData)
+        .enter()
+        .append("polyline")
+            .attr("class", "summary coefficients-polylines")
+            .attr("id", d => `coefficients-polylines-${d.name}`)
+            .attr("points", (d, i) => {
+                const x = - 0.5*(nodeRectWidth)+xBar(d.start);
+                const x1 = - 0.5*(nodeRectWidth)+xBar(d.end);
+                let posA = [(x+x1)/2, nodeRectRatio];
+                let posB = [(x+x1)/2+i*(nodeRectWidth-4*nodeRectRatio)/4-(1-i)*(nodeRectWidth-4*nodeRectRatio)/4, 0.25*nodeRectRatio];
+                let posC = [(x+x1)/2+i*(nodeRectWidth-4*nodeRectRatio)/2-(1-i)*(nodeRectWidth-4*nodeRectRatio)/2, 0.25*nodeRectRatio];
+                return [posA, posB, posC];
+            })
+            .style("fill", "none")
+            .style("stroke", "#000")
+            .style("stroke-width", "2px");
+
     // Append text above each bar
     coefficientDistribution.selectAll("text")
         .data(coefficientsData)
@@ -210,10 +229,11 @@ export function drawCoefficientBar(targetSelection, nodeData, that) {
         .append("text")
             .attr("class", "summary coefficients-bar-text")
             .attr("id", d => `coefficients-bar-text-${d.name}`)
-            .attr("x", (d) => - 0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start)))
-            .attr("y", 0.25*nodeRectRatio)
+            .attr("x", (d,i) => -0.5*(nodeRectWidth)+xBar(d.start)+0.5*(xBar(d.end)-xBar(d.start))+i*(nodeRectWidth-4*nodeRectRatio)/2-(1-i)*(nodeRectWidth-4*nodeRectRatio)/2)
+            .attr("y", 0.1*nodeRectRatio)
             .attr("text-anchor", "middle")
             .attr("fill", "black")
+            .attr("font-size", "18px")
             .text((d) => d.name);
 }
 
