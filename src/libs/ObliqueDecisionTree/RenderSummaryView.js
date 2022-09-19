@@ -544,7 +544,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
             })
             .attr("height", yBand.bandwidth())
             .attr("x", - nodeRectRatio)
-            .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("y", (d) => yBand(d.label)+0.4*(nodeRectWidth-2*nodeRectRatio))
             .attr("fill", (d) => {
                 const texture = textures.lines()
                     .size(8)
@@ -572,7 +572,7 @@ export function drawExposedSplitHistogram(targetSelection, originalNodeData, exp
             })
             .attr("height", yBand.bandwidth())
             .attr("x", (d) => -0.5*nodeRectWidth+xLeft(d.count))
-            .attr("y", (d) => yBand(d.label)+0.5*(nodeRectWidth-2*nodeRectRatio))
+            .attr("y", (d) => yBand(d.label)+0.4*(nodeRectWidth-2*nodeRectRatio))
             .attr("fill", (d) => {
                 const texture = textures.lines()
                     .size(8)
