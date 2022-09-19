@@ -280,6 +280,12 @@ const drawLegend = (type) => {
     return legend;
 }
 
+/**
+ * Draw feature name in feature table body
+ * @param {any} featureName
+ * @param {any} featureId
+ * @returns {any}
+ */
 const drawFeatureName = (featureName, featureId) => {
     // Create div element
     const featureNameDiv = document.createElement("div");
@@ -813,7 +819,15 @@ const drawRectPlot = (contributionArrs, featureId) => {
                 .style("stroke", "#000")
                 .style("stroke-width", "1px")
                 .on("mouseover", mouseover)
-                .on("mouseout", mouseout)
+                .on("mouseout", mouseout);
+        
+        // Draw the y axis
+        cell.append("g")
+            .attr("class", "y-axis")
+            .attr("transform", `translate(${padding}, 0)`)
+            .call(d3.axisRight(y).tickSize(5).tickFormat((d) => ""))
+            .call((g) => g.select(".domain").remove())
+            .call((g) => g.selectAll(".tick text").attr("font-size", "12px"));
                 
     } else {
         cell.append("line")
