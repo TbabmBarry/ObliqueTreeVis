@@ -721,7 +721,7 @@ const drawBoxplot = (boxplotData, featureId) => {
 const drawRectPlot = (contributionArrs, featureId) => {
     const rectplot = document.createElement("div");
     rectplot.setAttribute("class", "rectplot-div");
-    const w = state.width * 0.35, h = state.width * 0.2, padding = 10;
+    const w = state.width * 0.35, h = state.width * 0.2, padding = 0.05 * w;
     const isEmpty = (curr) => curr.length === 0;
     // Create x scale
     const x = d3.scaleLinear()
