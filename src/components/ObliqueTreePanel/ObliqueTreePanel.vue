@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen flex flex-col">
-        <div class="w-full px-2 flex text-xl justify-center text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Feature View</div>
+        <div class="w-full px-2 flex text-xl justify-center text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Oblique Tree View</div>
         <div class="w-full h-full" id="vis"></div>
     </div>
 </template>

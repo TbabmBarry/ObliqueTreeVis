@@ -1278,7 +1278,7 @@ class Odt {
      * @param {data} data
      */
     setDataAndOpts(opts, data, trainingData) {
-        this.constants.nodeRectWidth = this.height*(1/(1.5*maxDepth(data)));
+        this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
         this.constants.leafNodeRectHeight = this.height*(1/(2*maxDepth(data)));
         this.opts = opts;
         this.data = data;
