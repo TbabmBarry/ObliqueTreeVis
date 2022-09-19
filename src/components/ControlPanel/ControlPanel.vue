@@ -218,7 +218,7 @@ function renderClassDistribution () {
 
     state.yScale = d3.scaleBand()
         .domain(state.classCounts.map(d => d.label))
-        .range([height - state.padding, state.padding])
+        .range([state.padding, height - state.padding])
         .padding(0.2);
     
     state.xScale = d3.scaleLinear()

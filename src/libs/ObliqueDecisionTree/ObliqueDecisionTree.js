@@ -84,6 +84,7 @@ class Odt {
                 nodeRectStrokeWidth: 3,
                 leafNodeRectStrokeWidth: 3,
                 colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
+                classNames: ['Adelie','Gentoo','Chinstrap'],
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
                 featureTable: null,
@@ -114,7 +115,7 @@ class Odt {
     }
 
     draw() {
-        const { opts, data, parts, height, width, scale, constants: { nodeRectWidth, treeMargins, leafNodeRectHeight } } = this;
+        const { opts, data, parts, height, width, scale, constants: { nodeRectWidth, classNames, colorScale, leafNodeRectHeight } } = this;
 
         // Assign feature name array to featureArr
         if (opts.dataset_name == "iris") this.constants.featureArr = Array.from({length: 4}, (_, i) => `f_${i+1}`);
@@ -170,6 +171,32 @@ class Odt {
         this.renderNodes(nodes.descendants());
         // Enable zooming
         // this.enableZooming();
+        const legendRectSize = 100;
+        const legendSpacing = legendRectSize/4;
+        // Render class legend
+        parts.svgGroup.selectAll("class-legend")
+            .data(this.constants.classNames)
+            .enter()
+            .append("rect")
+            .attr("x", 100)
+            .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing))
+            .attr("width", legendRectSize)
+            .attr("height", legendRectSize)
+            .style("fill", (d, i) => colorScale[i])
+
+        // Render class legend text
+        parts.svgGroup.selectAll("class-legend-text")
+            .data(this.constants.classNames)
+            .enter()
+            .append("text")
+            .attr("x", 100 + legendRectSize+legendSpacing)
+            .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing)+legendRectSize*0.5)
+            .text(d => d)
+            .style("fill", (d, i) => colorScale[i])
+            .style("font-size", legendRectSize*0.5)
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
+
     }
 
     /**
