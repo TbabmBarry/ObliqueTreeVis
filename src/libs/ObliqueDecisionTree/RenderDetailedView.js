@@ -471,13 +471,6 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
 
     const triangle = d3.symbol().type(d3.symbolTriangle).size(50); // triangle symbol
 
-    targetSelection.append("path")
-        .attr("class", "detailed histogram split-point-triangle")
-        .attr("d", triangle)
-        .attr("transform", `translate(${xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
-            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-3*scatterPlotPadding})`)
-        .style("fill", "#000");
-
     // Set up y-axis value encodings for histograms
     const yHistogram = d3.scaleLinear()
         .domain([0, Math.max(d3.max(binsLeft, d => d.length), d3.max(binsRight, d => d.length))])
@@ -497,8 +490,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
         .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
-        .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
-        .style("opacity", 0.3);
+        .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])));
 
     targetSelection.append("g")
         .selectAll("g.histogram.x-histogram.right")
@@ -513,8 +505,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
         .attr("transform", d => `translate(${xScale(d.data.x0)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding}, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding})`)
             .attr("width", d => xScale(d.data.x1)-xScale(d.data.x0))
-            .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])))
-        .style("opacity", 0.7);
+            .attr("height", d => Math.abs(yHistogram(d[0])-yHistogram(d[1])));
 
     // Draw x-axis for histogram
     targetSelection.append("g")
@@ -551,6 +542,23 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
             .attr("transform", "rotate(90)")
             .text(`← Count`)
         );
+
+    // Draw split point triangle
+    targetSelection.append("path")
+        .attr("class", "detailed histogram split-point-triangle")
+        .attr("d", triangle)
+        .attr("transform", `translate(${xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding},
+            ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-3*scatterPlotPadding})`)
+        .style("fill", "#000");
+    // Draw split point line
+    targetSelection.append("line")
+        .attr("class", "detailed histogram split-point-line")
+        .attr("x1", xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding)
+        .attr("x2", xScale(splitPoint)-0.5*detailedViewNodeRectWidth+4*scatterPlotPadding)
+        .attr("y1", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+detailedViewNodeRectWidth-4*scatterPlotPadding)
+        .attr("y2", -0.5*(detailedViewNodeRectWidth-nodeRectWidth)+4*scatterPlotPadding)
+        .style("stroke", "#000")
+        .style("stroke-width", 3);
 }
 
 /**
