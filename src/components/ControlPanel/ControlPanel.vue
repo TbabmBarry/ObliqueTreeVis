@@ -1,15 +1,8 @@
 <template>
-    <div class="m-2 flex flex-col">
-        <div class="titles">
-            <a 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                href="https://github.com/TbabmBarry/oblique-tree/tree/main" 
-                class="text-2xl text-black underline decoration-4 decoration-sky-500 hover:underline hover:text-sky-800">
-                ObliqueTreeVis
-            </a>
-        </div>
-        <div class="leading-normal grid grid-cols-2 gap my-2">
+    <div class="flex flex-col">
+        <div class="w-full px-2 flex justify-center text-xl text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Control Panel</div>
+        <div class="m-2 h-full flex flex-col">
+            <div class="leading-normal grid grid-cols-2 gap mb-2">
             <div class="col-span-1 titles text-base">
                 Type: 
             </div>
@@ -61,6 +54,16 @@
         <hr style="height:1px" />
         <div class="gap grow content-center" id="class-overview">
         </div>
+        </div>
+            <!-- <a 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                href="https://github.com/TbabmBarry/oblique-tree/tree/main" 
+                class="text-2xl text-black underline decoration-4 decoration-sky-500 hover:underline hover:text-sky-800">
+                ObliqueTreeVis
+            </a> -->
+            
+        
     </div>
 </template>
 <script setup>

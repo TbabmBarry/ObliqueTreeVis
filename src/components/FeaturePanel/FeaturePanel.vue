@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen flex flex-col">
-        <div class="w-full px-2 text-xl text-justify text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Feature View</div>
+        <div class="w-full flex px-2 justify-center text-xl text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Feature View</div>
         <div class="feature-table w-full h-full overflow-auto"></div>
     </div>
 </template>

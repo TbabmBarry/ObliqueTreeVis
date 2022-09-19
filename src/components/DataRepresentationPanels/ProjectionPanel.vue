@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col">
-        <div class="w-full px-2 text-xl text-justify text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Projection View</div>
+        <div class="w-full px-2 flex text-xl justify-center text-white font-bold rounded header border-double border-2 border-slate-100 bg-slate-400">Projection View</div>
         <div class="w-full h-full" id="projection"></div>
     </div>
 </template>
