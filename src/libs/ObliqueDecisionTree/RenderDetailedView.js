@@ -633,7 +633,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
         .attr("width", d => x[currFeatureIdx[0]](d.data.x1)-x[currFeatureIdx[0]](d.data.x0))
         .attr("height", d => Math.abs(yHistogram1(d[0])-yHistogram1(d[1])))
-        .style("opacity", 0.3);
+        .style("opacity", 0.6);
 
     targetSelection.append("g")
         .selectAll("g.histogram.x-histogram.right")
@@ -649,7 +649,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
             ${-0.5*(detailedViewNodeRectWidth-nodeRectWidth)+scatterPlotPadding})`)
             .attr("width", d => x[currFeatureIdx[0]](d.data.x1)-x[currFeatureIdx[0]](d.data.x0))
             .attr("height", d => Math.abs(yHistogram1(d[0])-yHistogram1(d[1])))
-        .style("opacity", 0.7);
+        .style("opacity", 0.6);
 
     // Draw axis for histogram on the first feature
     targetSelection.append("g")
@@ -672,7 +672,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
             ${y[currFeatureIdx[1]](d.data.x1)})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
-        .style("opacity", 0.3);
+        .style("opacity", 0.6);
     
     targetSelection.append("g")
         .selectAll("g.histogram.y-histogram.right")
@@ -688,7 +688,7 @@ export function drawFeatureHistogram(targetSelection, nodeData, currFeatureIdx, 
             ${y[currFeatureIdx[1]](d.data.x1)})`)
         .attr("width", d => Math.abs(yHistogram2(d[0])-yHistogram2(d[1])))
         .attr("height", d => -y[currFeatureIdx[1]](d.data.x1)+y[currFeatureIdx[1]](d.data.x0))
-        .style("opacity", 0.7);
+        .style("opacity", 0.6);
 
      // Draw axis for histogram on the second feature
      targetSelection.append("g")
