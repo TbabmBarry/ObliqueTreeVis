@@ -19,6 +19,10 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    selectedDataset: {
+        type: String,
+        default: "penguins"
+    },
     exposedFeatureContributions: {
         type: Array,
         default: () => []
@@ -48,11 +52,12 @@ const state = reactive({
 });
 
 onMounted(() => {
-    initFeatureView("penguins");
+    initFeatureView();
     state.rootElement = document.querySelector(".feature-table");
 });
 
-async function initFeatureView (dataset_name) {
+async function initFeatureView () {
+    let dataset_name = props.selectedDataset;
     let req = {
         dataset_name: dataset_name
     };
@@ -60,6 +65,8 @@ async function initFeatureView (dataset_name) {
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
             let featureArr = trainingSet.shift();
+            labelSet.shift();
+            console.log(featureArr);
             trainingSet = trainingSet.map((row) => {
                 let obj = {};
                 featureArr.forEach((feature, index) => {
@@ -1407,6 +1414,10 @@ const stackDataGenerator = (bins) => {
 watch(() => props.featureTable, (newVal, oldVal) => {
     state.featureTable = newVal.slice();
     initFeatureTable();
+});
+
+watch(() => props.selectedDataset, (val) => {
+    initFeatureView();
 });
 
 watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {

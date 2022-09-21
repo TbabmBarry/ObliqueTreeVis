@@ -84,7 +84,11 @@ class Odt {
                 nodeRectStrokeWidth: 3,
                 leafNodeRectStrokeWidth: 3,
                 colorScale: ["#66c2a5", "#fc8d62", "#8da0cb"],
-                classNames: ['Adelie','Gentoo','Chinstrap'],
+                classNames: {
+                    "penguins": ['Adelie','Gentoo','Chinstrap'],
+                    "iris": ['setosa', 'versicolor', 'virginica'],
+                    "wine": ['class_0', 'class_1', 'class_2']
+                },
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
                 featureTable: null,
@@ -117,8 +121,6 @@ class Odt {
     draw() {
         const { opts, data, parts, height, width, scale, constants: { nodeRectWidth, classNames, colorScale, leafNodeRectHeight } } = this;
 
-        // Assign feature name array to featureArr
-        if (opts.dataset_name == "iris") this.constants.featureArr = Array.from({length: 4}, (_, i) => `f_${i+1}`);
         this.computeGlobalFeatureContribution();
         const zoomed = ({ transform }) => {
             parts.svgGroup.attr('transform', transform);
@@ -175,7 +177,7 @@ class Odt {
         const legendSpacing = legendRectSize/4;
         // Render class legend
         parts.svgGroup.selectAll("class-legend")
-            .data(this.constants.classNames)
+            .data(this.constants.classNames[opts.dataset_name])
             .enter()
             .append("rect")
             .attr("x", 100)
@@ -186,7 +188,7 @@ class Odt {
 
         // Render class legend text
         parts.svgGroup.selectAll("class-legend-text")
-            .data(this.constants.classNames)
+            .data(this.constants.classNames[opts.dataset_name])
             .enter()
             .append("text")
             .attr("x", 100 + legendRectSize+legendSpacing)

@@ -25,6 +25,7 @@
             <FeaturePanel 
                 @emit-selected-features-changed="selectedFeaturesChanged"
                 :featureTable="featureTable" 
+                :selectedDataset="selectedDataset"
                 :exposedFeatureContributions="exposedFeatureContributions" />
         </div>
     </div>

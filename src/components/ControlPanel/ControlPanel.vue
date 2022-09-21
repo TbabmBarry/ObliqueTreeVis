@@ -85,13 +85,17 @@ const props = defineProps({
 const state = reactive({
     value1: ref('penguins'),
     options1: ref([
-        // {
-        // value: 'iris',
-        // label: 'Iris Data',
-        // }, 
+        {
+        value: 'iris',
+        label: 'Iris Data',
+        }, 
         {
             value: 'penguins',
             label: 'Penguins Data',
+        },
+        {
+            value: 'wine',
+            label: 'Wine Data',
         }
     ]),
     value2: ref('bivariate'),
@@ -114,7 +118,11 @@ const state = reactive({
     xScale: {},
     yScale: {},
     classCounts: {},
-    classNames: ['Adelie','Gentoo','Chinstrap'],
+    classNames: {
+        "penguins": ['Adelie','Gentoo','Chinstrap'],
+        "iris": ['setosa', 'versicolor', 'virginica'],
+        "wine": ['class_0', 'class_1', 'class_2']
+    },
     selectedClassCounts: {},
     baseSvg: {},
     tooltip: {},
@@ -157,6 +165,7 @@ async function initiateClassOverview () {
     state.labelSet = await getDatasetChangeSelects(req)
         .then(function (bundle) {
             let { trainingSet, labelSet } = bundle.data;
+            labelSet.shift();
             return labelSet.slice();
         }).catch(function (error) {
             console.log("ERROR: ", error);
@@ -263,7 +272,7 @@ function renderClassDistribution () {
         .attr("class", "y-axis")
         .attr("transform", `translate(${width*0.2}, 0)`)
         .style("font-size", width*0.04)
-        .call(d3.axisLeft(state.yScale).tickFormat((d) => state.classNames[d]));
+        .call(d3.axisLeft(state.yScale).tickFormat((d) => state.classNames[state.value1][d]));
 
     classDistribution.selectAll(".class-bar")
         .data(state.classCounts)
