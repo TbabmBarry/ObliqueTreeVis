@@ -159,15 +159,14 @@ class Odt {
             .call(zoomListener.transform, 
                 d3.zoomIdentity.scale(scale));
 
-        parts.treeMap = d3.tree().size([width, 
-            height-leafNodeRectHeight]);
+        parts.treeMap = d3.tree().size([width, height-leafNodeRectHeight]);
         let nodes = d3.hierarchy(data);
         nodes = parts.treeMap(nodes);
         // Assign y-axis position difference plus half of the node rect width to detail view node rect width
         this.constants.detailedViewNodeRectWidth = Math.abs(nodes.y - nodes.children[0].y) + 0.2 * nodeRectWidth;
         this.nodes = nodes;
         // Modify element for each node recursively
-        // traverseTree(nodes);
+        traverseTree(nodes,nodeRectWidth);
         // Render Oblique Tree Links and Nodes
         this.renderLinks(nodes.descendants().slice(1));
         this.renderNodes(nodes.descendants());
@@ -605,9 +604,11 @@ class Odt {
 
         const y = x.map(x => x.copy()
             .range([detailedViewNodeRectWidth-histogramHeight-3*scatterPlotPadding-histogramScatterPlotPadding, 0]));
-
+        
+            
         // Add dots in each decision node
         node.each(function (nodeData, index) {
+            d3.select(this).raise();
             let currFeatureIdx = nodeData.data.featureIdx;
             if (currFeatureIdx.length === 2) {
                 // Draw two-feature scatter plot
@@ -1308,7 +1309,7 @@ class Odt {
      */
     setDataAndOpts(opts, data, trainingData) {
         this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
-        this.constants.leafNodeRectHeight = this.height*(1/(2*maxDepth(data)));
+        this.constants.leafNodeRectHeight = this.constants.nodeRectWidth;
         this.opts = opts;
         this.data = data;
         this.trainX = trainingData.trainingSet;

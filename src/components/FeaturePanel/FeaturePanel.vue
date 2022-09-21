@@ -66,7 +66,6 @@ async function initFeatureView () {
             let { trainingSet, labelSet } = bundle.data;
             let featureArr = trainingSet.shift();
             labelSet.shift();
-            console.log(featureArr);
             trainingSet = trainingSet.map((row) => {
                 let obj = {};
                 featureArr.forEach((feature, index) => {

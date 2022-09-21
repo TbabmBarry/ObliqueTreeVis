@@ -16,6 +16,7 @@ export const adjustedClientRect = (node) => {
     curr.right += window.scrollX;
     curr.x += window.scrollX;
     curr.scale = curr.height / 2160;
+    // curr.scale = curr.width / 2160;
     curr.screenHeight = curr.height;
     curr.screenWidth = curr.width;
     // TODO: define inner svg width and height according to returned DOMRect size
@@ -109,15 +110,25 @@ export const getEffectiveFeatureContribution = (currNode, that) => {
  * @date 2022-06-25
  * @param {node} node
  */
-export const traverseTree = (node) => {
+export const traverseTree = (node, nodeRectWidth) => {
     if (!node) return;
-    // Move tree diagram to let by 500
-    node.x -= 320;
-
-    // TODO: Filter effective feature contribution in leaf nodes
 
     if (node.children && node.children.length > 0) {
-        node.children.map(child => traverseTree(child));
+        let currMinimumGap = nodeRectWidth*1.2;
+        if (node.children.length === 2) {
+            let diff = Math.abs(node.children[0].x-node.children[1].x);
+            if (diff <= currMinimumGap) {
+                node.children[0].x -= (currMinimumGap-diff)/2;
+                node.children[1].x += (currMinimumGap-diff)/2;
+                // node.children[0].ancestors().forEach((ancestor) => {
+                //     ancestor.x += (currMinimumGap-diff)/2;
+                // })
+                // node.children[1].ancestors().forEach((ancestor) => {
+                //     ancestor.x -= (currMinimumGap-diff)/2;
+                // })
+            }
+        }
+        node.children.map(child => traverseTree(child, nodeRectWidth));
     }
 }
 
