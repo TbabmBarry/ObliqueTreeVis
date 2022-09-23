@@ -210,6 +210,7 @@ const renderTableBody = (targetSelection, tableData) => {
         .attr("id", "feature-contribution")
         .attr("width", "35%")
         .append((d) => drawRectPlot(d.value, d.index));
+        // .append((d) => drawBarchart(d.value, d.index));
 
     tbdoyRow.selectAll("td")
         .filter((d) => d.key === "histogram")
@@ -1156,12 +1157,12 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
         // const exposedBarChartCell = barchartSvg.append("g")
         //     .attr("class", "exposed-barchart-g");
     
-        // // Create x scale
+        // Create x scale
         // const x = d3.scaleLinear()
         //     .domain([state.contributionMin, state.contributionMax])
         //     .range([padding, w - padding]);
             
-        // // Create y scale
+        // Create y scale
         // const y = d3.scaleBand()
         //     .domain(exposedFeatureContribution.contribution.map((d, i) => i))
         //     .range([padding, h - padding])
@@ -1170,7 +1171,7 @@ const drawExposedFeatureContributions = (exposedFeatureContributions) => {
         // const mouseover = function(event, d) {
         //     d3.select(this)
         //         .style("stroke-width", "2px");
-        //     // Highlight the corresponding feature contribution on the X-axis
+            // Highlight the corresponding feature contribution on the X-axis
         //     d3.select("g#legend-g-contribution")
         //         .append("line")
         //         .attr("class", "highlighted-legend-line")
@@ -1430,8 +1431,8 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
         .style("opacity", 1)
         .style("stroke", "black");
 
-    // d3.selectAll(`rect.feature-stacked-histogram-bar`)
-    //         .style("opacity", 1);
+    d3.selectAll(`rect.feature-stacked-histogram-bar`)
+            .style("opacity", 1);
 
     // Update the density plot opacity
     d3.selectAll("path.feature-density-plot-path")
