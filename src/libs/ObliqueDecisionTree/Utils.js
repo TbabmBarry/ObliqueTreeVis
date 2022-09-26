@@ -43,28 +43,55 @@ export const getEndSplitPoint = (featureIdxArr, currNode, that) => {
         tmpMaxY = rangeY[1],
         tmpMinX = rangeX[0],
         tmpMinY = rangeY[0];
-    if (getSplitY(tmpMaxX) > tmpMaxY || getSplitY(tmpMaxX) < tmpMinY) {
-        tmpMaxX = Math.max(getSplitX(tmpMaxY), getSplitX(tmpMinY));
+    // Check if the split is within the range of the data and store correct end points
+    if (getSplitY(tmpMaxX) > tmpMaxY) {
+        endPointsPair.push({
+            x: getSplitX(tmpMaxY),
+            y: tmpMaxY
+        })
     }
-    if (getSplitY(tmpMinX) < tmpMinY || getSplitY(tmpMinX) > tmpMaxY) {
-        tmpMinX = Math.min(getSplitX(tmpMaxY), getSplitX(tmpMinY));
+    if (getSplitY(tmpMaxX) < tmpMinY) {
+        endPointsPair.push({
+            x: getSplitX(tmpMinY),
+            y: tmpMinY
+        })
     }
-
-    if (getSplitX(tmpMaxY) > tmpMaxX || getSplitX(tmpMaxY) < tmpMinX) {
-        tmpMaxY = Math.max(getSplitY(tmpMaxX), getSplitY(tmpMinX));
+    if (getSplitY(tmpMinX) > tmpMaxY) {
+        endPointsPair.push({
+            x: getSplitX(tmpMaxY),
+            y: tmpMaxY
+        });
     }
-
-    if (getSplitX(tmpMinY) < tmpMinX || getSplitX(tmpMinY) > tmpMaxX) {
-        tmpMinY = Math.min(getSplitY(tmpMaxX), getSplitY(tmpMinX));
+    if (getSplitY(tmpMinX) < tmpMinY) {
+        endPointsPair.push({
+            x: getSplitX(tmpMinY),
+            y: tmpMinY
+        });
     }
-    endPointsPair.push({
-        x: tmpMaxX,
-        y: tmpMaxY,
-    });
-    endPointsPair.push({
-        x: tmpMinX,
-        y: tmpMinY,
-    });
+    if (getSplitX(tmpMaxY) > tmpMaxX) {
+        endPointsPair.push({
+            x: tmpMaxX,
+            y: getSplitY(tmpMaxX)
+        });
+    }
+    if (getSplitX(tmpMaxY) < tmpMinX) {
+        endPointsPair.push({
+            x: tmpMinX,
+            y: getSplitY(tmpMinX)
+        });
+    }
+    if (getSplitX(tmpMinY) > tmpMaxX) {
+        endPointsPair.push({
+            x: tmpMaxX,
+            y: getSplitY(tmpMaxX)
+        });
+    }
+    if (getSplitX(tmpMinY) < tmpMinX) {
+        endPointsPair.push({
+            x: tmpMinX,
+            y: getSplitY(tmpMinX)
+        });
+    }
     return endPointsPair;
 }
 
