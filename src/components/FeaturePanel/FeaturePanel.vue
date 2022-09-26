@@ -1509,67 +1509,70 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
             const w = state.width * 0.45, h = state.width * 0.2, padding = 0.07 * w;
             const densityPlotSvg = d3.selectAll(`svg#feature-density-plot-svg-${exposedHistogram.featureId}`);
             const densityPlotCell = densityPlotSvg.select("g.feature-density-plot-g");
-            // x-scale for the density plot
-            const x = d3.scaleLinear()
-                .domain(d3.extent(state.featureTable[exposedHistogram.featureId].histogram.dataset, (d)=>d.value))
-                .range([padding, w - 2*padding]);
-            
-            // Compute the optimal bandwidth
-            const bandwidth = (label) => {
-                const data = state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label);
-                const n = data.length;
-                let stdVal = d3.deviation(data, (d) => d.value),
-                iqrVal = d3.quantile(data, 0.75, (d) => d.value) 
-                    - d3.quantile(data, 0.25, (d) => d.value),
-                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(n, -1/5);
-                return bandwidth;
-            }
-            const kde = {}
-            Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).forEach((label) => {
-                kde[label] = kernelDensityEstimator(kernelEpanechnikov(bandwidth(label)), x.ticks(100));
-            })
-            const densityData = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).map((label, i) => {
-                return {
-                    label: label,
-                    data: kde[label](state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label).map((d) => d.value))
+            const isNumeric = state.featureTable[exposedHistogram.featureId].histogram.isNumeric;
+            if (isNumeric) {
+                // x-scale for the density plot
+                const x = d3.scaleLinear()
+                    .domain(d3.extent(state.featureTable[exposedHistogram.featureId].histogram.dataset, (d)=>d.value))
+                    .range([padding, w - 2*padding]);
+                
+                // Compute the optimal bandwidth
+                const bandwidth = (label) => {
+                    const data = state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label);
+                    const n = data.length;
+                    let stdVal = d3.deviation(data, (d) => d.value),
+                    iqrVal = d3.quantile(data, 0.75, (d) => d.value) 
+                        - d3.quantile(data, 0.25, (d) => d.value),
+                    bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(n, -1/5);
+                    return bandwidth;
                 }
-            });
-            // Compute the y extrema
-            let maxProb = 0;
-            densityData.forEach((d) => {
-                d.data.forEach((d) => {
-                    if (d[1] > maxProb) {
-                        maxProb = d[1];
+                const kde = {}
+                Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).forEach((label) => {
+                    kde[label] = kernelDensityEstimator(kernelEpanechnikov(bandwidth(label)), x.ticks(100));
+                })
+                const densityData = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).map((label, i) => {
+                    return {
+                        label: label,
+                        data: kde[label](state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label).map((d) => d.value))
                     }
                 });
-            });
-            // y-scale for the density plot
-            const y = d3.scaleLinear()
-                .domain([0, maxProb])
-                .range([h-2*padding, padding]);
+                // Compute the y extrema
+                let maxProb = 0;
+                densityData.forEach((d) => {
+                    d.data.forEach((d) => {
+                        if (d[1] > maxProb) {
+                            maxProb = d[1];
+                        }
+                    });
+                });
+                // y-scale for the density plot
+                const y = d3.scaleLinear()
+                    .domain([0, maxProb])
+                    .range([h-2*padding, padding]);
 
-            // Render the density plot
-            densityPlotCell.append("g").selectAll("density-plots")
-                .data(densityData)
-                .join("g")
-                .attr("fill", (d) => state.colorScale[d.label])
-                .append("path")
-                .datum(d => d.data)
-                .attr("class", "feature-density-plot-path")
-                .attr("id", `feature-density-plot-path-${exposedHistogram.featureId}`)
-                .attr("opacity", ".8")
-                .attr("stroke", "#000")
-                .attr("stroke-width", 1)
-                .attr("stroke-linejoin", "round")
-                .attr("d", d3.area().curve(d3.curveBasis)
-                    .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
+                // Render the density plot
+                densityPlotCell.append("g").selectAll("density-plots")
+                    .data(densityData)
+                    .join("g")
+                    .attr("fill", (d) => state.colorScale[d.label])
+                    .append("path")
+                    .datum(d => d.data)
+                    .attr("class", "feature-density-plot-path")
+                    .attr("id", `feature-density-plot-path-${exposedHistogram.featureId}`)
+                    .attr("opacity", ".8")
+                    .attr("stroke", "#000")
+                    .attr("stroke-width", 1)
+                    .attr("stroke-linejoin", "round")
+                    .attr("d", d3.area().curve(d3.curveBasis)
+                        .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
 
-            // Draw y-axis 
-            densityPlotCell.append("g")
-                .attr("class", "feature-density-plot-y-axis cursor-default")
-                .attr("id", `feature-density-plot-y-axis-${exposedHistogram.featureId}`)
-                .attr("transform", `translate(${2*padding}, 0)`)
-                .call(d3.axisLeft(y).ticks(4).tickSize(2));
+                // Draw y-axis 
+                densityPlotCell.append("g")
+                    .attr("class", "feature-density-plot-y-axis cursor-default")
+                    .attr("id", `feature-density-plot-y-axis-${exposedHistogram.featureId}`)
+                    .attr("transform", `translate(${2*padding}, 0)`)
+                    .call(d3.axisLeft(y).ticks(4).tickSize(2));
+            }
         })
     }
 });
