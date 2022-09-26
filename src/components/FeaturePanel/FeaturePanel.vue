@@ -41,7 +41,8 @@ const state = reactive({
     contributionMin: -1,
     contributionMax: 1,
     maxProb: {},
-    bandwidth: {},
+    bandwidth: null,
+    kde: {},
     isSorted: false,
     width: 0,
     height: 0,
@@ -899,22 +900,29 @@ const drawDensityPlot = (histogramData, featureId) => {
 
         // Compute the optimal bandwidth
         histogramData.dataset.sort((a, b) => d3.ascending(a.value, b.value));
-        let stdVal = d3.deviation(histogramData.dataset, (d) => d.value),
-            iqrVal = d3.quantile(histogramData.dataset, 0.75, (d) => d.value) - d3.quantile(histogramData.dataset, 0.25, (d) => d.value),
-            bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.dataset.length, -1/5);
-        state.bandwidth[featureId] = bandwidth;
+        const bandwidth = (label) => {
+            const data = histogramData.dataset.filter((d) => d.label === label);
+            const n = data.length;
+            let stdVal = d3.deviation(data, (d) => d.value),
+            iqrVal = d3.quantile(data, 0.75, (d) => d.value) 
+                - d3.quantile(data, 0.25, (d) => d.value),
+            bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(n, -1/5);
+            return bandwidth;
+        }
+        state.bandwidth = bandwidth;
         // Compute kernel density estimation
-        const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), x.ticks(50));
-
-        const densityData = Array.from(new Set(histogramData.dataset.map((d) => d.label))).map((label) => {
+        const kde = {};
+        Array.from(new Set(histogramData.dataset.map((d) => d.label))).forEach((label) => {
+            kde[label] = kernelDensityEstimator(kernelEpanechnikov(state.bandwidth(label)), x.ticks(100));
+        })
+        const densityData = Array.from(new Set(histogramData.dataset.map((d) => d.label))).map((label, i) => {
             return {
                 label: label,
-                data: kde(histogramData.dataset.filter((d) => d.label === label).map((d) => d.value))
+                data: kde[label](histogramData.dataset.filter((d) => d.label === label).map((d) => d.value))
             }
         });
-
         const xAxis = d3.axisBottom(x).ticks(5).tickSize(3);
-        
+
         // Compute the y extrema
         let maxProb = 0;
         densityData.forEach((d) => {
@@ -1033,8 +1041,8 @@ const drawExposedDensityPlot = (exposedHistograms) => {
         
         if (isNumeric) {
             // Update the density plot opacity
-            d3.selectAll(`path.feature-density-plot-path`)
-                .style("opacity", ".3");
+            d3.selectAll(`path#feature-density-plot-path-${exposedHistogram.featureId}`).remove();
+            d3.selectAll(`g#feature-density-plot-y-axis-${exposedHistogram.featureId}`).remove();
             
             // x-scale for the density plot
             const x = d3.scaleLinear()
@@ -1043,20 +1051,31 @@ const drawExposedDensityPlot = (exposedHistograms) => {
             
             // Compute the optimal bandwidth
             histogramData.sort((a, b) => d3.ascending(a.value, b.value));
-
-            let stdVal = d3.deviation(histogramData, (d) => d.value),
-                iqrVal = d3.quantile(histogramData, 0.75, (d) => d.value) - d3.quantile(histogramData, 0.25, (d) => d.value),
-                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.length, -1/5);
-            // let bandwidth = state.bandwidth[exposedHistogram.featureId];
-            // Compute kernel density estimation
-            const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), x.ticks(50));
+            const bandwidth = (label) => {
+                const data = state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label);
+                const n = data.length;
+                let stdVal = d3.deviation(data, (d) => d.value),
+                iqrVal = d3.quantile(data, 0.75, (d) => d.value) 
+                    - d3.quantile(data, 0.25, (d) => d.value),
+                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(n, -1/5);
+                return bandwidth;
+            }
+            const kde = {}
+            Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).forEach((label) => {
+                kde[label] = kernelDensityEstimator(kernelEpanechnikov(bandwidth(label)), x.ticks(100));
+            })
             const exposedDensityData = Array.from(new Set(histogramData.map((d) => d.label))).map((label) => {
                 return {
                     label: label,
-                    data: kde(histogramData.filter((d) => d.label === label).map((d) => d.value))
+                    data: kde[label](histogramData.filter((d) => d.label === label).map((d) => d.value))
                 }
             });
-
+            const densityData = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).map((label, i) => {
+                return {
+                    label: label,
+                    data: kde[label](state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label).map((d) => d.value))
+                }
+            });
             // Compute the y extrema
             let maxProb = 0;
             exposedDensityData.forEach((d) => {
@@ -1066,6 +1085,8 @@ const drawExposedDensityPlot = (exposedHistograms) => {
                     }
                 });
             });
+            state.maxProb[exposedHistogram.featureId] > maxProb 
+            ? maxProb = state.maxProb[exposedHistogram.featureId] : maxProb = maxProb;
             // y-scale for the density plot
             const y = d3.scaleLinear()
                 .domain([0, maxProb])
@@ -1086,6 +1107,30 @@ const drawExposedDensityPlot = (exposedHistograms) => {
                 .attr("stroke-linejoin", "round")
                 .attr("d", d3.area().curve(d3.curveBasis)
                     .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
+
+            // Render the density plot
+            exposedDensityPlotCell.append("g").selectAll("density-plots")
+                .data(densityData)
+                .join("g")
+                .attr("fill", (d) => state.colorScale[d.label])
+                .append("path")
+                .datum(d => d.data)
+                .attr("class", "feature-density-plot-path")
+                .attr("id", `feature-density-plot-path-${exposedHistogram.featureId}`)
+                .attr("opacity", ".8")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 1)
+                .attr("stroke-linejoin", "round")
+                .attr("d", d3.area().curve(d3.curveBasis)
+                    .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)))
+                .style("opacity", 0.3);
+
+                // Draw y-axis for the stacked histogram
+                exposedDensityPlotCell.append("g")
+                    .attr("class", "exposed-feature-density-plot-y-axis cursor-default")
+                    .attr("id", `exposed-feature-density-plot-y-axis-${exposedHistogram.featureId}`)
+                    .attr("transform", `translate(${2*padding}, 0)`)
+                    .call(d3.axisLeft(y).ticks(4).tickSize(2));
         } else {
             d3.selectAll(`rect#feature-histogram-bar-${exposedHistogram.featureId}`)
                 .style("opacity", 0.6);
@@ -1458,6 +1503,75 @@ watch(() => props.exposedFeatureContributions, (newVal, oldVal) => {
 
     // Draw exposed feature rects
     drawExposedFeatureRects(newVal);
+
+    if (newVal.length === 0 && oldVal.length !== 0) {
+        oldVal.forEach((exposedHistogram) => {
+            const w = state.width * 0.45, h = state.width * 0.2, padding = 0.07 * w;
+            const densityPlotSvg = d3.selectAll(`svg#feature-density-plot-svg-${exposedHistogram.featureId}`);
+            const densityPlotCell = densityPlotSvg.select("g.feature-density-plot-g");
+            // x-scale for the density plot
+            const x = d3.scaleLinear()
+                .domain(d3.extent(state.featureTable[exposedHistogram.featureId].histogram.dataset, (d)=>d.value))
+                .range([padding, w - 2*padding]);
+            
+            // Compute the optimal bandwidth
+            const bandwidth = (label) => {
+                const data = state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label);
+                const n = data.length;
+                let stdVal = d3.deviation(data, (d) => d.value),
+                iqrVal = d3.quantile(data, 0.75, (d) => d.value) 
+                    - d3.quantile(data, 0.25, (d) => d.value),
+                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(n, -1/5);
+                return bandwidth;
+            }
+            const kde = {}
+            Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).forEach((label) => {
+                kde[label] = kernelDensityEstimator(kernelEpanechnikov(bandwidth(label)), x.ticks(100));
+            })
+            const densityData = Array.from(new Set(state.featureTable[exposedHistogram.featureId].histogram.dataset.map((d) => d.label))).map((label, i) => {
+                return {
+                    label: label,
+                    data: kde[label](state.featureTable[exposedHistogram.featureId].histogram.dataset.filter((d) => d.label === label).map((d) => d.value))
+                }
+            });
+            // Compute the y extrema
+            let maxProb = 0;
+            densityData.forEach((d) => {
+                d.data.forEach((d) => {
+                    if (d[1] > maxProb) {
+                        maxProb = d[1];
+                    }
+                });
+            });
+            // y-scale for the density plot
+            const y = d3.scaleLinear()
+                .domain([0, maxProb])
+                .range([h-2*padding, padding]);
+
+            // Render the density plot
+            densityPlotCell.append("g").selectAll("density-plots")
+                .data(densityData)
+                .join("g")
+                .attr("fill", (d) => state.colorScale[d.label])
+                .append("path")
+                .datum(d => d.data)
+                .attr("class", "feature-density-plot-path")
+                .attr("id", `feature-density-plot-path-${exposedHistogram.featureId}`)
+                .attr("opacity", ".8")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 1)
+                .attr("stroke-linejoin", "round")
+                .attr("d", d3.area().curve(d3.curveBasis)
+                    .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
+
+            // Draw y-axis 
+            densityPlotCell.append("g")
+                .attr("class", "feature-density-plot-y-axis cursor-default")
+                .attr("id", `feature-density-plot-y-axis-${exposedHistogram.featureId}`)
+                .attr("transform", `translate(${2*padding}, 0)`)
+                .call(d3.axisLeft(y).ticks(4).tickSize(2));
+        })
+    }
 });
 
 watch(() => state.selectedFeatures, (newVal, oldVal) => {
