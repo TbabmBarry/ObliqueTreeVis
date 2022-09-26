@@ -1044,10 +1044,10 @@ const drawExposedDensityPlot = (exposedHistograms) => {
             // Compute the optimal bandwidth
             histogramData.sort((a, b) => d3.ascending(a.value, b.value));
 
-            // let stdVal = d3.deviation(histogramData, (d) => d.value),
-            //     iqrVal = d3.quantile(histogramData, 0.75, (d) => d.value) - d3.quantile(histogramData, 0.25, (d) => d.value),
-            //     bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.length, -1/5);
-            let bandwidth = state.bandwidth[exposedHistogram.featureId];
+            let stdVal = d3.deviation(histogramData, (d) => d.value),
+                iqrVal = d3.quantile(histogramData, 0.75, (d) => d.value) - d3.quantile(histogramData, 0.25, (d) => d.value),
+                bandwidth = 1.06 * Math.min(stdVal, iqrVal/1.34) * Math.pow(histogramData.length, -1/5);
+            // let bandwidth = state.bandwidth[exposedHistogram.featureId];
             // Compute kernel density estimation
             const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), x.ticks(50));
             const exposedDensityData = Array.from(new Set(histogramData.map((d) => d.label))).map((label) => {
@@ -1058,15 +1058,14 @@ const drawExposedDensityPlot = (exposedHistograms) => {
             });
 
             // Compute the y extrema
-            // let maxProb = 0;
-            // exposedDensityData.forEach((d) => {
-            //     d.data.forEach((d) => {
-            //         if (d[1] > maxProb) {
-            //             maxProb = d[1];
-            //         }
-            //     });
-            // });
-            let maxProb = state.maxProb[exposedHistogram.featureId];
+            let maxProb = 0;
+            exposedDensityData.forEach((d) => {
+                d.data.forEach((d) => {
+                    if (d[1] > maxProb) {
+                        maxProb = d[1];
+                    }
+                });
+            });
             // y-scale for the density plot
             const y = d3.scaleLinear()
                 .domain([0, maxProb])
@@ -1086,7 +1085,7 @@ const drawExposedDensityPlot = (exposedHistograms) => {
                 .attr("stroke-width", 2)
                 .attr("stroke-linejoin", "round")
                 .attr("d", d3.area().curve(d3.curveBasis)
-                    .x(d => x(d[0])+padding).y1(d => y(d[1]/3)).y0(y(0)));
+                    .x(d => x(d[0])+padding).y1(d => y(d[1])).y0(y(0)));
         } else {
             d3.selectAll(`rect#feature-histogram-bar-${exposedHistogram.featureId}`)
                 .style("opacity", 0.6);
