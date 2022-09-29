@@ -85,18 +85,22 @@ const props = defineProps({
 const state = reactive({
     value1: ref('penguins'),
     options1: ref([
-        {
-        value: 'iris',
-        label: 'Iris Data',
-        }, 
+        // {
+        // value: 'iris',
+        // label: 'Iris Data',
+        // }, 
         {
             value: 'penguins',
             label: 'Penguins Data',
         },
         {
-            value: 'wine',
-            label: 'Wine Data',
+            value: 'blobs',
+            label: 'Generated Data',
         }
+        // {
+        //     value: 'wine',
+        //     label: 'Wine Data',
+        // }
     ]),
     value2: ref('bivariate'),
     options2: ref([
@@ -121,7 +125,8 @@ const state = reactive({
     classNames: {
         "penguins": ['Adelie','Gentoo','Chinstrap'],
         "iris": ['setosa', 'versicolor', 'virginica'],
-        "wine": ['class_0', 'class_1', 'class_2']
+        "wine": ['class_0', 'class_1', 'class_2'],
+        "blobs": ['class_0', 'class_1', 'class_2']
     },
     selectedClassCounts: {},
     baseSvg: {},

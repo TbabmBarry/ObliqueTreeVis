@@ -87,7 +87,8 @@ class Odt {
                 classNames: {
                     "penguins": ['Adelie','Gentoo','Chinstrap'],
                     "iris": ['setosa', 'versicolor', 'virginica'],
-                    "wine": ['class_0', 'class_1', 'class_2']
+                    "wine": ['class_0', 'class_1', 'class_2'],
+                    "blobs": ['class_0', 'class_1', 'class_2']
                 },
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
@@ -1309,6 +1310,8 @@ class Odt {
      */
     setDataAndOpts(opts, data, trainingData) {
         this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
+        this.constants.nodeRectRatio = this.constants.nodeRectWidth * 0.1;
+        this.constants.scatterPlotPadding = this.constants.nodeRectWidth * 0.05;
         this.constants.leafNodeRectHeight = this.constants.nodeRectWidth;
         this.opts = opts;
         this.data = data;
