@@ -42,14 +42,13 @@ class Odt {
      * updating the container, and reassign this.
      * @date 2022-06-14
      */
-    init() {
+    init(rootNode) {
         // Unregister existing listeners
         this.registeredStateListeners.forEach(dergisterFn => dergisterFn());
         this.rootElement.innerHTML = '';
         // Clear DOM (such as d3-tip)
-
         // Reset container dimensions
-        this.updateContainerDimensions();
+        this.updateContainerDimensions(rootNode);
 
         _.assign(this, {
             data: null,
@@ -109,9 +108,9 @@ class Odt {
      * the viewport.
      * @date 2022-06-14
      */
-    updateContainerDimensions() {
+    updateContainerDimensions(rootNode) {
         try {
-            const { width, height, screenHeight, screenWidth, scale } = adjustedClientRect(this.rootElement);
+            const { width, height, screenHeight, screenWidth, scale } = adjustedClientRect(this.rootElement, rootNode);
             _.assign(this, { width, height, screenHeight, screenWidth, scale });
         } catch (err) {
             err.message = `Fail to reset the container: ${err.message}`;
@@ -173,31 +172,31 @@ class Odt {
         this.renderNodes(nodes.descendants());
         // Enable zooming
         // this.enableZooming();
-        const legendRectSize = 100;
-        const legendSpacing = legendRectSize/4;
-        // Render class legend
-        parts.svgGroup.selectAll("class-legend")
-            .data(this.constants.classNames[opts.dataset_name])
-            .enter()
-            .append("rect")
-            .attr("x", 100)
-            .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing))
-            .attr("width", legendRectSize)
-            .attr("height", legendRectSize)
-            .style("fill", (d, i) => colorScale[i])
+        // const legendRectSize = 100;
+        // const legendSpacing = legendRectSize/4;
+        // // Render class legend
+        // parts.svgGroup.selectAll("class-legend")
+        //     .data(this.constants.classNames[opts.dataset_name])
+        //     .enter()
+        //     .append("rect")
+        //     .attr("x", 100)
+        //     .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing))
+        //     .attr("width", legendRectSize)
+        //     .attr("height", legendRectSize)
+        //     .style("fill", (d, i) => colorScale[i])
 
-        // Render class legend text
-        parts.svgGroup.selectAll("class-legend-text")
-            .data(this.constants.classNames[opts.dataset_name])
-            .enter()
-            .append("text")
-            .attr("x", 100 + legendRectSize+legendSpacing)
-            .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing)+legendRectSize*0.5)
-            .text(d => d)
-            .style("fill", (d, i) => colorScale[i])
-            .style("font-size", legendRectSize*0.5)
-            .attr("text-anchor", "left")
-            .style("alignment-baseline", "middle")
+        // // Render class legend text
+        // parts.svgGroup.selectAll("class-legend-text")
+        //     .data(this.constants.classNames[opts.dataset_name])
+        //     .enter()
+        //     .append("text")
+        //     .attr("x", 100 + legendRectSize+legendSpacing)
+        //     .attr("y", (d, i) => legendRectSize+i*(legendRectSize+legendSpacing)+legendRectSize*0.5)
+        //     .text(d => d)
+        //     .style("fill", (d, i) => colorScale[i])
+        //     .style("font-size", legendRectSize*0.5)
+        //     .attr("text-anchor", "left")
+        //     .style("alignment-baseline", "middle")
 
     }
 
@@ -509,19 +508,23 @@ class Odt {
                         // Remove the summary view and render the detailed view after the transition
                         currNodeGroup.selectAll(".summary").remove();
                         const zoomListener = _this.registeredStateListeners[0];
+                        let detailedScale = 1;
+                        if (screenHeight/detailedViewNodeRectWidth < detailedScale) {
+                            detailedScale = (screenHeight/detailedViewNodeRectWidth)*0.7;
+                        }
                         // Center the node rect in the viewport
                         parts.svgGroup.transition()
                             .duration(750)
                             .call(zoomListener.transform,
                                 d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
-                                    .translate(-node.x, -node.y-nodeRectWidth/2)
-                                    .scale(1),d3.pointer(event));
+                                    .translate(-node.x+node.x*(1-detailedScale), -node.y-nodeRectWidth/2+node.y*(1-detailedScale))
+                                    .scale(detailedScale),d3.pointer(event));
                         // Update the transform and scale of zoom listener in the detailed view
                         parts.baseSvg.call(zoomListener)
                                 .call(zoomListener.transform,
                                     d3.zoomIdentity.translate(screenHeight/2, screenWidth/2)
-                                    .translate(-node.x, -node.y-nodeRectWidth/2)
-                                    .scale(1),d3.pointer(event));
+                                    .translate(-node.x+node.x*(1-detailedScale), -node.y-nodeRectWidth/2+node.y*(1-detailedScale))
+                                    .scale(detailedScale),d3.pointer(event));
                         // Render the detailed view
                         _this.renderDetailedView(currNodeGroup);
                         if (_this.uniqueDecisionPaths.length !== 0) {
@@ -1311,7 +1314,10 @@ class Odt {
     setDataAndOpts(opts, data, trainingData) {
         this.constants.nodeRectWidth = this.height*(1/(2*maxDepth(data)));
         this.constants.nodeRectRatio = this.constants.nodeRectWidth * 0.1;
-        this.constants.scatterPlotPadding = this.constants.nodeRectWidth * 0.05;
+        this.constants.scatterPlotPadding = this.constants.nodeRectWidth * 0.07;
+        this.constants.histogramHeight = this.constants.nodeRectWidth * 0.5;
+        this.constants.nodeRectStrokeWidth = this.constants.nodeRectWidth * 0.015;
+        this.constants.leafNodeRectStrokeWidth = this.constants.nodeRectWidth * 0.01;
         this.constants.leafNodeRectHeight = this.constants.nodeRectWidth;
         this.opts = opts;
         this.data = data;

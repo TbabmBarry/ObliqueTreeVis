@@ -205,7 +205,7 @@ const initializeObliqueTree = async () => {
         dataset_name: dataset_name
     };
     state.obliqueTreeVis = new Odt(["#vis"]);
-    state.obliqueTreeVis.init();
+    state.obliqueTreeVis.init(state.rootNode);
     state.obliqueTreeVis.setDataAndOpts(opts, state.rootNode, state.trainingData);
     state.obliqueTreeVis.draw();
     let featureTable = state.obliqueTreeVis.computeGlobalFeatureContribution();

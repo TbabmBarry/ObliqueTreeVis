@@ -7,7 +7,7 @@ import * as d3 from 'd3';
  * @date 2022-06-14
  * @param {node} node
  */
-export const adjustedClientRect = (node) => {
+export const adjustedClientRect = (node, rootNode) => {
     const curr = _.pick(node.getBoundingClientRect(), ['x', 'y', 'width', 'height', 'top', 'right', 'bottom', 'left']);
     curr.top += window.scrollY;
     curr.bottom += window.scrollY;
@@ -15,12 +15,13 @@ export const adjustedClientRect = (node) => {
     curr.left += window.scrollX;
     curr.right += window.scrollX;
     curr.x += window.scrollX;
-    curr.scale = curr.height / 4320;
+    let absHeight = 300 * 2 * maxDepth(rootNode);
+    curr.scale = curr.height / absHeight;
     // curr.scale = curr.width / 2160;
     curr.screenHeight = curr.height;
     curr.screenWidth = curr.width;
     // TODO: define inner svg width and height according to returned DOMRect size
-    curr.height = 4320;
+    curr.height = absHeight;
     curr.width = curr.height;
     return curr;
 };
