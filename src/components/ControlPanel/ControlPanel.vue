@@ -85,10 +85,10 @@ const props = defineProps({
 const state = reactive({
     value1: ref('penguins'),
     options1: ref([
-        // {
-        // value: 'iris',
-        // label: 'Iris Data',
-        // }, 
+        {
+        value: 'iris',
+        label: 'Iris Data',
+        }, 
         {
             value: 'penguins',
             label: 'Penguins Data',
@@ -96,11 +96,11 @@ const state = reactive({
         {
             value: 'blobs',
             label: 'Generated Data',
+        },
+        {
+            value: 'wine',
+            label: 'Wine Data',
         }
-        // {
-        //     value: 'wine',
-        //     label: 'Wine Data',
-        // }
     ]),
     value2: ref('bivariate'),
     options2: ref([
