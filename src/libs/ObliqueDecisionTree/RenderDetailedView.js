@@ -28,7 +28,7 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
             .attr("text-anchor", "end")
-            .style("font-size", "12px")
+            .style("font-size", "16px")
             .text(`${featureArr[currFeatureIdx[0]]} →`)
         );
     targetSelection.append("g")
@@ -42,7 +42,7 @@ export function drawScatterPlot(targetSelection, nodeData, currFeatureIdx, x, y,
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
             .attr("text-anchor", "end")
-            .style("font-size", "12px")
+            .style("font-size", "16px")
             .attr("transform", "rotate(90)")
             .text(`← ${featureArr[currFeatureIdx[1]]}`)
         );
@@ -519,7 +519,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
             .attr("y", 2*scatterPlotPadding)
             .attr("fill", "currentColor")
             .attr("text-anchor", "end")
-            .style("font-size", "12px")
+            .style("font-size", "16px")
             .text(`${featureArr[currFeatureIdx[0]]} →`)
         );
 
@@ -538,7 +538,7 @@ export function drawOneFeatureHistogram(targetSelection, nodeData, currFeatureId
             .attr("y", 1.5*scatterPlotPadding)
             .attr("fill", "currentColor")
             .attr("text-anchor", "end")
-            .style("font-size", "12px")
+            .style("font-size", "16px")
             .attr("transform", "rotate(90)")
             .text(`← Count`)
         );
