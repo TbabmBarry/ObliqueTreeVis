@@ -87,7 +87,7 @@ class Odt {
                     "penguins": ['Adelie','Gentoo','Chinstrap'],
                     "iris": ['setosa', 'versicolor', 'virginica'],
                     "wine": ['class_0', 'class_1', 'class_2'],
-                    "blobs": ['class_0', 'class_1', 'class_2']
+                    "blobs": ['rotundicauda', 'gigas', 'tridentatus']
                 },
                 featureColorScale: d3.scaleOrdinal(["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab"]),
                 featureArr: null,
