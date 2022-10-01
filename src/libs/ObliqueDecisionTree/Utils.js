@@ -16,13 +16,15 @@ export const adjustedClientRect = (node, rootNode) => {
     curr.right += window.scrollX;
     curr.x += window.scrollX;
     let absHeight = 300 * 2 * maxDepth(rootNode);
-    curr.scale = curr.height / absHeight;
+    // curr.scale = curr.height / absHeight;
     // curr.scale = curr.width / 2160;
     curr.screenHeight = curr.height;
     curr.screenWidth = curr.width;
     // TODO: define inner svg width and height according to returned DOMRect size
     curr.height = absHeight;
-    curr.width = curr.height;
+    curr.width = Math.max(300 * maxWidth(rootNode) * 0.25, absHeight);
+    curr.scale = Math.min(curr.screenHeight/curr.height, curr.screenWidth/curr.width);
+    // curr.scale = curr.screenWidth / curr.width;
     return curr;
 };
 
