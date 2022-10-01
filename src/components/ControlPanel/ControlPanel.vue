@@ -95,7 +95,7 @@ const state = reactive({
         },
         {
             value: 'blobs',
-            label: 'Generated Data',
+            label: 'Houseshoe Crab Data',
         },
         {
             value: 'wine',
