@@ -126,7 +126,7 @@ const state = reactive({
         "penguins": ['Adelie','Gentoo','Chinstrap'],
         "iris": ['Setosa', 'Versicolor', 'Virginica'],
         "wine": ['Class_0', 'Class_1', 'Class_2'],
-        "blobs": ['Rotundicauda', 'Gigas', 'Tridentatus']
+        "blobs": ['Rotund', 'Gigas', 'Trident']
     },
     selectedClassCounts: {},
     baseSvg: {},
