@@ -492,6 +492,8 @@ class Odt {
                         } else {
                             _this.update("reset");
                         };
+                        // Re-render the selected feature effects
+                        _this.renderSelectedFeaturesUpdate(_this.selectedFeatureNames);
                     })
                 } else {
                     // Update all the affected flow paths
