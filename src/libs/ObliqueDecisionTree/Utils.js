@@ -22,7 +22,7 @@ export const adjustedClientRect = (node, rootNode) => {
     curr.screenWidth = curr.width;
     // TODO: define inner svg width and height according to returned DOMRect size
     curr.height = absHeight;
-    curr.width = Math.max(300 * maxWidth(rootNode) * 0.25, absHeight);
+    curr.width = Math.max(300 * maxWidth(rootNode) * 0.7, absHeight);
     curr.scale = Math.min(curr.screenHeight/curr.height, curr.screenWidth/curr.width);
     // curr.scale = curr.screenWidth / curr.width;
     return curr;
